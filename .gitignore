@@ -1,0 +1,16 @@
+# Python cache files
+__pycache__/
+*.pyc
+
+# Environment variables
+.env
+
+# Virtual environments
+venv/
+env/
+
+# SQLite database (optional)
+mydb.db
+
+# Migrations (optional, can track later)
+migrations/
