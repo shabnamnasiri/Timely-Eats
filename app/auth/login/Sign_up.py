@@ -19,7 +19,7 @@ def register_register_routes(app, mysql):
             confirm_password = request.form.get("confirm_password")
 
             form_data = {
-             "username": username,
+            "username": username,
             "phone": phone}
 
             pattern = r'^(?=.*[0-9])(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$'

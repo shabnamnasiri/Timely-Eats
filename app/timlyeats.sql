@@ -90,3 +90,11 @@ CREATE TABLE Review (
     FOREIGN KEY (user_id) REFERENCES User(user_id),
     FOREIGN KEY (item_id) REFERENCES Item(item_id)
 );
+
+
+-- adding roles
+INSERT INTO role (role_id, role_name, role_level) 
+VALUES 
+    ('1', 'Customer', '1'),
+    ('2', 'Staff', '2'),
+    ('3', 'Administrator', '3');

@@ -34,10 +34,10 @@ def register_login_routes(app, mysql):
                 if user[2]==1:
                     return redirect("/menu")
                 elif user[2]==2:
-                    return redirect("/add_menu")
+                    return redirect("/staff")
                 else: 
-                    return redirect("/admin")
+                    return redirect("/add_menu")
 
             return "Invalid username or password"
 
-        return render_template("Sign_in.html")
+        return render_template("Sign_In.html")

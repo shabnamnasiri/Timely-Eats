@@ -1,12 +1,14 @@
 import os
 from flask import Flask, session, redirect
-from flask_mysqldb import MySQL
 from app.auth.auth import login_required, role_required
 from app.auth.login.Sign_in import register_login_routes
 from app.auth.login.Sign_up import register_register_routes
 from app.customer.menu import register_menu_routes
 from app.staff.add_menu import register_add_menu_routes
-
+import pymysql
+pymysql.install_as_MySQLdb()
+from flask import Flask, session, redirect
+from flask_mysqldb import MySQL
 
 template_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "app", "templates")
 
@@ -16,7 +18,7 @@ app.secret_key = "secret_key_123"
 
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = ''
+app.config['MYSQL_PASSWORD'] = '22703380'
 app.config['MYSQL_DB'] = 'timlyeats'
 app.config['MYSQL_PORT'] = 3306
 
