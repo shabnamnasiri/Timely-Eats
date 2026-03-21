@@ -2,13 +2,14 @@
 
 class Config:
     # Secret key for sessions and forms
-    SECRET_KEY = "supersecretkey"
+    SECRET_KEY = "secret_key_123"
 
-    # Database URI (SQLite for starter)
-    SQLALCHEMY_DATABASE_URI = "sqlite:///mydb.db"
-
-    # Disable unnecessary tracking to save memory
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
-
-    # Optional: debug mode (can override later)
+    # Debug mode: True = show errors, False = hide errors
     DEBUG = True
+
+    # MySQL database connection (fill your info)
+    MYSQL_HOST = "localhost"
+    MYSQL_USER = "root"
+    MYSQL_PASSWORD = "22703380"
+    MYSQL_DB = "timlyeats"
+    MYSQL_PORT = 3306

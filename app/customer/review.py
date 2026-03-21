@@ -3,20 +3,24 @@ import mysql.connector
 from mysql.connector import Error
 from config import DB_CONFIG  
 
+#blueprint for run.py
 review_bp = Blueprint('review', __name__)
 
-# Submit a review
 @review_bp.route('/<int:item_id>/review', methods=["POST"])
-def submit_review(item_id):
+def submit_review():
+
+    #getting the input from html form
     user_id = session.get("user_id")
     if not user_id:
         return jsonify({'error': 'User must be logged in'}), 401
 
+    item_id = request.form.get("item_id")
     rating = request.form.get("rating")
     comment = request.form.get("comment", "").strip()
 
-    if not rating:
-        return jsonify({'error': 'rating is required'}), 400
+    #logical checks
+    if not item_id:
+        return jsonify({'error': 'item_id is required'}), 400
 
     try:
         rating = int(rating)
@@ -25,6 +29,7 @@ def submit_review(item_id):
     except (TypeError, ValueError):
         return jsonify({'error': 'rating must be a number'}), 400
 
+    #connecting to db and insert
     try:
         connection = mysql.connector.connect(**DB_CONFIG)
         cursor = connection.cursor()
@@ -42,22 +47,18 @@ def submit_review(item_id):
         if connection: connection.close()
 
 
-# Get average rating for an item
+
 @review_bp.route('/item/<int:item_id>/avg-rating', methods=["GET"])
 def get_item_avg_rating(item_id):
     try:
+        #connetion to db 
         connection = mysql.connector.connect(**DB_CONFIG)
         cursor = connection.cursor()
-        sql = "SELECT AVG(rating), COUNT(*) FROM review WHERE item_id = %s"
+        sql = "SELECT AVG(rating) FROM review WHERE item_id = %s"
         cursor.execute(sql, (item_id,))
         result = cursor.fetchone()
-        avg_rating = result[0] if result[0] is not None else 0
-        review_count = result[1]
-        return jsonify({
-            'item_id': item_id,
-            'avg_rating': round(avg_rating, 2),
-            'review_count': review_count
-        }), 200
+        avg_rating = result[0] if result[0] is not None else 0  # 0 if no reviews
+        return jsonify({'item_id': item_id, 'avg_rating': round(avg_rating, 2)}), 200
     except Error as e:
         return jsonify({'error': str(e)}), 500
     finally:
