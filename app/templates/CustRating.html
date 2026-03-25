@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Share Your Experience | OrderFlow</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500;600&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../static/css/Add_menu.css">
+    <style>
+        /* Customer-specific layout override */
+        .customer-container {
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 0 20px;
+            width: 100%;
+        }
+        .rating-stars {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 32px;
+        }
+        .star-radio { display: none; }
+        .star-label {
+            flex: 1;
+            text-align: center;
+            border: 1px solid var(--rule);
+            background: white;
+            padding: 15px 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 24px;
+        }
+        .star-radio:checked + .star-label {
+            background: green;
+            color: white;
+            border-color: var(--accent);
+        }
+        .order-summary-box {
+            background: var(--cream);
+            padding: 20px;
+            border: 1px solid var(--rule);
+            margin-bottom: 32px;
+        }
+    </style>
+</head>
+<body style="display: block; background: var(--paper);">
+
+    <div class="customer-container">
+        <div style="text-align: center; margin-bottom: 40px;">
+            <b style="font-family: 'Bebas Neue'; font-size: 32px; letter-spacing: 0.1em;">ORDER<span>FLOW</span></b>
+            <span class="label" style="margin-top: 8px;">Guest Review Portal</span>
+        </div>
+
+        <div class="form-panel">
+            <h2>How was your visit?</h2>
+            <p>Your feedback helps our team maintain the standard of excellence you expect from us.</p>
+            <div class="form-divider"></div>
+
+            <div class="order-summary-box">
+                <span class="label" style="color: var(--smoke);">Order #1024 Details</span>
+                <div style="display: flex; justify-content: space-between; margin-top: 10px;">
+                    <strong style="font-family: 'DM Sans'; font-size: 14px;">Table 12 • Alex T.</strong>
+                    <span style="font-family: 'DM Mono'; font-size: 12px; color: var(--accent);">$42.50</span>
+                </div>
+            </div>
+
+            <form>
+                <label class="label">Overall Rating</label>
+                <div class="rating-stars">
+                    <input type="radio" name="rate" id="r1" class="star-radio">
+                    <label for="r1" class="star-label">1</label>
+                    
+                    <input type="radio" name="rate" id="r2" class="star-radio">
+                    <label for="r2" class="star-label">2</label>
+                    
+                    <input type="radio" name="rate" id="r3" class="star-radio">
+                    <label for="r3" class="star-label">3</label>
+                    
+                    <input type="radio" name="rate" id="r4" class="star-radio">
+                    <label for="r4" class="star-label">4</label>
+                    
+                    <input type="radio" name="rate" id="r5" class="star-radio" checked>
+                    <label for="r5" class="star-label">5</label>
+                </div>
+
+                <label class="label">What stood out?</label>
+                <div class="tags-group">
+                    <input type="checkbox" id="t1" class="tag-toggle">
+                    <label for="t1">Service</label>
+                    
+                    <input type="checkbox" id="t2" class="tag-toggle">
+                    <label for="t2">Speed</label>
+                    
+                    <input type="checkbox" id="t3" class="tag-toggle">
+                    <label for="t3">Food Quality</label>
+                    
+                    <input type="checkbox" id="t4" class="tag-toggle">
+                    <label for="t4">Ambiance</label>
+                </div>
+
+                <div class="field">
+                    <label>Additional Comments</label>
+                    <textarea placeholder="Tell us more about your experience..." style="min-height: 120px;"></textarea>
+                </div>
+
+                <button type="submit" class="btn-submit" style="margin-top: 20px;">Submit My Review</button>
+            </form>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px; padding-bottom: 40px;">
+            <small style="font-family: 'DM Mono'; color: var(--ash); font-size: 10px; text-transform: uppercase; letter-spacing: 0.2em;">
+                Thank you for choosing OrderFlow
+            </small>
+        </div>
+    </div>
+
+</body>
+</html>

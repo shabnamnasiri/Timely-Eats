@@ -2,7 +2,7 @@
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
       --ink: #0e0e0e; --ink2: #1a1a1a; --smoke: #3d3d3d;
-      --mist: #7a7a7a; --ash: #b0b0b0; --cream: #f3f0ea;
+      --mist: #000000; --ash: #b0b0b0; --cream: #f3f0ea;
       --paper: #f9f7f4; --accent: #c8933a; --rule: #d4cfc6;
       --danger: #9e3737; --success: #3a6b3a;
     }
@@ -92,7 +92,7 @@
       transition: all .18s; background: var(--cream);
     }
     .tag-toggle + label:hover { border-color: var(--smoke); color: var(--smoke); }
-    .tag-toggle:checked + label { border-color: var(--accent); color: var(--accent); background: rgba(200,147,58,.1); }
+    .tag-toggle:checked + label { border-color: var(--accent); color: white; background: rgb(0, 0, 0); }
 
     .btn-submit {
       width: 100%; padding: 13px; background: var(--accent); border: none; color: var(--ink);
@@ -106,7 +106,7 @@
     .list-controls { display: flex; gap: 10px; margin-bottom: 20px; align-items: center; }
     .filter-tabs { display: flex; gap: 2px; flex: 1; overflow-x: auto; }
     .filter-tab {
-      font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: .2em; text-transform: uppercase;
+      font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: .2em; text-transform: uppercase;
       padding: 8px 14px; border: 1px solid var(--rule); background: #fff; color: var(--mist);
       cursor: pointer; white-space: nowrap; transition: all .18s;
     }
@@ -122,14 +122,14 @@
     }
     .item-row:hover { border-color: var(--accent); background: var(--cream); }
     .item-cat {
-      font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: .18em; text-transform: uppercase;
+      font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: .18em; text-transform: uppercase;
       padding: 3px 8px; background: var(--ink); color: var(--ash); flex-shrink: 0; width: 76px; text-align: center;
     }
-    .item-cat.starters { background: #1e1e2e; color: #8080c0; }
-    .item-cat.mains    { background: #1a1a0e; color: #b0a060; }
-    .item-cat.sides    { background: #0e1e0e; color: #70b070; }
-    .item-cat.desserts { background: #2e1a1a; color: #c08080; }
-    .item-cat.drinks   { background: #0e1e2e; color: #6090c0; }
+    .item-cat.starters { background: #1e1e2e; color: #ffffff; }
+    .item-cat.mains    { background: #1a1a0e; color: #ffffff; }
+    .item-cat.sides    { background: #0e1e0e; color: #ffffff; }
+    .item-cat.desserts { background: #2e1a1a; color: #ffffff; }
+    .item-cat.drinks   { background: #0e1e2e; color: #ffffff; }
 
     .item-info { flex: 1; min-width: 0; }
     .item-info strong { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: .04em; display: block; line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
