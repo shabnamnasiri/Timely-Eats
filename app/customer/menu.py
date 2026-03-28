@@ -9,6 +9,5 @@ def register_menu_routes(app, mysql):
         if "user_id" not in session:
             return redirect("/signin")
 
-
         return render_template("Menu.html")
 
