@@ -91,6 +91,13 @@ CREATE TABLE Review (
     FOREIGN KEY (item_id) REFERENCES Item(item_id)
 );
 
+-- restaurant table TABLE
+CREATE TABLE Table_Session (
+    session_id INT PRIMARY KEY AUTO_INCREMENT,
+    table_number INT NOT NULL,
+    status VARCHAR(50) DEFAULT 'active',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
 
 -- adding roles
 INSERT INTO role (role_id, role_name, role_level) 
@@ -98,3 +105,7 @@ VALUES
     ('1', 'Customer', '1'),
     ('2', 'Staff', '2'),
     ('3', 'Administrator', '3');
+
+ALTER TABLE Orders
+ADD session_id INT,
+ADD FOREIGN KEY (session_id) REFERENCES Table_Session(session_id);
