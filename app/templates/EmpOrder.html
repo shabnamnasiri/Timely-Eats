@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Order Portal | System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../static/css/Add_Menu.css"> </head>
+<body>
+
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <b>ORDER<span>FLOW</span></b>
+            <small>Internal Terminal v2.0</small>
+        </div>
+        
+        <div class="sidebar-section">Management</div>
+        <nav class="sidebar-nav">
+            <a href="#" class="active"><i class="ico">⬢</i> Live Orders</a>
+            <a href="EmpQR.html"><i class="ico">▤</i>QR GENERATOR</a>
+            <a href="#"><i class="ico">◈</i> Inventory</a>
+            <a href="#"><i class="ico">⚙</i> Settings</a>
+        </nav>
+
+        <div class="sidebar-user">
+            <small>Active Staff</small>
+            <span>Alex Thompson</span>
+        </div>
+    </aside>
+
+    <main class="main">
+        <header class="topbar">
+            <h1>Current Expeditions</h1>
+            <div class="topbar-right">
+                <span class="badge badge-items">Network: Online</span>
+                <span class="badge badge-items" style="color: var(--success)">8 Active Orders</span>
+            </div>
+        </header>
+
+        <div class="content">
+            <div class="list-panel">
+                <span class="label">Live Queue</span>
+                
+                <div class="stats">
+                    <div class="stat"><dt>Pending</dt><dd>03</dd></div>
+                    <div class="stat"><dt>Preparing</dt><dd>04</dd></div>
+                    <div class="stat"><dt>Ready</dt><dd>01</dd></div>
+                    <div class="stat"><dt>Avg Time</dt><dd>14<span>min</span></dd></div>
+                    <div class="stat"><dt>Revenue</dt><dd><span>$</span>842</dd></div>
+                </div>
+
+                <div class="list-controls">
+                    <div class="filter-tabs">
+                        <div class="filter-tab on">All Orders</div>
+                        <div class="filter-tab">Priority</div>
+                        <div class="filter-tab">Dine-In</div>
+                        <div class="filter-tab">Takeaway</div>
+                    </div>
+                </div>
+
+                <div class="item-list">
+                    <div class="item-row" style="--i: 1">
+                        <div class="item-cat starters">#1024</div>
+                        <div class="item-info">
+                            <b>Table 12 - 2x Burger, 1x Fries</b>
+                            <span>Status: Pending • Wait: 4m • <b style="color: var(--accent)">VISA **** 1234</b></span>
+                        </div>
+                        <div class="item-price">$42.50</div>
+                        <div class="item-actions">
+                            <button class="btn-icon">Modify</button>
+                            <button class="btn-icon" style="background: var(--success); color: white; border: none;">Start</button>
+                        </div>
+                    </div>
+
+                    <div class="item-row" style="--i: 2">
+                        <div class="item-cat mains">#1023</div>
+                        <div class="item-info">
+                            <b>Pickup: Sarah J. - 1x Caesar Salad</b>
+                            <span>Status: Preparing • Wait: 12m • <b style="color: var(--accent)">CASH</b></span>
+                        </div>
+                        <div class="item-price">$18.00</div>
+                        <div class="item-actions">
+                            <button class="btn-icon">Modify</button>
+                            <button class="btn-icon" style="background: var(--ink); color: white;">Ready</button>
+                        </div>
+                    </div>
+
+                    <div class="item-row" style="--i: 3">
+                        <div class="item-cat sides">#1022</div>
+                        <div class="item-info">
+                            <b>Table 04 - Full Course Dinner</b>
+                            <span>Status: Ready to Serve • <b style="color: var(--accent)">AMEX **** 9002</b></span>
+                        </div>
+                        <div class="item-price">$124.90</div>
+                        <div class="item-actions">
+                            <button class="btn-icon del">Void</button>
+                            <button class="btn-icon" style="border-color: var(--success); color: var(--success);">Complete</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <aside class="form-panel">
+                <h2>Order Assistance</h2>
+                <p>Modify existing order details or manually update order status for synchronization.</p>
+                <div class="form-divider"></div>
+
+                <form>
+                    <div class="field">
+                        <label>Target Order ID</label>
+                        <input type="text" placeholder="e.g. #1024" value="#1024">
+                    </div>
+
+                    <div class="field-row">
+                        <div class="field">
+                            <label>Update Status</label>
+                            <div class="select-wrap">
+                                <select>
+                                    <option>Pending</option>
+                                    <option selected>Preparing</option>
+                                    <option>Ready</option>
+                                    <option>Completed</option>
+                                    <option>Voided</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label>Payment Mode</label>
+                            <div class="select-wrap">
+                                <select>
+                                    <option>Credit Card</option>
+                                    <option>Cash</option>
+                                    <option>Mobile Pay</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label>Special Instructions / Assistance Notes</label>
+                        <textarea placeholder="Add allergy warnings or table change notes here..."></textarea>
+                    </div>
+
+                    <label class="label">Priority Level</label>
+                    <div class="tags-group">
+                        <input type="checkbox" id="tag1" class="tag-toggle">
+                        <label for="tag1">Standard</label>
+                        
+                        <input type="checkbox" id="tag2" class="tag-toggle" checked>
+                        <label for="tag2">Rush</label>
+                        
+                        <input type="checkbox" id="tag3" class="tag-toggle">
+                        <label for="tag3">VIP</label>
+                    </div>
+
+                    <button type="submit" class="btn-submit">Update Order Details</button>
+                </form>
+            </aside>
+        </div>
+    </main>
+
+</body>
+</html>
