@@ -16,3 +16,6 @@ def register_menu_routes(app, mysql):
         cursor.close()
 
         return render_template("Menu.html", items=items)
+
+
+    

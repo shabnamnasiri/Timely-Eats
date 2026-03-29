@@ -36,7 +36,7 @@
 
 <main class="content">
 
-  <!-- ── STARTERS — with footer + tags ── -->
+  <!-- STARTERS -->
   {% set starters = items | selectattr('5', 'equalto', 'starters') | list %}
   <section class="menu-section" id="starters">
     <div class="section-header">
@@ -57,8 +57,12 @@
             <span class="tag">⏱ {{ item[3] or '—' }} min</span>
           </div>
         </footer>
-        <input class="order-toggle" type="checkbox" id="order-{{ item[0] }}">
-        <label class="order-btn" for="order-{{ item[0] }}">Add to Order</label>
+        <form action="{{ url_for('add_to_cart') }}" method="post">
+          <input type="hidden" name="item_id" value="{{ item[0] }}">
+          <input type="hidden" name="item_name" value="{{ item[1] }}">
+          <input type="hidden" name="item_price" value="{{ item[4] }}">
+          <button type="submit" class="order-btn">Add to Order</button>
+        </form>
       </div>
       {% else %}
       <p class="empty-cat">No starters available today.</p>
@@ -66,7 +70,7 @@
     </div>
   </section>
 
-  <!-- ── MAINS — with footer + tags ── -->
+  <!-- MAINS -->
   {% set mains = items | selectattr('5', 'equalto', 'mains') | list %}
   <section class="menu-section" id="mains">
     <div class="section-header">
@@ -87,8 +91,12 @@
             <span class="tag">⏱ {{ item[3] or '—' }} min</span>
           </div>
         </footer>
-        <input class="order-toggle" type="checkbox" id="order-{{ item[0] }}">
-        <label class="order-btn" for="order-{{ item[0] }}">Add to Order</label>
+        <form action="{{ url_for('add_to_cart') }}" method="post">
+          <input type="hidden" name="item_id" value="{{ item[0] }}">
+          <input type="hidden" name="item_name" value="{{ item[1] }}">
+          <input type="hidden" name="item_price" value="{{ item[4] }}">
+          <button type="submit" class="order-btn">Add to Order</button>
+        </form>
       </div>
       {% else %}
       <p class="empty-cat">No mains available today.</p>
@@ -96,7 +104,7 @@
     </div>
   </section>
 
-  <!-- ── SIDES — no footer ── -->
+  <!-- SIDES -->
   {% set sides = items | selectattr('5', 'equalto', 'sides') | list %}
   <section class="menu-section" id="sides">
     <div class="section-header">
@@ -112,8 +120,12 @@
           <span class="price">${{ item[4] }}</span>
         </div>
         <p>{{ item[2] }}</p>
-        <input class="order-toggle" type="checkbox" id="order-{{ item[0] }}">
-        <label class="order-btn" for="order-{{ item[0] }}">Add to Order</label>
+        <form action="{{ url_for('add_to_cart') }}" method="post">
+          <input type="hidden" name="item_id" value="{{ item[0] }}">
+          <input type="hidden" name="item_name" value="{{ item[1] }}">
+          <input type="hidden" name="item_price" value="{{ item[4] }}">
+          <button type="submit" class="order-btn">Add to Order</button>
+        </form>
       </div>
       {% else %}
       <p class="empty-cat">No sides available today.</p>
@@ -121,7 +133,7 @@
     </div>
   </section>
 
-  <!-- ── DESSERTS — with footer + tags ── -->
+  <!-- DESSERTS -->
   {% set desserts = items | selectattr('5', 'equalto', 'desserts') | list %}
   <section class="menu-section" id="desserts">
     <div class="section-header">
@@ -137,13 +149,12 @@
           <span class="price">${{ item[4] }}</span>
         </div>
         <p>{{ item[2] }}</p>
-        <footer>
-          <div class="tags">
-            <span class="tag">⏱ {{ item[3] or '—' }} min</span>
-          </div>
-        </footer>
-        <input class="order-toggle" type="checkbox" id="order-{{ item[0] }}">
-        <label class="order-btn" for="order-{{ item[0] }}">Add to Order</label>
+        <form action="{{ url_for('add_to_cart') }}" method="post">
+          <input type="hidden" name="item_id" value="{{ item[0] }}">
+          <input type="hidden" name="item_name" value="{{ item[1] }}">
+          <input type="hidden" name="item_price" value="{{ item[4] }}">
+          <button type="submit" class="order-btn">Add to Order</button>
+        </form>
       </div>
       {% else %}
       <p class="empty-cat">No desserts available today.</p>
@@ -151,7 +162,7 @@
     </div>
   </section>
 
-  <!-- ── DRINKS — no footer ── -->
+  <!-- DRINKS -->
   {% set drinks = items | selectattr('5', 'equalto', 'drinks') | list %}
   <section class="menu-section" id="drinks">
     <div class="section-header">
@@ -167,8 +178,12 @@
           <span class="price">${{ item[4] }}</span>
         </div>
         <p>{{ item[2] }}</p>
-        <input class="order-toggle" type="checkbox" id="order-{{ item[0] }}">
-        <label class="order-btn" for="order-{{ item[0] }}">Add to Order</label>
+        <form action="{{ url_for('add_to_cart') }}" method="post">
+          <input type="hidden" name="item_id" value="{{ item[0] }}">
+          <input type="hidden" name="item_name" value="{{ item[1] }}">
+          <input type="hidden" name="item_price" value="{{ item[4] }}">
+          <button type="submit" class="order-btn">Add to Order</button>
+        </form>
       </div>
       {% else %}
       <p class="empty-cat">No drinks available today.</p>
