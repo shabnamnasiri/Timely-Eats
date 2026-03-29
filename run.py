@@ -1,5 +1,5 @@
 import os
-from flask import Flask, session, redirect, send_file
+from flask import Flask, render_template, session, redirect, send_file
 from app.auth.auth import login_required, role_required
 from app.auth.login.Sign_in import register_login_routes
 from app.auth.login.Sign_up import register_register_routes
@@ -74,6 +74,10 @@ def test_db():
 @app.route('/debug-static')
 def debug_static():
     return app.static_folder
+
+@app.route('/staff/orders')
+def staff_orders():
+    return render_template('EmpOrder.html')
 
 
 if __name__ == "__main__":
