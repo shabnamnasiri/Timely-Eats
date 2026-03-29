@@ -6,11 +6,19 @@ def register_login_routes(app, mysql):
 
     @app.route("/signin", methods=["GET","POST"])
     def signin():
-
-        if "user_id" in session:
+        #checking if user is already logged in
+        if "user_id" in session and "user_id" == "1":
             
-            return redirect("/menu")
+            if session.get("role_id") == 1:
+                    return redirect("/menu")
+                
+            elif session.get("role_id") == 2:
+                    return redirect("/staff")
+                
+            else:
+                    return redirect("/admin/add_menu")
 
+        #sign in button actions
         if request.method == "POST":
 
             username_phone = request.form["username_phone"]
@@ -27,8 +35,8 @@ def register_login_routes(app, mysql):
 
             cursor.close()
 
+            #checking passsword
             if user and check_password_hash(user[1], password):
-
                 session["user_id"] = user[0]
                 session["role_id"] = user[2]
                 if user[2]==1:
@@ -36,7 +44,7 @@ def register_login_routes(app, mysql):
                 elif user[2]==2:
                     return redirect("/staff")
                 else: 
-                    return redirect("/add_menu")
+                    return redirect("/admin/add_menu")
 
             return "Invalid username or password"
 

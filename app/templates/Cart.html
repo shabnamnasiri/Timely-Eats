@@ -4,7 +4,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Timely Eats — Your Order</title>
-    <link rel="stylesheet" href="../static/css/Cart.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/Cart.css') }}"/>
 
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
   
@@ -13,7 +13,7 @@
 
 <!-- ══ TOPBAR ══ -->
 <header class="topbar">
-  <a href="Menu.html" class="logo">
+  <a href="/menu" class="logo">
     <b>Timely<span>Eats</span></b>
     <small>← Menu</small>
   </a>

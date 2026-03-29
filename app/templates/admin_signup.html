@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Timely Eats — Create Account</title>
-    <link rel="stylesheet" href="../static/css/Sign_up.css">
+  <title>Timely Eats — Create Admin Account</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Sign_up.css') }}">
 
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 </head>
@@ -26,8 +26,7 @@
   <div class="step">
     <div class="step-num">01</div>
     <div class="step-body">
-      <div class="step-title">Scan the QR code</div>
-      <div class="step-desc">Use your phone to scan the QR code on the table to open the digital menu.</div>
+      <div class="step-title">Sign up as Admin</div>
     </div>
   </div>
   <div class="step-divider"></div>
@@ -35,8 +34,7 @@
   <div class="step">
     <div class="step-num">02</div>
     <div class="step-body">
-      <div class="step-title">Browse & order</div>
-      <div class="step-desc">Explore the menu, customize your items, and place your order directly from your phone.</div>
+      <div class="step-title">Add menu items and manage staff</div>
     </div>
   </div>
   <div class="step-divider"></div>
@@ -44,8 +42,7 @@
   <div class="step">
     <div class="step-num">03</div>
     <div class="step-body">
-      <div class="step-title">Enjoy your meal</div>
-      <div class="step-desc">Your order is sent straight to the kitchen while you relax and enjoy your time.</div>
+      <div class="step-title">see reports</div>
     </div>
   </div>
 </div>
@@ -58,34 +55,24 @@
   <!-- RIGHT -->
   <main class="panel-right">
     <div class="form-shell">
-      <h2 class="form-title">Create Account</h2>
-      <p class="form-subtitle">Set up your Timely Eats staff profile</p>
+      <h2 class="form-title">Create Admin Account</h2>
+      <p class="form-subtitle">Set up Admin Account</p>
       <div class="divider"></div>
 
-      <form action="#" method="post">
+      <form action="/" method="post">
 
         <!-- Personal -->
         <div class="section-heading">Personal Details</div>
 
-        <div class="field-row">
-          <div class="field">
-            <label for="first-name">First Name</label>
-            <input type="text" id="first-name" name="first_name" placeholder="Jane" required autocomplete="given-name"/>
-          </div>
-          <div class="field">
-            <label for="last-name">Last Name</label>
-            <input type="text" id="last-name" name="last_name" placeholder="Smith" required autocomplete="family-name"/>
-          </div>
-        </div>
 
         <div class="field">
-          <label for="email">Email Address</label>
-          <input type="email" id="email" name="email" placeholder="jane@restaurant.com" required autocomplete="email"/>
+          <label for="username">Username</label>
+          <input type="username" id="username" name="username" placeholder="Admin@gmail" required autocomplete="username" value="{{ form_data.username if form_data.username }}"/>
         </div>
 
         <div class="field">
           <label for="phone">Phone Number</label>
-          <input type="tel" id="phone" name="phone" placeholder="+1 (000) 000-0000" autocomplete="tel"/>
+          <input type="tel" id="phone" name="phone" placeholder="+1 (000) 000-0000" autocomplete="tel" value="{{ form_data.phone if form_data.phone }}"/>
         </div>
 
         <!-- Workplace -->
@@ -126,13 +113,17 @@
       </form>
 
       <p class="bottom-link">
-        Already have an account? <a href="Sign_in.html">Sign in here →</a>
+        Already have an account? <a href="/signin">Sign in here →</a>
       </p>
 
     </div>
   </main>
 
 </div>
-
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% for category, message in messages %}
+    <script>alert("{{ message }}");</script>
+  {% endfor %}
+{% endwith %}
 </body>
 </html>

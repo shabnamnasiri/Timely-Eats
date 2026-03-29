@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Timely Eats — Staff Manager</title>
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/Add_menu.css') }}">
+
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <b>Timely<span>Eats</span></b>
+    <small>Admin Panel</small>
+  </div>
+
+  <div class="sidebar-section">Menu</div>
+  <ul class="sidebar-nav">
+    <li><a href="/admin/add_menu"><i class="ico">▤</i> Menu Items</a></li>
+  </ul>
+
+  <div class="sidebar-section">Operations</div>
+  <ul class="sidebar-nav">
+    <li><a href="/Admin/add_staff" class="active"><i class="ico">⊙</i> Add Staff</a></li>
+  </ul>
+
+  <div class="sidebar-section">Reports</div>
+  <ul class="sidebar-nav">
+    <li><a href="#"><i class="ico">◈</i> Analytics</a></li>
+    <li><a href="#"><i class="ico">▦</i> Revenue</a></li>
+  </ul>
+
+  <div class="sidebar-user">
+    <small>Signed in as</small>
+    <span>Admin · Jane Smith</span>
+    <a href="/logout" class="sidebar-logout">⏻ Logout</a>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <h1>Staff Manager</h1>
+    <div class="topbar-right">
+      <span class="badge badge-items">{{ staffs|length }} staff</span>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- LEFT: STAFF LIST -->
+    <div class="list-panel">
+      <span class="label">Current Workers</span>
+
+      <div class="item-list" id="item-list">
+        {% if staffs %}
+          {% for staff in staffs %}
+          <div class="item-row" style="--i:{{ loop.index0 }}">
+
+            <!-- Role / Category -->
+            <span class="item-cat">{{ staff[0] }}</span>
+
+            <!-- Info -->
+            <div class="item-info">
+              <strong>{{ staff[1] }}</strong> <!-- Username -->
+              <span>{{ staff[2] }}</span> <!-- Phone -->
+            </div>
+
+            <!-- Example extra field (optional) -->
+            <span class="item-price">{{ staff[4] }}</span>
+
+            <!-- Actions -->
+            <div class="item-actions">
+
+              <!-- Edit button -->
+              <button class="btn-icon">Edit</button>
+
+              <!-- Delete -->
+              <form action="/delete_staff/{{ staff[0] }}" method="POST" style="display:inline">
+                {% if csrf_token %}
+                  {{ csrf_token() }}
+                {% endif %}
+                <button type="submit" class="btn-icon del">Delete</button>
+              </form>
+
+            </div>
+
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="empty">
+            <b>No Staff Added Yet</b>
+            <span>Use the form to add first staff.</span>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- RIGHT: ADD STAFF FORM -->
+    <div class="form-panel">
+      <div class="form-divider"></div>
+
+      <h2>Add Staff</h2>
+      <p>Fill in the details below to add a new staff member.</p>
+
+      <form method="POST" action="/admin/add_new_staff" autocomplete="off">
+
+        {% if csrf_token %}
+          {{ csrf_token() }}
+        {% endif %}
+
+        <!-- Username -->
+        <div class="field">
+          <label for="username">Username</label>
+          <input 
+            type="text"
+            id="username"
+            name="username"
+            placeholder="JaneSmith"
+            required
+            autocomplete="username"
+            value="{{ form_data.username if form_data and form_data.username }}"
+          />
+        </div>
+
+        <!-- Phone -->
+        <div class="field">
+          <label for="phone">Phone Number</label>
+          <input 
+            type="tel"
+            id="phone"
+            name="phone"
+            placeholder="+1 (000) 000-0000"
+            autocomplete="tel"
+            value="{{ form_data.phone if form_data and form_data.phone }}"
+          />
+        </div>
+
+        <!-- Password -->
+        <div class="field">
+          <label for="password">Password</label>
+          <input 
+            type="password"
+            id="password"
+            name="password"
+            placeholder="••••••••"
+            required
+            autocomplete="new-password"
+          />
+          <p class="hint">Minimum 8 characters, including a number and symbol.</p>
+        </div>
+
+        <!-- Confirm Password -->
+        <div class="field">
+          <label for="confirm">Confirm Password</label>
+          <input 
+            type="password"
+            id="confirm"
+            name="confirm_password"
+            placeholder="••••••••"
+            required
+            autocomplete="new-password"
+          />
+        </div>
+
+        <button type="submit" class="btn-primary">Create Account</button>
+
+      </form>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

@@ -4,7 +4,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Timely Eats — Menu · Table 07</title>
-  <link rel="stylesheet" href="../static/css/Menu.css"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/Menu.css') }}"/>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant:ital,wght@0,400;0,600;1,300;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 </head>
 <body>
@@ -12,7 +12,7 @@
 <header class="topbar">
   <div class="logo"><b>Timely<span>Eats</span></b><small>Restaurant</small></div>
   <div class="table-badge"><span>Table</span><strong>07</strong></div>
-  <a href="#" class="cart">⊡ Order</a>
+  <a href="/Customer/Cart" class="cart">⊡ Cart</a>
   <a href="/logout" class="cart">Logout</a>
 </header>
 
@@ -36,89 +36,147 @@
 
 <main class="content">
 
+  <!-- ── STARTERS — with footer + tags ── -->
+  {% set starters = items | selectattr('5', 'equalto', 'starters') | list %}
   <section class="menu-section" id="starters">
     <div class="section-header">
       <h2>Starters</h2>
-      <span id="starters-count">0 dishes</span>
+      <span id="starters-count">{{ starters | length }} dishes</span>
     </div>
     <div class="grid" id="starters-grid">
-      <!-- Cards injected by backend -->
+      {% for item in starters %}
+      <div class="card" style="--i:{{ loop.index0 }}">
+        <img src="/item_photo/{{ item[0] }}" class="card-photo" alt="{{ item[1] }}" onerror="this.style.display='none'">
+        <div class="card-row">
+          <h3>{{ item[1] }}</h3>
+          <span class="price">${{ item[4] }}</span>
+        </div>
+        <p>{{ item[2] }}</p>
+        <footer>
+          <div class="tags">
+            <span class="tag">⏱ {{ item[3] or '—' }} min</span>
+          </div>
+        </footer>
+        <input class="order-toggle" type="checkbox" id="order-{{ item[0] }}">
+        <label class="order-btn" for="order-{{ item[0] }}">Add to Order</label>
+      </div>
+      {% else %}
+      <p class="empty-cat">No starters available today.</p>
+      {% endfor %}
     </div>
   </section>
 
+  <!-- ── MAINS — with footer + tags ── -->
+  {% set mains = items | selectattr('5', 'equalto', 'mains') | list %}
   <section class="menu-section" id="mains">
     <div class="section-header">
       <h2>Mains</h2>
-      <span id="mains-count">0 dishes</span>
+      <span id="mains-count">{{ mains | length }} dishes</span>
     </div>
     <div class="grid" id="mains-grid">
-      <!-- Cards injected by backend -->
+      {% for item in mains %}
+      <div class="card" style="--i:{{ loop.index0 }}">
+        <img src="/item_photo/{{ item[0] }}" class="card-photo" alt="{{ item[1] }}" onerror="this.style.display='none'">
+        <div class="card-row">
+          <h3>{{ item[1] }}</h3>
+          <span class="price">${{ item[4] }}</span>
+        </div>
+        <p>{{ item[2] }}</p>
+        <footer>
+          <div class="tags">
+            <span class="tag">⏱ {{ item[3] or '—' }} min</span>
+          </div>
+        </footer>
+        <input class="order-toggle" type="checkbox" id="order-{{ item[0] }}">
+        <label class="order-btn" for="order-{{ item[0] }}">Add to Order</label>
+      </div>
+      {% else %}
+      <p class="empty-cat">No mains available today.</p>
+      {% endfor %}
     </div>
   </section>
 
+  <!-- ── SIDES — no footer ── -->
+  {% set sides = items | selectattr('5', 'equalto', 'sides') | list %}
   <section class="menu-section" id="sides">
     <div class="section-header">
       <h2>Sides</h2>
-      <span id="sides-count">0 items</span>
+      <span id="sides-count">{{ sides | length }} items</span>
     </div>
     <div class="grid" id="sides-grid">
-      <!-- Cards injected by backend -->
+      {% for item in sides %}
+      <div class="card" style="--i:{{ loop.index0 }}">
+        <img src="/item_photo/{{ item[0] }}" class="card-photo" alt="{{ item[1] }}" onerror="this.style.display='none'">
+        <div class="card-row">
+          <h3>{{ item[1] }}</h3>
+          <span class="price">${{ item[4] }}</span>
+        </div>
+        <p>{{ item[2] }}</p>
+        <input class="order-toggle" type="checkbox" id="order-{{ item[0] }}">
+        <label class="order-btn" for="order-{{ item[0] }}">Add to Order</label>
+      </div>
+      {% else %}
+      <p class="empty-cat">No sides available today.</p>
+      {% endfor %}
     </div>
   </section>
 
+  <!-- ── DESSERTS — with footer + tags ── -->
+  {% set desserts = items | selectattr('5', 'equalto', 'desserts') | list %}
   <section class="menu-section" id="desserts">
     <div class="section-header">
       <h2>Desserts</h2>
-      <span id="desserts-count">0 dishes</span>
+      <span id="desserts-count">{{ desserts | length }} dishes</span>
     </div>
     <div class="grid" id="desserts-grid">
-      <!-- Cards injected by backend -->
+      {% for item in desserts %}
+      <div class="card" style="--i:{{ loop.index0 }}">
+        <img src="/item_photo/{{ item[0] }}" class="card-photo" alt="{{ item[1] }}" onerror="this.style.display='none'">
+        <div class="card-row">
+          <h3>{{ item[1] }}</h3>
+          <span class="price">${{ item[4] }}</span>
+        </div>
+        <p>{{ item[2] }}</p>
+        <footer>
+          <div class="tags">
+            <span class="tag">⏱ {{ item[3] or '—' }} min</span>
+          </div>
+        </footer>
+        <input class="order-toggle" type="checkbox" id="order-{{ item[0] }}">
+        <label class="order-btn" for="order-{{ item[0] }}">Add to Order</label>
+      </div>
+      {% else %}
+      <p class="empty-cat">No desserts available today.</p>
+      {% endfor %}
     </div>
   </section>
 
+  <!-- ── DRINKS — no footer ── -->
+  {% set drinks = items | selectattr('5', 'equalto', 'drinks') | list %}
   <section class="menu-section" id="drinks">
     <div class="section-header">
       <h2>Drinks</h2>
-      <span id="drinks-count">0 items</span>
+      <span id="drinks-count">{{ drinks | length }} items</span>
     </div>
     <div class="grid" id="drinks-grid">
-      <!-- Cards injected by backend -->
+      {% for item in drinks %}
+      <div class="card" style="--i:{{ loop.index0 }}">
+        <img src="/item_photo/{{ item[0] }}" class="card-photo" alt="{{ item[1] }}" onerror="this.style.display='none'">
+        <div class="card-row">
+          <h3>{{ item[1] }}</h3>
+          <span class="price">${{ item[4] }}</span>
+        </div>
+        <p>{{ item[2] }}</p>
+        <input class="order-toggle" type="checkbox" id="order-{{ item[0] }}">
+        <label class="order-btn" for="order-{{ item[0] }}">Add to Order</label>
+      </div>
+      {% else %}
+      <p class="empty-cat">No drinks available today.</p>
+      {% endfor %}
     </div>
   </section>
 
 </main>
-
-
-<!--
-═══════════════════════════════════════════════════════
-  CARD TEMPLATE — copy & populate for each menu item
-  ───────────────────────────────────────────────────
-  • style="--i:N"  → 0-based index, drives stagger animation
-  • <footer> block → optional; omit for sides / drinks
-  • Tags           → add only applicable: .tag.v / .tag.gf / .tag.s
-  • id attributes  → must be unique per checkbox + label pair
-═══════════════════════════════════════════════════════
-
-<div class="card" style="--i:0">
-  <div class="card-row">
-    <h3>Dish Name</h3>
-    <span class="price">$00</span>
-  </div>
-  <p>Dish description text goes here.</p>
-  <footer>
-    <div class="tags">
-      <span class="tag v">V</span>
-      <span class="tag gf">GF</span>
-      <span class="tag s">Spicy</span>
-    </div>
-    <span class="kcal">000 kcal</span>
-  </footer>
-  <input class="order-toggle" type="checkbox" id="UNIQUE_ID">
-  <label class="order-btn" for="UNIQUE_ID">Add to Order</label>
-</div>
-
-═══════════════════════════════════════════════════════
--->
 
 </body>
 </html>
