@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Print QR</title>
+    <style>
+        body {
+            text-align: center;
+            font-family: Arial;
+            margin-top: 50px;
+        }
+
+        .card {
+            border: 2px dashed black;
+            padding: 20px;
+            display: inline-block;
+        }
+
+        img {
+            width: 200px;
+            height: 200px;
+        }
+
+        h2 {
+            margin: 10px 0;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>Table {{ table_number }}</h2>
+    <h3>Session #{{ session_id }}</h3>
+
+   <img src="{{ url_for('static', filename=qr_code) }}">
+   
+
+    <br>
+    <button onclick="window.print()">Print</button>
+    <button onclick="window.location.href='/staff/qr'">Back</button>
+    
+    
+</div>
+
+</body>
+</html>

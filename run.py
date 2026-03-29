@@ -19,8 +19,9 @@ from app.staff.qr.session_routes import register_session_routes
 
 
 template_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "app", "templates")
+static_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "app", "static")
 
-app = Flask(__name__, template_folder=template_path)
+app = Flask(__name__, template_folder=template_path, static_folder=static_path)
 app.secret_key = "secret_key_123"
 
 
@@ -70,7 +71,9 @@ def test_db():
     cursor.execute("SELECT 1")
     return "DB Connected!"
 
-
+@app.route('/debug-static')
+def debug_static():
+    return app.static_folder
 
 
 if __name__ == "__main__":
