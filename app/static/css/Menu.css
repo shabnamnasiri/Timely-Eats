@@ -334,3 +334,123 @@ body {
     transform: none;
   }
 }
+
+.order-btn {
+  margin-top: 10px;
+  align-self: flex-start;
+
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+
+  color: var(--ink);
+  background: transparent;
+
+  border: 1px solid var(--accent);
+  padding: 10px 16px;
+
+  cursor: pointer;
+  transition: all .25s ease;
+  position: relative;
+}
+
+/* Hover = elegant fill */
+.order-btn:hover {
+  background: var(--accent);
+  color: var(--paper);
+  border-color: var(--accent);
+}
+
+/* Click effect */
+.order-btn:active {
+  transform: translateY(1px);
+  opacity: 0.9;
+}
+
+/* Optional subtle line animation */
+.order-btn::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 0%;
+  height: 1px;
+  background: var(--accent);
+  transition: width .25s ease;
+}
+
+.order-btn:hover::after {
+  width: 100%;
+}
+
+/* Disabled */
+.order-btn:disabled {
+  border-color: var(--rule);
+  color: var(--ash);
+  cursor: not-allowed;
+}
+
+.flash-container {
+  margin-bottom: 20px;
+}
+
+.flash {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  padding: 10px 14px;
+  border: 1px solid var(--accent);
+  background: var(--cream);
+  color: var(--ink);
+  display: inline-block;
+}
+
+.flash.success {
+  border-color: var(--accent);
+}
+.popup-toast {
+  position: fixed;
+  top: 90px;
+  right: 30px;
+  z-index: 9999;
+
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  background: var(--ink);
+  color: var(--paper);
+
+  border-left: 3px solid var(--accent);
+  padding: 14px 18px;
+
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: .12em;
+
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+
+  opacity: 0;
+  transform: translateY(-10px);
+  animation: slideIn .4s ease forwards;
+}
+
+.toast-title {
+  font-size: 10px;
+  color: var(--accent);
+}
+
+.toast-msg {
+  font-size: 11px;
+  color: var(--paper);
+}
+
+/* animation */
+@keyframes slideIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

@@ -4,7 +4,6 @@ pymysql.install_as_MySQLdb()
 
 from flask import Flask, session, redirect
 from flask_mysqldb import MySQL
-from flask import render_template
 from app.auth.auth import login_required, role_required
 from app.auth.login.Sign_in import register_login_routes
 from app.auth.login.Sign_up import register_register_routes
