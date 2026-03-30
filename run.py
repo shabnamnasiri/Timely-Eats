@@ -1,6 +1,8 @@
 import os
 import pymysql
 pymysql.install_as_MySQLdb()
+import qrcode
+import uuid
 
 from flask import Flask, session, redirect
 from flask_mysqldb import MySQL
@@ -14,6 +16,8 @@ from app.customer.review import register_review_routes
 from app.customer.cart import register_customer_cart_routes
 from app.admin.add_menu import register_admin_add_menu_routes
 from app.admin.add_staff import register_admin_add_staff_routes
+from app.staff.session_routes import register_session_routes
+
 template_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "app", "templates")
 static_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "app", "static")
 
@@ -37,16 +41,16 @@ register_admin_add_menu_routes(app, mysql)
 register_customer_cart_routes(app,mysql)
 register_forgotpassword_routes(app, mysql)
 register_admin_add_staff_routes(app,mysql)
+register_session_routes(app, mysql)
 
 @app.route("/logout")
 def logout():
     session.clear()
     return redirect("/signin")
 
-@app.route("/staff")
-@role_required(2)
-def staff_page():
-    return "Staff dashboard"
+@app.route('/staff/orders')
+def staff_orders():
+    return render_template('EmpOrder.html')
 
 
 if __name__ == "__main__":

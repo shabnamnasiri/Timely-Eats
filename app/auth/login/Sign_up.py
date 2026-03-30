@@ -10,7 +10,7 @@ def register_register_routes(app, mysql):
     def register():
 
         #checking if user is already logged in
-        if "user_id" in session and "user_id" == "1":
+        if "user_id" in session:
             
             if session.get("role_id") == 1:
                     return redirect("/menu")

@@ -10,7 +10,7 @@ def register_add_item_routes(app, mysql):
 
         user_id = session["user_id"]
         item_id = request.form["item_id"]
-        quantity = int(request.form.get("quantity", 1))
+        quantity = 1
 
         cur = mysql.connection.cursor()
 
