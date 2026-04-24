@@ -52,12 +52,16 @@ body { font-family: 'DM Sans', sans-serif; background: var(--paper); color: var(
 
 /* ── PAGE GRID ── */
 .page {
-  display: grid;
-  grid-template-columns: 1fr 380px;
-  gap: 32px;
-  padding: 32px 40px;
-  max-width: 1300px;
+  max-width: 1500px;
   margin: 0 auto;
+  padding: 40px;
+}
+
+.page-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 40px;
+  width: 100%;
   align-items: start;
 }
 
@@ -231,8 +235,20 @@ body { font-family: 'DM Sans', sans-serif; background: var(--paper); color: var(
 .review-box { display: block; margin-top: 6px; }
 
 /* ── RIGHT COLUMN ── */
-.summary-col { display: flex; flex-direction: column; gap: 16px; position: sticky; top: 80px; }
+.summary-col {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  position: sticky;
+  top: 90px;
+  align-self: start;
+}
 
+.left-col {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
 /* loyalty */
 .loyalty-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
 .loyalty-header h3 { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: .05em; }
@@ -302,11 +318,23 @@ body { font-family: 'DM Sans', sans-serif; background: var(--paper); color: var(
 .card-row .card-input { flex: 1; }
 
 .btn-place {
-  width: 100%; padding: 14px;
-  background: var(--ink); border: none; color: var(--paper);
-  font-family: 'DM Mono', monospace; font-size: 10px;
-  letter-spacing: .28em; text-transform: uppercase;
-  cursor: pointer; transition: background .2s;
+  width: 100%;
+  padding: 18px;
+  margin-top: 20px;
+  background: var(--ink);
+  border: none;
+  color: var(--paper);
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: .28em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all .2s;
+}
+
+.btn-place:hover {
+  background: var(--accent);
+  color: var(--ink);
 }
 .btn-place:hover { background: var(--accent); color: var(--ink); }
 

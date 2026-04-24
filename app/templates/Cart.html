@@ -4,152 +4,151 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Timely Eats — Your Order</title>
+
   <link rel="stylesheet" href="{{ url_for('static', filename='css/Cart.css') }}"/>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 </head>
+
 <body>
 
-<!-- TOPBAR -->
 <header class="topbar">
   <a href="/menu" class="logo">
     <b>Timely<span>Eats</span></b>
     <small>← Menu</small>
   </a>
+
   <div class="topbar-center">
     <span class="table-pill">Table</span>
     <span class="table-num">{{ table_number }}</span>
   </div>
+
   <div class="loyalty-pill">
     <small>Points</small>
     <b>{{ loyalty_points }}</b>
   </div>
 </header>
 
-<!-- FLASH TOAST -->
-
-<!-- PAGE GRID -->
 <div class="page">
 
   <!-- LEFT COLUMN -->
   <div class="left-col">
 
-    <!-- ORDER ITEMS -->
     <div class="mb32">
       <span class="sec-label">Your Selection</span>
       <div class="sec-title">Order Summary</div>
 
       <div class="item-list">
+
         {% if cart_items %}
-          {% for item in cart_items %}
-          <div class="order-item" style="--i:{{ loop.index0 }}">
-            <div>
-              <span class="item-cat">{{ item.category }}</span>
-              <div class="item-name">{{ item.name }}</div>
-              {% if item.customisations %}
-              <div class="item-customs">
-                {% for custom in item.customisations %}
-                <span class="custom-tag">{{ custom }}</span>
-                {% endfor %}
-              </div>
-              {% endif %}
-              {% if item.note %}
-              <p class="item-note">{{ item.note }}</p>
-              {% endif %}
-            </div>
-            <div class="item-right">
-              <div class="item-price">${{ "%.2f"|format(item.price * item.quantity) }}</div>
-              <div class="qty-control">
-                <button class="qty-btn" data-item="{{ item.id }}" data-action="decrease">−</button>
-                <div class="qty-val">{{ item.quantity }}</div>
-                <button class="qty-btn" data-item="{{ item.id }}" data-action="increase">+</button>
-              </div>
-              <button class="btn-remove" data-item="{{ item.id }}">Remove</button>
-            </div>
-          </div>
-          {% endfor %}
-        {% else %}
-          <p class="empty-cat">Your cart is empty.</p>
-        {% endif %}
-      </div>
-    </div>
+        {% for item in cart_items %}
 
-    <!-- CUSTOMISATIONS (simplified for now) -->
-    <div class="mb32">
-      <span class="sec-label">Preferences</span>
-      <div class="sec-title" style="font-size:24px">Customise Items</div>
+        <div class="order-item">
 
-      {% for item in cart_items %}
-      <div class="cust-block">
-        <input class="cust-checkbox" type="checkbox" id="cust-{{ item.id }}">
-        <label class="cust-header" for="cust-{{ item.id }}">
-          <span class="cust-header-name">{{ item.name }}</span>
-          <span class="cust-toggle-icon">▾</span>
-        </label>
-        <div class="cust-body">
-          <div class="cust-group" style="margin-bottom:0">
-            <span class="cust-group-label">Special Instructions</span>
-            <textarea class="special-req field-base" placeholder="Notes for kitchen…">{{ item.note or '' }}</textarea>
+          <!-- ITEM INFO -->
+          <div>
+            <span class="item-cat">{{ item.category }}</span>
+            <div class="item-name">{{ item.name }}</div>
+
+            {% if item.note %}
+            <div class="item-customs">
+              <span class="custom-tag">{{ item.note }}</span>
+            </div>
+            {% endif %}
           </div>
+
+          <!-- RIGHT SIDE -->
+          <div class="item-right">
+
+            <div class="item-price">
+              ${{ "%.2f"|format(item.price * item.quantity) }}
+            </div>
+
+            <!-- QUANTITY CONTROLS (SERVER SIDE FIX) -->
+            <div class="qty-control">
+
+              <!-- DECREASE -->
+              <form method="POST" action="/cart/decrease/{{ item.id }}" style="display:inline;">
+                <button type="submit" class="qty-btn">−</button>
+              </form>
+
+              <div class="qty-val">{{ item.quantity }}</div>
+
+              <!-- INCREASE -->
+              <form method="POST" action="/cart/increase/{{ item.id }}" style="display:inline;">
+                <button type="submit" class="qty-btn">+</button>
+              </form>
+
+            </div>
+
+            <!-- REMOVE -->
+            <form method="POST" action="/cart/remove/{{ item.id }}">
+              <button type="submit" class="btn-remove">Remove</button>
+            </form>
+
+          </div>
+
         </div>
-      </div>
-      {% endfor %}
 
-      <button class="btn-save">Save Preferences</button>
+        {% endfor %}
+        {% else %}
+        <p class="empty-cat">Your cart is empty.</p>
+        {% endif %}
+
+      </div>
     </div>
 
-  </div><!-- end left-col -->
+  </div>
 
   <!-- RIGHT COLUMN -->
   <div class="summary-col">
 
-    <!-- LOYALTY PANEL -->
-    <div class="panel">
-      <div class="loyalty-header">
-        <h3>Loyalty Points</h3>
-        <div class="pts-big">
-          <small>Balance</small>
-          <b>{{ loyalty_points }} <span>pts</span></b>
-        </div>
-      </div>
-      <div class="loyalty-bar-wrap">
-        <div class="loyalty-bar-fill" style="width:{{ loyalty_progress }}%"></div>
-      </div>
-      <p class="loyalty-hint"><b>{{ points_to_next_reward }}</b> pts until your next free starter reward.</p>
-      <div class="redeem-row">
-        <p>Redeem 100 pts → <b style="color:var(--accent)">${{ loyalty_discount }}</b></p>
-        <input class="redeem-toggle" type="checkbox" id="redeem-toggle">
-        <label class="redeem-lbl" for="redeem-toggle">Redeem</label>
-      </div>
-    </div>
-
-    <!-- BILL SUMMARY -->
+    <!-- BILL -->
     <div class="panel">
       <span class="sec-label">Bill</span>
 
       {% for item in cart_items %}
       <div class="bill-row">
-        <span>{% if item.quantity > 1 %}{{ item.quantity }}× {% endif %}{{ item.name }}</span>
+        <span>
+          {% if item.quantity > 1 %}{{ item.quantity }}× {% endif %}
+          {{ item.name }}
+        </span>
         <b>${{ "%.2f"|format(item.price * item.quantity) }}</b>
       </div>
       {% endfor %}
-
-      {% if loyalty_discount_active %}
-      <div class="discount-row" id="discount-row">
-        <span>⭐ Loyalty Discount</span>
-        <b>− ${{ loyalty_discount }}</b>
-      </div>
-      {% endif %}
 
       <div class="bill-total">
         <span>Total</span>
         <b>${{ "%.2f"|format(cart_total) }}</b>
       </div>
-      <p class="earn-note">This order earns <b>{{ points_earned }}</b> loyalty points.</p>
     </div>
 
-  </div><!-- end summary-col -->
+    <!-- PAYMENT -->
+    <div class="pay-panel">
+      <h3>Payment</h3>
 
-</div><!-- end page -->
+      <form method="POST" action="/Customer/PlaceOrder">
+
+        <label>
+          <input type="radio" name="payment_method" value="cash" checked>
+          Cash
+        </label>
+
+        <label>
+          <input type="radio" name="payment_method" value="card">
+          Card
+        </label>
+
+        <button type="submit" class="btn-place">
+          Place Order
+        </button>
+
+      </form>
+
+    </div>
+
+  </div>
+
+</div>
 
 </body>
 </html>
