@@ -7,7 +7,7 @@ def register_login_routes(app, mysql):
     @app.route("/signin", methods=["GET","POST"])
     def signin():
         #checking if user is already logged in
-        if "user_id" in session and "user_id" == "1":
+        if "user_id" in session:
             
             if session.get("role_id") == 1:
                     return redirect("/menu")

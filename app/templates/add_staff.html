@@ -25,7 +25,7 @@
 
   <div class="sidebar-section">Operations</div>
   <ul class="sidebar-nav">
-    <li><a href="/Admin/add_staff" class="active"><i class="ico">⊙</i> Add Staff</a></li>
+    <li><a href="/admin/add_staff" class="active"><i class="ico">⊙</i> Add Staff</a></li>
   </ul>
 
   <div class="sidebar-section">Reports</div>
@@ -72,8 +72,8 @@
               <span>{{ staff[2] }}</span> <!-- Phone -->
             </div>
 
-            <!-- Example extra field (optional) -->
-            <span class="item-price">{{ staff[4] }}</span>
+            <!-- Role label -->
+            <span class="item-price">Staff</span>
 
             <!-- Actions -->
             <div class="item-actions">
@@ -83,9 +83,6 @@
 
               <!-- Delete -->
               <form action="/delete_staff/{{ staff[0] }}" method="POST" style="display:inline">
-                {% if csrf_token %}
-                  {{ csrf_token() }}
-                {% endif %}
                 <button type="submit" class="btn-icon del">Delete</button>
               </form>
 
@@ -109,11 +106,22 @@
       <h2>Add Staff</h2>
       <p>Fill in the details below to add a new staff member.</p>
 
-      <form method="POST" action="/admin/add_new_staff" autocomplete="off">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+          <div style="
+            padding: 10px 14px;
+            margin-bottom: 16px;
+            font-family: 'DM Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 0.1em;
+            border-left: 3px solid {{ 'var(--success)' if category == 'success' else 'var(--danger)' }};
+            background: {{ '#eaf4ea' if category == 'success' else '#fdeaea' }};
+            color: {{ 'var(--success)' if category == 'success' else 'var(--danger)' }};
+          ">{{ message }}</div>
+        {% endfor %}
+      {% endwith %}
 
-        {% if csrf_token %}
-          {{ csrf_token() }}
-        {% endif %}
+      <form method="POST" action="/admin/add_new_staff" autocomplete="off">
 
         <!-- Username -->
         <div class="field">
