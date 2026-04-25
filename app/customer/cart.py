@@ -1,4 +1,4 @@
-from flask import render_template, redirect, session
+from flask import render_template, redirect, session, flash, request
 import MySQLdb.cursors
 
 def register_customer_cart_routes(app, mysql):
@@ -20,38 +20,47 @@ def register_customer_cart_routes(app, mysql):
         cart = cursor.fetchone()
 
         if not cart:
-            return render_template('Cart.html', cart_items=[], cart_total=0,
-                                   table_number="—", loyalty_points=0,
-                                   loyalty_progress=0, points_to_next_reward=100,
+            return render_template('Cart.html',
+                                   cart_items=[],
+                                   cart_total=0,
+                                   table_number="—",
+                                   loyalty_points=0,
+                                   loyalty_progress=0,
+                                   points_to_next_reward=100,
                                    loyalty_discount='5.00',
                                    loyalty_discount_active=False,
                                    points_earned=0)
 
+        # FIX: select cart_item_id without aliasing to 'id'
+        #      also select customization_note directly
         cursor.execute("""
-            SELECT ci.cart_item_id AS id,
+            SELECT ci.cart_item_id,
                    ci.quantity,
-                   ci.customization_note AS note,
-                   m.name, m.category, m.price
+                   ci.customization_note,
+                   i.name,
+                   i.category,
+                   i.price
             FROM cart_item ci
-            JOIN item m ON ci.item_id = m.item_id
+            JOIN item i ON ci.item_id = i.item_id
             WHERE ci.cart_id = %s
         """, (cart['cart_id'],))
 
         rows = cursor.fetchall()
+        cursor.close()
 
         cart_items = []
         for r in rows:
             cart_items.append({
-                "id": r["id"],
-                "name": r["name"],
-                "category": r["category"],
-                "price": float(r["price"]),
-                "quantity": r["quantity"],
-                "note": r["note"],
-                "customisations": [r["note"]] if r["note"] else []
+                "cart_item_id":      r["cart_item_id"],       # used in form actions + textarea names
+                "name":              r["name"],
+                "category":          r["category"],
+                "price":             float(r["price"]),
+                "quantity":          r["quantity"],
+                "customization_note": r["customization_note"], # pre-fills textarea + item-note display
+                "customisations":    [r["customization_note"]] if r["customization_note"] else []
             })
 
-        cart_total = sum(i["price"] * i["quantity"] for i in cart_items)
+        cart_total   = sum(i["price"] * i["quantity"] for i in cart_items)
         points_earned = int(cart_total)
 
         return render_template("Cart.html",
@@ -69,50 +78,58 @@ def register_customer_cart_routes(app, mysql):
     @app.route("/cart/increase/<int:item_id>", methods=["POST"])
     def increase_item(item_id):
         cursor = mysql.connection.cursor()
-
         cursor.execute("""
             UPDATE cart_item
             SET quantity = quantity + 1
             WHERE cart_item_id = %s
         """, (item_id,))
-
         mysql.connection.commit()
         cursor.close()
-
-        return redirect("/Customer/Cart")
+        return redirect('/Customer/Cart')
 
     # ---------------- DECREASE ----------------
     @app.route("/cart/decrease/<int:item_id>", methods=["POST"])
     def decrease_item(item_id):
         cursor = mysql.connection.cursor()
-
         cursor.execute("""
             UPDATE cart_item
             SET quantity = quantity - 1
             WHERE cart_item_id = %s
         """, (item_id,))
-
         cursor.execute("""
             DELETE FROM cart_item
             WHERE cart_item_id = %s AND quantity <= 0
         """, (item_id,))
-
         mysql.connection.commit()
         cursor.close()
-
-        return redirect("/Customer/Cart")
+        return redirect('/Customer/Cart')
 
     # ---------------- REMOVE ----------------
     @app.route("/cart/remove/<int:item_id>", methods=["POST"])
     def remove_item(item_id):
         cursor = mysql.connection.cursor()
-
         cursor.execute("""
             DELETE FROM cart_item
             WHERE cart_item_id = %s
         """, (item_id,))
-
         mysql.connection.commit()
         cursor.close()
+        return redirect('/Customer/Cart')
 
-        return redirect("/Customer/Cart")
+    # ---------------- SAVE NOTES ----------------
+    @app.route('/cart/save_notes', methods=['POST'])
+    def save_notes():
+        cursor = mysql.connection.cursor()
+        for key, value in request.form.items():
+            if key.startswith('note_'):
+                cart_item_id = key.split('_', 1)[1]   # "note_7" → "7"
+                note = value.strip()
+                cursor.execute("""
+                    UPDATE cart_item
+                    SET customization_note = %s
+                    WHERE cart_item_id = %s
+                """, (note if note else None, cart_item_id))
+        mysql.connection.commit()
+        cursor.close()
+        flash('Preferences saved!', 'success')
+        return redirect('/Customer/Cart')

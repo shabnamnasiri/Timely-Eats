@@ -4,151 +4,205 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Timely Eats — Your Order</title>
-
   <link rel="stylesheet" href="{{ url_for('static', filename='css/Cart.css') }}"/>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 </head>
-
 <body>
 
+<!-- TOPBAR -->
 <header class="topbar">
   <a href="/menu" class="logo">
     <b>Timely<span>Eats</span></b>
     <small>← Menu</small>
   </a>
-
   <div class="topbar-center">
     <span class="table-pill">Table</span>
     <span class="table-num">{{ table_number }}</span>
   </div>
-
   <div class="loyalty-pill">
     <small>Points</small>
     <b>{{ loyalty_points }}</b>
   </div>
 </header>
 
+<!-- FLASH TOAST -->
+
+<!-- PAGE WRAPPER → GRID inside -->
 <div class="page">
+  <div class="page-grid">
 
-  <!-- LEFT COLUMN -->
-  <div class="left-col">
+    <!-- ═══════════════ COL 1 — LEFT ═══════════════ -->
+    <div class="left-col">
 
-    <div class="mb32">
-      <span class="sec-label">Your Selection</span>
-      <div class="sec-title">Order Summary</div>
+      <!-- ORDER ITEMS -->
+      <div class="mb32">
+        <span class="sec-label">Your Selection</span>
+        <div class="sec-title">Order Summary</div>
 
-      <div class="item-list">
+        <div class="item-list">
+          {% if cart_items %}
+            {% for item in cart_items %}
+            <div class="order-item" data-index="{{ loop.index0 }}">
+              <div>
+                <span class="item-cat">{{ item.category }}</span>
+                <div class="item-name">{{ item.name }}</div>
+                {% if item.customization_note %}
+                <p class="item-note">{{ item.customization_note }}</p>
+                {% endif %}
+              </div>
+              <div class="item-right">
+                <div class="item-price">${{ "%.2f"|format(item.price * item.quantity) }}</div>
 
-        {% if cart_items %}
-        {% for item in cart_items %}
+                <div class="qty-control">
+                  <form method="POST" action="/cart/decrease/{{ item.cart_item_id }}" style="display:inline;">
+                    <button type="submit" class="qty-btn">-</button>
+                  </form>
+                  <div class="qty-val">{{ item.quantity }}</div>
+                  <form method="POST" action="/cart/increase/{{ item.cart_item_id }}" style="display:inline;">
+                    <button type="submit" class="qty-btn">+</button>
+                  </form>
+                </div>
 
-        <div class="order-item">
-
-          <!-- ITEM INFO -->
-          <div>
-            <span class="item-cat">{{ item.category }}</span>
-            <div class="item-name">{{ item.name }}</div>
-
-            {% if item.note %}
-            <div class="item-customs">
-              <span class="custom-tag">{{ item.note }}</span>
+                <form method="POST" action="/cart/remove/{{ item.cart_item_id }}">
+                  <button type="submit" class="btn-remove">Remove</button>
+                </form>
+              </div>
             </div>
-            {% endif %}
-          </div>
-
-          <!-- RIGHT SIDE -->
-          <div class="item-right">
-
-            <div class="item-price">
-              ${{ "%.2f"|format(item.price * item.quantity) }}
-            </div>
-
-            <!-- QUANTITY CONTROLS (SERVER SIDE FIX) -->
-            <div class="qty-control">
-
-              <!-- DECREASE -->
-              <form method="POST" action="/cart/decrease/{{ item.id }}" style="display:inline;">
-                <button type="submit" class="qty-btn">−</button>
-              </form>
-
-              <div class="qty-val">{{ item.quantity }}</div>
-
-              <!-- INCREASE -->
-              <form method="POST" action="/cart/increase/{{ item.id }}" style="display:inline;">
-                <button type="submit" class="qty-btn">+</button>
-              </form>
-
-            </div>
-
-            <!-- REMOVE -->
-            <form method="POST" action="/cart/remove/{{ item.id }}">
-              <button type="submit" class="btn-remove">Remove</button>
-            </form>
-
-          </div>
-
+            {% endfor %}
+          {% else %}
+            <p class="empty-cat">Your cart is empty.</p>
+          {% endif %}
         </div>
+      </div>
 
+      <!-- CUSTOMISATIONS -->
+      <div class="mb32">
+        <span class="sec-label">Preferences</span>
+        <div class="sec-title sec-title--sm">Customise Items</div>
+
+        <form method="POST" action="/cart/save_notes">
+          {% for item in cart_items %}
+          <div class="cust-block">
+            <input class="cust-checkbox" type="checkbox" id="cust-{{ item.cart_item_id }}">
+            <label class="cust-header" for="cust-{{ item.cart_item_id }}">
+              <span class="cust-header-name">{{ item.name }}</span>
+              <span class="cust-toggle-icon">▾</span>
+            </label>
+            <div class="cust-body">
+              <div class="cust-group cust-group--last">
+                <span class="cust-group-label">Special Instructions</span>
+                <textarea
+                  class="special-req field-base"
+                  name="note_{{ item.cart_item_id }}"
+                  placeholder="e.g. No onions, extra sauce, allergy info..."
+                >{{ item.customization_note or '' }}</textarea>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+          <button type="submit" class="btn-save">Save Preferences</button>
+        </form>
+      </div>
+
+    </div><!-- end left-col -->
+
+    <!-- ═══════════════ COL 2 — RIGHT ═══════════════ -->
+    <div class="summary-col">
+
+      <!-- 1. PAYMENT — top of right col -->
+      <div class="pay-panel">
+        <h3>Payment</h3>
+        <form method="POST" action="/Customer/PlaceOrder">
+          <div class="pay-opts">
+            <input class="pay-r" type="radio" name="payment_method" id="pay-cash" value="cash" checked>
+            <label class="pay-lbl" for="pay-cash">
+              <span class="pay-icon">💵</span>
+              <span>
+                <span class="pay-name">Cash</span>
+                <span class="pay-desc">Pay at the counter</span>
+              </span>
+            </label>
+
+            <input class="pay-r" type="radio" name="payment_method" id="pay-card" value="card">
+            <label class="pay-lbl" for="pay-card">
+              <span class="pay-icon">💳</span>
+              <span>
+                <span class="pay-name">Card</span>
+                <span class="pay-desc">Visa, Mastercard, Amex</span>
+              </span>
+            </label>
+          </div>
+
+          <!-- Card fields shown only when card is selected (CSS-driven) -->
+          <div class="card-fields">
+            <input class="card-input field-base" type="text" placeholder="Card Number" maxlength="19">
+            <div class="card-row">
+              <input class="card-input field-base" type="text" placeholder="MM / YY" maxlength="7">
+              <input class="card-input field-base" type="text" placeholder="CVV" maxlength="4">
+            </div>
+          </div>
+
+          <button type="submit" class="btn-place">Place Order</button>
+        </form>
+      </div>
+
+      <!-- 2. LOYALTY PANEL -->
+      <div class="panel">
+        <div class="loyalty-header">
+          <h3>Loyalty Points</h3>
+          <div class="pts-big">
+            <small>Balance</small>
+            <b>{{ loyalty_points }} <span>pts</span></b>
+          </div>
+        </div>
+        <div class="loyalty-bar-wrap">
+          <div class="loyalty-bar-fill" data-progress="{{ loyalty_progress }}"></div>
+        </div>
+        <p class="loyalty-hint"><b>{{ points_to_next_reward }}</b> pts until your next free starter reward.</p>
+        <div class="redeem-row">
+          <p>Redeem 100 pts → <b class="accent-text">${{ loyalty_discount }}</b></p>
+          <input class="redeem-toggle" type="checkbox" id="redeem-toggle">
+          <label class="redeem-lbl" for="redeem-toggle">Redeem</label>
+        </div>
+      </div>
+
+      <!-- 3. BILL SUMMARY -->
+      <div class="panel">
+        <span class="sec-label">Bill</span>
+
+        {% for item in cart_items %}
+        <div class="bill-row">
+          <span>{% if item.quantity > 1 %}{{ item.quantity }}× {% endif %}{{ item.name }}</span>
+          <b>${{ "%.2f"|format(item.price * item.quantity) }}</b>
+        </div>
         {% endfor %}
-        {% else %}
-        <p class="empty-cat">Your cart is empty.</p>
+
+        {% if loyalty_discount_active %}
+        <div class="discount-row" id="discount-row">
+          <span>⭐ Loyalty Discount</span>
+          <b>- ${{ loyalty_discount }}</b>
+        </div>
         {% endif %}
 
+        <div class="bill-total">
+          <span>Total</span>
+          <b>${{ "%.2f"|format(cart_total) }}</b>
+        </div>
+        <p class="earn-note">This order earns <b>{{ points_earned }}</b> loyalty points.</p>
       </div>
-    </div>
 
-  </div>
+    </div><!-- end summary-col -->
 
-  <!-- RIGHT COLUMN -->
-  <div class="summary-col">
+  </div><!-- end page-grid -->
+</div><!-- end page -->
 
-    <!-- BILL -->
-    <div class="panel">
-      <span class="sec-label">Bill</span>
-
-      {% for item in cart_items %}
-      <div class="bill-row">
-        <span>
-          {% if item.quantity > 1 %}{{ item.quantity }}× {% endif %}
-          {{ item.name }}
-        </span>
-        <b>${{ "%.2f"|format(item.price * item.quantity) }}</b>
-      </div>
-      {% endfor %}
-
-      <div class="bill-total">
-        <span>Total</span>
-        <b>${{ "%.2f"|format(cart_total) }}</b>
-      </div>
-    </div>
-
-    <!-- PAYMENT -->
-    <div class="pay-panel">
-      <h3>Payment</h3>
-
-      <form method="POST" action="/Customer/PlaceOrder">
-
-        <label>
-          <input type="radio" name="payment_method" value="cash" checked>
-          Cash
-        </label>
-
-        <label>
-          <input type="radio" name="payment_method" value="card">
-          Card
-        </label>
-
-        <button type="submit" class="btn-place">
-          Place Order
-        </button>
-
-      </form>
-
-    </div>
-
-  </div>
-
-</div>
+<script>
+  document.querySelectorAll('.order-item[data-index]').forEach(el => {
+    el.style.setProperty('--i', el.dataset.index);
+  });
+  const bar = document.querySelector('.loyalty-bar-fill[data-progress]');
+  if (bar) bar.style.width = bar.dataset.progress + '%';
+</script>
 
 </body>
 </html>
