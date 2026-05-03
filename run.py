@@ -10,6 +10,7 @@ from app.auth.auth import login_required, role_required
 from app.auth.login.Sign_in import register_login_routes
 from app.auth.login.Sign_up import register_register_routes
 from app.auth.login.forgot_password import register_forgotpassword_routes
+from app.customer.scan import register_scan_routes
 from app.customer.menu import register_menu_routes
 from app.customer.add_item import register_add_item_routes
 from app.customer.review import register_review_routes
@@ -36,6 +37,7 @@ mysql = MySQL(app)
 register_login_routes(app, mysql)
 register_register_routes(app, mysql)
 register_menu_routes(app, mysql)
+register_scan_routes(app, mysql)
 register_add_item_routes(app, mysql)
 register_review_routes(app, mysql)
 register_admin_add_menu_routes(app, mysql)
