@@ -1,4 +1,4 @@
-from flask import Blueprint, request,session,redirect,flash
+from flask import Blueprint, request, session, redirect, flash
 
 add_item_bp = Blueprint('add_item', __name__)
 
@@ -41,4 +41,5 @@ def register_add_item_routes(app, mysql):
         mysql.connection.commit()
         cur.close()
         flash("Item added to your cart!", "success")
-        return redirect("/menu")
+        session_id = request.form.get("session_id")
+        return redirect(f"/menu?session_id={session_id}")
