@@ -107,6 +107,59 @@ def register_admin_add_staff_routes(app, mysql):
         flash("Staff member added successfully!", "success")
         return redirect(url_for('admin_staff'))
 
+    # ── edit staff ──
+    @app.route("/admin/edit_staff/<int:user_id>", methods=["POST"])
+    def edit_staff(user_id):
+        guard = admin_required()
+        if guard:
+            return guard
+
+        username         = request.form.get("username")
+        phone            = request.form.get("phone")
+        password         = request.form.get("password")
+        confirm_password = request.form.get("confirm_password")
+
+        cursor = mysql.connection.cursor()
+        try:
+            # Check duplicate username/phone excluding this user
+            cursor.execute("""
+                SELECT user_id FROM user
+                WHERE (username=%s OR phone_number=%s) AND user_id != %s
+            """, (username, phone, user_id))
+            if cursor.fetchone():
+                flash("Username or phone already exists", "error")
+                return redirect(url_for('admin_staff'))
+
+            if password:
+                # Validate new password if provided
+                pattern = r'^(?=.*[0-9])(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$'
+                if not re.match(pattern, password):
+                    flash("Password must be at least 8 characters, include a number and symbol", "error")
+                    return redirect(url_for('admin_staff'))
+                if password != confirm_password:
+                    flash("Passwords do not match", "error")
+                    return redirect(url_for('admin_staff'))
+                hashed_password = generate_password_hash(password)
+                cursor.execute("""
+                    UPDATE user SET username=%s, phone_number=%s, password=%s
+                    WHERE user_id=%s AND role_id=2
+                """, (username, phone, hashed_password, user_id))
+            else:
+                cursor.execute("""
+                    UPDATE user SET username=%s, phone_number=%s
+                    WHERE user_id=%s AND role_id=2
+                """, (username, phone, user_id))
+
+            mysql.connection.commit()
+            flash("Staff member updated successfully!", "success")
+
+        except Exception as e:
+            flash("Error updating staff member", "error")
+        finally:
+            cursor.close()
+
+        return redirect(url_for('admin_staff'))
+
     # ── delete staff ──
     @app.route("/delete_staff/<int:user_id>", methods=["POST"])
     def delete_staff(user_id):

@@ -75,17 +75,14 @@
             <!-- Role label -->
             <span class="item-price">Staff</span>
 
-            <!-- Actions -->
             <div class="item-actions">
-
-              <!-- Edit button -->
-              <button class="btn-icon">Edit</button>
-
-              <!-- Delete -->
+              <button class="btn-icon"
+                onclick="openEditModal({{ staff[0] }}, '{{ staff[1]|replace("'", "\\'") }}', '{{ staff[2] }}')">
+                Edit
+              </button>
               <form action="/delete_staff/{{ staff[0] }}" method="POST" style="display:inline">
                 <button type="submit" class="btn-icon del">Delete</button>
               </form>
-
             </div>
 
           </div>
@@ -184,6 +181,55 @@
 
   </div>
 </div>
+
+<!-- ── EDIT STAFF MODAL ── -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal()"></div>
+<div class="modal" id="editModal">
+  <div class="modal-header">
+    <h2>Edit Staff</h2>
+    <button class="modal-close" onclick="closeModal()">✕</button>
+  </div>
+
+  <form id="editForm" method="POST" autocomplete="off">
+
+    <div class="field">
+      <label>Username</label>
+      <input type="text" name="username" id="edit-username" required/>
+    </div>
+
+    <div class="field">
+      <label>Phone Number</label>
+      <input type="tel" id="edit-phone" name="phone" placeholder="+1 (000) 000-0000"/>
+    </div>
+
+    <div class="field">
+      <label>New Password <span style="font-size:10px; color:var(--mist)">(leave blank to keep current)</span></label>
+      <input type="password" name="password" placeholder="••••••••" autocomplete="new-password"/>
+    </div>
+
+    <div class="field">
+      <label>Confirm New Password</label>
+      <input type="password" name="confirm_password" placeholder="••••••••" autocomplete="new-password"/>
+    </div>
+
+    <button type="submit" class="btn-submit">Save Changes</button>
+  </form>
+</div>
+
+<script>
+  function openEditModal(id, username, phone) {
+    document.getElementById('editForm').action = '/admin/edit_staff/' + id;
+    document.getElementById('edit-username').value = username;
+    document.getElementById('edit-phone').value = phone;
+    document.getElementById('modalOverlay').classList.add('active');
+    document.getElementById('editModal').classList.add('active');
+  }
+
+  function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('active');
+    document.getElementById('editModal').classList.remove('active');
+  }
+</script>
 
 </body>
 </html>

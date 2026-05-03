@@ -24,7 +24,7 @@ def register_admin_add_menu_routes(app, mysql):
             return guard
 
         cursor = mysql.connection.cursor()
-        cursor.execute("SELECT item_id, name, description, preparation_time, price, category FROM Item")
+        cursor.execute("SELECT item_id, name, description, preparation_time, price, category FROM item")
         items = cursor.fetchall()
         cursor.close()
         return render_template("Add_menu.html", items=items)
@@ -52,7 +52,7 @@ def register_admin_add_menu_routes(app, mysql):
         try:
             cursor = mysql.connection.cursor()
             cursor.execute("""
-                INSERT INTO Item (name, description, price, preparation_time, category, photo, photo_mimetype)
+                INSERT INTO item (name, description, price, preparation_time, category, photo, photo_mimetype)
                 VALUES (%s, %s, %s, %s, %s, %s, %s)
             """, (name, description, price, prep_time, category, photo_data, photo_mimetype))
             mysql.connection.commit()
@@ -67,7 +67,7 @@ def register_admin_add_menu_routes(app, mysql):
     def item_photo(item_id):
         try:
             cursor = mysql.connection.cursor()
-            cursor.execute("SELECT photo, photo_mimetype FROM Item WHERE item_id=%s", (item_id,))
+            cursor.execute("SELECT photo, photo_mimetype FROM item WHERE item_id=%s", (item_id,))
             row = cursor.fetchone()
             cursor.close()
             if row and row[0]:
@@ -100,19 +100,19 @@ def register_admin_add_menu_routes(app, mysql):
                     photo_data     = file.read()
                     photo_mimetype = file.mimetype
                     cursor.execute("""
-                        UPDATE Item SET name=%s, description=%s, price=%s,
+                        UPDATE item SET name=%s, description=%s, price=%s,
                         preparation_time=%s, category=%s, photo=%s, photo_mimetype=%s
                         WHERE item_id=%s
                     """, (name, description, price, prep_time, category, photo_data, photo_mimetype, item_id))
                 else:
                     cursor.execute("""
-                        UPDATE Item SET name=%s, description=%s, price=%s,
+                        UPDATE item SET name=%s, description=%s, price=%s,
                         preparation_time=%s, category=%s
                         WHERE item_id=%s
                     """, (name, description, price, prep_time, category, item_id))
             else:
                 cursor.execute("""
-                    UPDATE Item SET name=%s, description=%s, price=%s,
+                    UPDATE item SET name=%s, description=%s, price=%s,
                     preparation_time=%s, category=%s
                     WHERE item_id=%s
                 """, (name, description, price, prep_time, category, item_id))
@@ -133,10 +133,10 @@ def register_admin_add_menu_routes(app, mysql):
 
         try:
             cursor = mysql.connection.cursor()
-            cursor.execute("DELETE FROM Review WHERE item_id=%s", (item_id,))
-            cursor.execute("DELETE FROM Cart_Item WHERE item_id=%s", (item_id,))
-            cursor.execute("DELETE FROM Order_Details WHERE item_id=%s", (item_id,))
-            cursor.execute("DELETE FROM Item WHERE item_id=%s", (item_id,))
+            cursor.execute("DELETE FROM review WHERE item_id=%s", (item_id,))
+            cursor.execute("DELETE FROM cart_item WHERE item_id=%s", (item_id,))
+            cursor.execute("DELETE FROM order_details WHERE item_id=%s", (item_id,))
+            cursor.execute("DELETE FROM item WHERE item_id=%s", (item_id,))
             mysql.connection.commit()
             cursor.close()
             return redirect(url_for('admin_menu'))
