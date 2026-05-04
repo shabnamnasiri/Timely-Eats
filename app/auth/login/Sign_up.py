@@ -16,7 +16,7 @@ def register_register_routes(app, mysql):
                     return redirect("/menu")
                 
             elif session.get("role_id") == 2:
-                    return redirect("/staff")
+                    return redirect("/staff/qr")
                 
             else:
                     return redirect("/admin/add_menu")

@@ -10,6 +10,6 @@ class Config:
     # MySQL database connection (fill your info)
     MYSQL_HOST = "localhost"
     MYSQL_USER = "root"
-    MYSQL_PASSWORD = "22703380"
+    MYSQL_PASSWORD = ""
     MYSQL_DB = "timlyeats"
     MYSQL_PORT = 3306
