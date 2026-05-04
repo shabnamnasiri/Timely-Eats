@@ -6,12 +6,20 @@ def register_customer_cart_routes(app, mysql):
     # ---------------- CART PAGE ----------------
     @app.route('/Customer/Cart')
     def customer_cart():
-        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-
         user_id = session.get('user_id')
         if not user_id:
-            return "User not logged in", 401
+            return redirect('/signin')
 
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+
+        # Get loyalty points from DB ✅
+        cursor.execute("""
+            SELECT loyalty_point FROM User WHERE user_id = %s
+        """, (user_id,))
+        user_data = cursor.fetchone()
+        loyalty_points = user_data['loyalty_point'] if user_data else 0
+
+        # Get active cart
         cursor.execute("""
             SELECT * FROM cart
             WHERE user_id = %s AND status='open'
@@ -19,20 +27,25 @@ def register_customer_cart_routes(app, mysql):
         """, (user_id,))
         cart = cursor.fetchone()
 
+        # Calculate loyalty values ✅
+        loyalty_progress      = loyalty_points % 100
+        points_to_next_reward = 100 - loyalty_progress if loyalty_progress != 0 else 0
+        loyalty_discount      = (loyalty_points // 100) * 5  # 100pts = $5
+        loyalty_discount_active = loyalty_points >= 100       # True if enough to redeem
+
         if not cart:
+            cursor.close()
             return render_template('Cart.html',
                                    cart_items=[],
                                    cart_total=0,
-                                   table_number="—",
-                                   loyalty_points=0,
-                                   loyalty_progress=0,
-                                   points_to_next_reward=100,
-                                   loyalty_discount='5.00',
-                                   loyalty_discount_active=False,
+                                   table_number=session.get('table_number', '—'),
+                                   loyalty_points=loyalty_points,
+                                   loyalty_progress=loyalty_progress,
+                                   points_to_next_reward=points_to_next_reward,
+                                   loyalty_discount=loyalty_discount,
+                                   loyalty_discount_active=loyalty_discount_active,
                                    points_earned=0)
 
-        # FIX: select cart_item_id without aliasing to 'id'
-        #      also select customization_note directly
         cursor.execute("""
             SELECT ci.cart_item_id,
                    ci.quantity,
@@ -51,28 +64,28 @@ def register_customer_cart_routes(app, mysql):
         cart_items = []
         for r in rows:
             cart_items.append({
-                "cart_item_id":      r["cart_item_id"],       # used in form actions + textarea names
-                "name":              r["name"],
-                "category":          r["category"],
-                "price":             float(r["price"]),
-                "quantity":          r["quantity"],
-                "customization_note": r["customization_note"], # pre-fills textarea + item-note display
-                "customisations":    [r["customization_note"]] if r["customization_note"] else []
+                "cart_item_id":       r["cart_item_id"],
+                "name":               r["name"],
+                "category":           r["category"],
+                "price":              float(r["price"]),
+                "quantity":           r["quantity"],
+                "customization_note": r["customization_note"],
+                "customisations":     [r["customization_note"]] if r["customization_note"] else []
             })
 
-        cart_total   = sum(i["price"] * i["quantity"] for i in cart_items)
-        points_earned = int(cart_total)
+        cart_total    = sum(i["price"] * i["quantity"] for i in cart_items)
+        points_earned = int(cart_total * 0.10)  # ✅ 10% of total, not 100%
 
         return render_template("Cart.html",
                                cart_items=cart_items,
                                cart_total=cart_total,
-                               table_number="—",
-                               loyalty_points=session.get("loyalty_points", 0),
-                               loyalty_progress=0,
-                               points_to_next_reward=100,
-                               loyalty_discount="5.00",
-                               loyalty_discount_active=False,
-                               points_earned=points_earned)
+                               table_number=session.get('table_number', '—'),
+                               loyalty_points=loyalty_points,          # ✅ from DB
+                               loyalty_progress=loyalty_progress,      # ✅ calculated
+                               points_to_next_reward=points_to_next_reward,  # ✅
+                               loyalty_discount=loyalty_discount,      # ✅ in $
+                               loyalty_discount_active=loyalty_discount_active,  # ✅ True/False
+                               points_earned=points_earned)            # ✅ 10% preview
 
     # ---------------- INCREASE ----------------
     @app.route("/cart/increase/<int:item_id>", methods=["POST"])
@@ -122,7 +135,7 @@ def register_customer_cart_routes(app, mysql):
         cursor = mysql.connection.cursor()
         for key, value in request.form.items():
             if key.startswith('note_'):
-                cart_item_id = key.split('_', 1)[1]   # "note_7" → "7"
+                cart_item_id = key.split('_', 1)[1]
                 note = value.strip()
                 cursor.execute("""
                     UPDATE cart_item

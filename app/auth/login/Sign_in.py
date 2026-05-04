@@ -31,8 +31,10 @@ def register_login_routes(app, mysql):
                 session["user_id"] = user[0]
                 session["role_id"] = user[2]
                 session["username"] = user[3]
-                # ✅ table_session_id already saved by /session/<id> route
-                # no token handling needed here anymore
+
+                # ✅ debug lines in the RIGHT place
+                print("✅ Login success:", user[0], user[2])
+                print("✅ Session after login:", dict(session))
 
                 if user[2] == 1:
                     return redirect("/menu")
@@ -43,5 +45,4 @@ def register_login_routes(app, mysql):
 
             return "Invalid username or password"
 
-        # ✅ GET request — just render the template, no token needed
         return render_template("Sign_In.html")

@@ -122,32 +122,6 @@ def register_session_routes(app, mysql):
         })
     
 
-
-
-
-    # =========================
-    # CUSTOMER SCANS QR
-    # =========================
-    @app.route('/session/<int:session_id>')
-    def open_session(session_id):
-        cursor = mysql.connection.cursor()
-
-        cursor.execute("""
-            SELECT status FROM Table_Session
-            WHERE session_id=%s
-        """, (session_id,))
-
-        session = cursor.fetchone()
-
-        if not session:
-            return "Invalid QR"
-
-        if session[0] != 'active':
-            return "This QR is no longer valid"
-
-        return redirect(f"/menu?session_id={session_id}")
-
-
     # =========================
     # CLOSE SESSION
     # =========================

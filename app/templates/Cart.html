@@ -26,6 +26,24 @@
 </header>
 
 <!-- FLASH TOAST -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="popup-toast">
+        <span class="toast-icon">
+          {% if category == 'success' %}✅
+          {% elif category == 'warning' %}⚠️
+          {% else %}❌
+          {% endif %}
+        </span>
+        <div>
+          <div class="toast-title">{{ category | capitalize }}</div>  
+          <div class="toast-msg">{{ message }}</div>
+        </div>
+      </div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
 
 <!-- PAGE WRAPPER → GRID inside -->
 <div class="page">
@@ -106,47 +124,43 @@
 
     </div><!-- end left-col -->
 
-    <!-- ═══════════════ COL 2 — RIGHT ═══════════════ -->
-    <div class="summary-col">
+<!-- ═══════════════ COL 2 — RIGHT ═══════════════ -->
+<div class="summary-col">
 
-      <!-- 1. PAYMENT — top of right col -->
-      <div class="pay-panel">
-        <h3>Payment</h3>
-        <form method="POST" action="/Customer/PlaceOrder">
-          <div class="pay-opts">
-            <input class="pay-r" type="radio" name="payment_method" id="pay-cash" value="cash" checked>
-            <label class="pay-lbl" for="pay-cash">
-              <span class="pay-icon">💵</span>
-              <span>
-                <span class="pay-name">Cash</span>
-                <span class="pay-desc">Pay at the counter</span>
-              </span>
-            </label>
+  <!-- 1. PAYMENT — top of right col -->
+  <div class="pay-panel">
+    <h3>Payment</h3>
+    <form method="POST" action="/Customer/PlaceOrder">
+      <div class="pay-opts">
+        <input class="pay-r" type="radio" name="payment_method" id="pay-cash" value="cash" checked>
+        <label class="pay-lbl" for="pay-cash">
+          <span class="pay-icon">💵</span>
+          <span>
+            <span class="pay-name">Cash</span>
+            <span class="pay-desc">Pay at the counter</span>
+          </span>
+        </label>
 
-            <input class="pay-r" type="radio" name="payment_method" id="pay-card" value="card">
-            <label class="pay-lbl" for="pay-card">
-              <span class="pay-icon">💳</span>
-              <span>
-                <span class="pay-name">Card</span>
-                <span class="pay-desc">Visa, Mastercard, Amex</span>
-              </span>
-            </label>
-          </div>
-
-          <!-- Card fields shown only when card is selected (CSS-driven) -->
-          <div class="card-fields">
-            <input class="card-input field-base" type="text" placeholder="Card Number" maxlength="19">
-            <div class="card-row">
-              <input class="card-input field-base" type="text" placeholder="MM / YY" maxlength="7">
-              <input class="card-input field-base" type="text" placeholder="CVV" maxlength="4">
-            </div>
-          </div>
-
-          <button type="submit" class="btn-place">Place Order</button>
-        </form>
+        <input class="pay-r" type="radio" name="payment_method" id="pay-card" value="card">
+        <label class="pay-lbl" for="pay-card">
+          <span class="pay-icon">💳</span>
+          <span>
+            <span class="pay-name">Card</span>
+            <span class="pay-desc">Visa, Mastercard, Amex</span>
+          </span>
+        </label>
       </div>
 
-      <!-- 2. LOYALTY PANEL -->
+      <!-- Card fields -->
+      <div class="card-fields">
+        <input class="card-input field-base" type="text" placeholder="Card Number" maxlength="19">
+        <div class="card-row">
+          <input class="card-input field-base" type="text" placeholder="MM / YY" maxlength="7">
+          <input class="card-input field-base" type="text" placeholder="CVV" maxlength="4">
+        </div>
+      </div>
+
+      <!-- ✅ Loyalty panel INSIDE the form so redeem checkbox is submitted -->
       <div class="panel">
         <div class="loyalty-header">
           <h3>Loyalty Points</h3>
@@ -158,41 +172,52 @@
         <div class="loyalty-bar-wrap">
           <div class="loyalty-bar-fill" data-progress="{{ loyalty_progress }}"></div>
         </div>
-        <p class="loyalty-hint"><b>{{ points_to_next_reward }}</b> pts until your next free starter reward.</p>
-        <div class="redeem-row">
-          <p>Redeem 100 pts → <b class="accent-text">${{ loyalty_discount }}</b></p>
-          <input class="redeem-toggle" type="checkbox" id="redeem-toggle">
-          <label class="redeem-lbl" for="redeem-toggle">Redeem</label>
-        </div>
-      </div>
-
-      <!-- 3. BILL SUMMARY -->
-      <div class="panel">
-        <span class="sec-label">Bill</span>
-
-        {% for item in cart_items %}
-        <div class="bill-row">
-          <span>{% if item.quantity > 1 %}{{ item.quantity }}× {% endif %}{{ item.name }}</span>
-          <b>${{ "%.2f"|format(item.price * item.quantity) }}</b>
-        </div>
-        {% endfor %}
+        <p class="loyalty-hint"><b>{{ points_to_next_reward }}</b> pts until your next reward.</p>
 
         {% if loyalty_discount_active %}
-        <div class="discount-row" id="discount-row">
-          <span>⭐ Loyalty Discount</span>
-          <b>- ${{ loyalty_discount }}</b>
+        <div class="redeem-row">
+          <p>Redeem {{ (loyalty_points // 100) * 100 }} pts → <b class="accent-text">${{ loyalty_discount }}</b> off</p>
+          <!-- ✅ name="redeem_points" so place_order.py can read it -->
+          <input class="redeem-toggle" type="checkbox" name="redeem_points" id="redeem-toggle">
+          <label class="redeem-lbl" for="redeem-toggle">Redeem</label>
+        </div>
+        {% else %}
+        <div class="redeem-row">
+          <p class="loyalty-hint">You need <b>{{ points_to_next_reward }}</b> more pts to redeem.</p>
         </div>
         {% endif %}
-
-        <div class="bill-total">
-          <span>Total</span>
-          <b>${{ "%.2f"|format(cart_total) }}</b>
-        </div>
-        <p class="earn-note">This order earns <b>{{ points_earned }}</b> loyalty points.</p>
       </div>
 
-    </div><!-- end summary-col -->
+      <button type="submit" class="btn-place">Place Order</button>
+    </form>
+  </div>
 
+  <!-- 2. BILL SUMMARY — outside form, just display -->
+  <div class="panel">
+    <span class="sec-label">Bill</span>
+
+    {% for item in cart_items %}
+    <div class="bill-row">
+      <span>{% if item.quantity > 1 %}{{ item.quantity }}× {% endif %}{{ item.name }}</span>
+      <b>${{ "%.2f"|format(item.price * item.quantity) }}</b>
+    </div>
+    {% endfor %}
+
+    {% if loyalty_discount_active %}
+    <div class="discount-row" id="discount-row">
+      <span>⭐ Loyalty Discount</span>
+      <b>- ${{ loyalty_discount }}</b>
+    </div>
+    {% endif %}
+
+    <div class="bill-total">
+      <span>Total</span>
+      <b>${{ "%.2f"|format(cart_total) }}</b>
+    </div>
+    <p class="earn-note">This order earns <b>{{ points_earned }}</b> loyalty points.</p>
+  </div>
+
+</div><!-- end summary-col -->
   </div><!-- end page-grid -->
 </div><!-- end page -->
 
@@ -202,6 +227,18 @@
   });
   const bar = document.querySelector('.loyalty-bar-fill[data-progress]');
   if (bar) bar.style.width = bar.dataset.progress + '%';
+
+  window.addEventListener("load", function () {
+    const toasts = document.querySelectorAll(".popup-toast");
+    toasts.forEach((toast) => {
+      setTimeout(() => {
+        toast.style.opacity = "0";
+        toast.style.transform = "translateY(-10px)";  /* ✅ matches your CSS */
+        toast.style.transition = "all 0.4s ease";
+        setTimeout(() => { toast.remove(); }, 400);
+      }, 3000);
+    });
+  });
 </script>
 
 </body>

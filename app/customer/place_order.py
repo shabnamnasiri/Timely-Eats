@@ -20,7 +20,7 @@ def register_customer_place_order_routes(app, mysql):
 
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
 
-        # ✅ 'open' to match cart.py
+        # Get active cart
         cursor.execute("""
             SELECT * FROM cart
             WHERE user_id = %s AND status = 'open'
@@ -36,6 +36,7 @@ def register_customer_place_order_routes(app, mysql):
 
         cart_id = cart['cart_id']
 
+        # Fetch cart items
         cursor.execute("""
             SELECT ci.item_id, ci.quantity, ci.customization_note, i.price
             FROM cart_item ci
@@ -55,13 +56,37 @@ def register_customer_place_order_routes(app, mysql):
             order_status = 'pending cash'
             payment_status = 'pending'
         elif payment_method == 'card':
-            order_status = 'pending payment'
-            payment_status = 'pending'
+            order_status = 'pending'
+            payment_status = 'confirmed'
         else:
             flash("Invalid payment method selected.", "danger")
             cursor.close()
             return redirect('/Customer/Cart')
 
+        # Check if redeeming points
+        redeem = request.form.get('redeem_points') == 'on'
+
+        # Get current loyalty points
+        cursor.execute("""
+            SELECT loyalty_point FROM User WHERE user_id = %s
+        """, (user_id,))
+        user = cursor.fetchone()
+        current_points = user['loyalty_point'] if user else 0
+
+        # Calculate discount if redeeming
+        discount = 0
+        if redeem and current_points >= 100:
+            # how many full 100-point blocks does the user have?
+            redeemable_blocks = current_points // 100
+            discount = redeemable_blocks * 5  # 100 points = $5
+            discount = min(discount, total_amount)  # can't discount more than total
+
+        discounted_total = total_amount - discount
+
+        # Calculate points earned — 10% of discounted total
+        points_earned = int(discounted_total * 0.10)
+
+        # Insert into orders
         cursor.execute("""
             INSERT INTO orders
             (user_id, cart_id, timestamp, status, payment_method, total_amount, session_id)
@@ -72,11 +97,12 @@ def register_customer_place_order_routes(app, mysql):
             datetime.now(),
             order_status,
             payment_method,
-            total_amount,
+            discounted_total,
             session_id
         ))
         order_id = cursor.lastrowid
 
+        # Insert order_details
         for item in cart_items:
             cursor.execute("""
                 INSERT INTO order_details
@@ -89,24 +115,43 @@ def register_customer_place_order_routes(app, mysql):
                 item['customization_note']
             ))
 
+        # Insert payment
         cursor.execute("""
             INSERT INTO payment (order_id, payment_status, date)
             VALUES (%s, %s, %s)
         """, (order_id, payment_status, datetime.now()))
 
-        # ✅ match whatever status your DB uses for completed carts
+        # Mark cart as closed
         cursor.execute("""
             UPDATE cart SET status = 'closed'
             WHERE cart_id = %s
         """, (cart_id,))
+        
+        points_used = 0
+        # ✅ Update loyalty points
+        if redeem and current_points >= 100:
+            points_used = (current_points // 100) * 100  # deduct full blocks only
+            cursor.execute("""
+                UPDATE User
+                SET loyalty_point = loyalty_point - %s + %s
+                WHERE user_id = %s
+            """, (points_used, points_earned, user_id))
+        else:
+            cursor.execute("""
+                UPDATE User
+                SET loyalty_point = loyalty_point + %s
+                WHERE user_id = %s
+            """, (points_earned, user_id))
+
+        # ✅ Update session so cart page shows new points immediately
+        session['loyalty_points'] = current_points - (points_used if redeem and current_points >= 100 else 0) + points_earned
 
         mysql.connection.commit()
         cursor.close()
 
-        flash("Order placed successfully!", "success")
-        return redirect('/order/success')
+        if redeem and discount > 0:
+            flash(f"Order placed! ${discount:.2f} discount applied. You earned {points_earned} points.", "success")
+        else:
+            flash(f"Order placed! You earned {points_earned} loyalty points.", "success")
 
-    @app.route('/order/success')
-    def order_success():
-        return "Order placed successfully!"
-
+        return redirect('/Customer/Cart')

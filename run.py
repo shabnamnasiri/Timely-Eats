@@ -2,13 +2,11 @@ import os
 import pymysql
 pymysql.install_as_MySQLdb()
 
-from flask import Flask, session, redirect
 from flask import Flask, session, redirect, render_template
 from flask_mysqldb import MySQL
 from app.auth.auth import login_required, role_required
 from app.auth.login.Sign_in import register_login_routes
 from app.auth.login.Sign_up import register_register_routes
-from app.auth.login.forgot_password import register_forgotpassword_routes
 from app.customer.scan import register_scan_routes
 from app.customer.menu import register_menu_routes
 from app.customer.add_item import register_add_item_routes
@@ -27,6 +25,7 @@ app.secret_key = "secret_key_123"
 
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
+app.config['MYSQL_PASSWORD'] = '22703380'
 app.config['MYSQL_DB'] = 'timlyeats'
 app.config['MYSQL_PORT'] = 3306
 
@@ -34,22 +33,15 @@ mysql = MySQL(app)
 
 register_login_routes(app, mysql)
 register_register_routes(app, mysql)
-register_forgotpassword_routes(app, mysql)
 register_menu_routes(app, mysql)
 register_scan_routes(app, mysql)
 register_add_item_routes(app, mysql)
 register_review_routes(app, mysql)
 register_customer_cart_routes(app, mysql)
 register_admin_add_menu_routes(app, mysql)
-<<<<<<< HEAD
-register_customer_cart_routes(app,mysql)
 register_customer_place_order_routes(app,mysql)
-register_forgotpassword_routes(app, mysql)
-register_admin_add_staff_routes(app,mysql)
-=======
 register_admin_add_staff_routes(app, mysql)
 register_staff_api(app, mysql)
->>>>>>> d6eb80b4dc20dd4bc9e186f7998e0a2af83cd044
 register_session_routes(app, mysql)
 
 @app.route("/logout")
