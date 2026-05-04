@@ -52,4 +52,4 @@ def staff_orders():
     return render_template('EmpOrder.html')
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True) 

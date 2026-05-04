@@ -1,15 +1,17 @@
-from flask import render_template, redirect, session, request
+from flask import render_template, session, request
 
 def register_menu_routes(app, mysql):
 
     @app.route("/menu", methods=["GET", "POST"])
     def menu():
 
-        session_id = request.args.get('session_id')
+        session_id = request.args.get("session_id") or session.get("table_session_id")
         table_number = None
 
         if not session_id:
             return "No session provided", 400
+
+        session["table_session_id"] = str(session_id)
 
         cursor = mysql.connection.cursor()
 
