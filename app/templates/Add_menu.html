@@ -25,7 +25,7 @@
     <!-- <li><a href="#"><i class="ico">⊙</i> Orders</a></li>
     <li><a href="#"><i class="ico">◫</i> Tables</a></li>
     <li><a href="#"><i class="ico">⊿</i> Kitchen</a></li> -->
-    <li><a href="/Admin/add_staff"><i class="ico">⊙</i>Add Staff</a></li>
+    <li><a href="/admin/add_staff"><i class="ico">⊙</i>Add Staff</a></li>
   </ul>
   <div class="sidebar-section">Reports</div>
   <ul class="sidebar-nav">
@@ -89,7 +89,10 @@
             <span class="item-price">${{ item[4] }}</span>
 
             <div class="item-actions">
-            <button class="btn-icon"></button>
+              <button class="btn-icon"
+                onclick="openModal({{ item[0] }}, '{{ item[1]|replace("'", "\\'") }}', '{{ item[2]|replace("'", "\\'") }}', {{ item[4] }}, {{ item[3] or 0 }}, '{{ item[5] }}')">
+                Edit
+              </button>
               <form action="/delete_item/{{ item[0] }}" method="POST" style="display:inline">
                 <button type="submit" class="btn-icon del">Delete</button>
               </form>
@@ -124,15 +127,14 @@
           <textarea name="description" placeholder="Describe the dish…" required></textarea>
         </div>
 
-      <!-- EDIT MODAL -->
       <div class="field-row">
         <div class="field">
           <label>Price ($) *</label>
-          <input type="number" name="price" id="edit-price-modal" step="0.01" min="0" required/>
+          <input type="number" name="price" step="0.01" min="0" required/>
         </div>
         <div class="field">
           <label>Prep Time (mins)</label>
-          <input type="number" name="prep_time" id="edit-prep-modal" min="1" max="180"/>
+          <input type="number" name="prep_time" min="1" max="180"/>
         </div>
       </div>
 
@@ -226,8 +228,8 @@ function openModal(id, name, desc, price, prep, cat) {
   document.getElementById('editForm').action = '/update_item/' + id;
   document.getElementById('edit-name').value  = name;
   document.getElementById('edit-desc').value  = desc;
-  document.getElementById('edit-price-modal').value = price;   // updated ID
-  document.getElementById('edit-prep-modal').value  = prep;    // updated ID
+  document.getElementById('edit-price').value = price;
+  document.getElementById('edit-prep').value  = prep;
   document.getElementById('edit-cat').value   = cat;
   document.getElementById('edit-current-photo').src = '/item_photo/' + id;
   document.getElementById('edit-preview').innerHTML = '';

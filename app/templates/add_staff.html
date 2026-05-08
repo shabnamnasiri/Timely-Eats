@@ -25,7 +25,7 @@
 
   <div class="sidebar-section">Operations</div>
   <ul class="sidebar-nav">
-    <li><a href="/Admin/add_staff" class="active"><i class="ico">⊙</i> Add Staff</a></li>
+    <li><a href="/admin/add_staff" class="active"><i class="ico">⊙</i> Add Staff</a></li>
   </ul>
 
   <div class="sidebar-section">Reports</div>
@@ -72,23 +72,17 @@
               <span>{{ staff[2] }}</span> <!-- Phone -->
             </div>
 
-            <!-- Example extra field (optional) -->
-            <span class="item-price">{{ staff[4] }}</span>
+            <!-- Role label -->
+            <span class="item-price">Staff</span>
 
-            <!-- Actions -->
             <div class="item-actions">
-
-              <!-- Edit button -->
-              <button class="btn-icon">Edit</button>
-
-              <!-- Delete -->
+              <button class="btn-icon"
+                onclick="openEditModal({{ staff[0] }}, '{{ staff[1]|replace("'", "\\'") }}', '{{ staff[2] }}')">
+                Edit
+              </button>
               <form action="/delete_staff/{{ staff[0] }}" method="POST" style="display:inline">
-                {% if csrf_token %}
-                  {{ csrf_token() }}
-                {% endif %}
                 <button type="submit" class="btn-icon del">Delete</button>
               </form>
-
             </div>
 
           </div>
@@ -109,11 +103,22 @@
       <h2>Add Staff</h2>
       <p>Fill in the details below to add a new staff member.</p>
 
-      <form method="POST" action="/admin/add_new_staff" autocomplete="off">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+          <div style="
+            padding: 10px 14px;
+            margin-bottom: 16px;
+            font-family: 'DM Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 0.1em;
+            border-left: 3px solid {{ 'var(--success)' if category == 'success' else 'var(--danger)' }};
+            background: {{ '#eaf4ea' if category == 'success' else '#fdeaea' }};
+            color: {{ 'var(--success)' if category == 'success' else 'var(--danger)' }};
+          ">{{ message }}</div>
+        {% endfor %}
+      {% endwith %}
 
-        {% if csrf_token %}
-          {{ csrf_token() }}
-        {% endif %}
+      <form method="POST" action="/admin/add_new_staff" autocomplete="off">
 
         <!-- Username -->
         <div class="field">
@@ -176,6 +181,55 @@
 
   </div>
 </div>
+
+<!-- ── EDIT STAFF MODAL ── -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal()"></div>
+<div class="modal" id="editModal">
+  <div class="modal-header">
+    <h2>Edit Staff</h2>
+    <button class="modal-close" onclick="closeModal()">✕</button>
+  </div>
+
+  <form id="editForm" method="POST" autocomplete="off">
+
+    <div class="field">
+      <label>Username</label>
+      <input type="text" name="username" id="edit-username" required/>
+    </div>
+
+    <div class="field">
+      <label>Phone Number</label>
+      <input type="tel" id="edit-phone" name="phone" placeholder="+1 (000) 000-0000"/>
+    </div>
+
+    <div class="field">
+      <label>New Password <span style="font-size:10px; color:var(--mist)">(leave blank to keep current)</span></label>
+      <input type="password" name="password" placeholder="••••••••" autocomplete="new-password"/>
+    </div>
+
+    <div class="field">
+      <label>Confirm New Password</label>
+      <input type="password" name="confirm_password" placeholder="••••••••" autocomplete="new-password"/>
+    </div>
+
+    <button type="submit" class="btn-submit">Save Changes</button>
+  </form>
+</div>
+
+<script>
+  function openEditModal(id, username, phone) {
+    document.getElementById('editForm').action = '/admin/edit_staff/' + id;
+    document.getElementById('edit-username').value = username;
+    document.getElementById('edit-phone').value = phone;
+    document.getElementById('modalOverlay').classList.add('active');
+    document.getElementById('editModal').classList.add('active');
+  }
+
+  function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('active');
+    document.getElementById('editModal').classList.remove('active');
+  }
+</script>
 
 </body>
 </html>
