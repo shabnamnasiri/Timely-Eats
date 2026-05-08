@@ -1,6 +1,7 @@
 from flask import render_template, redirect, session, flash, request
 import MySQLdb.cursors
 
+
 def register_customer_cart_routes(app, mysql):
 
     # ---------------- CART PAGE ----------------

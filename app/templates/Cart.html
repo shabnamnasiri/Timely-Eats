@@ -13,7 +13,7 @@
 
 <!-- TOPBAR -->
 <header class="topbar">
-  <a href="/menu" class="logo">
+  <a href="/menu{% if table_session_id %}?session_id={{ table_session_id }}{% endif %}" class="logo">
     <b>Timely<span>Eats</span></b>
     <small>← Menu</small>
   </a>
