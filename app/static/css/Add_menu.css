@@ -1,12 +1,21 @@
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
+<<<<<<< HEAD
       --ink: #0e0e0e; --ink2: #1a1a1a; --smoke: #3d3d3d;
       --mist: #000000; --ash: #b0b0b0; --cream: #f3f0ea;
       --paper: #f9f7f4; --accent: #000000; --rule: #d4cfc6;
       --danger: #9e3737; --success: #3a6b3a;
       --canvas: #ebe6dc;
     }
+=======
+  --ink: #0e0e0e; --ink2: #1a1a1a; --smoke: #3d3d3d;
+  --mist: #7a7a7a; /* better than pure black */
+  --ash: #b0b0b0; --cream: #f3f0ea;
+  --paper: #f9f7f4; --accent: #c8933a; --rule: #d4cfc6;
+  --danger: #9e3737; --success: #3a6b3a;
+}
+>>>>>>> c691319be78cf9825b0e29e649dfc0d58cac6950
     html { scroll-behavior: smooth; }
     body { font-family: 'DM Sans', sans-serif; background: var(--canvas); color: var(--ink); display: flex; min-height: 100vh; }
 
@@ -214,8 +223,11 @@ background: linear-gradient(
       transition: all .18s; background: var(--cream);
     }
     .tag-toggle + label:hover { border-color: var(--smoke); color: var(--smoke); }
-    .tag-toggle:checked + label { border-color: var(--accent); color: white; background: rgb(0, 0, 0); }
-
+    .tag-toggle:checked + label {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(200,147,58,.1);
+}
     .btn-submit {
       width: 100%; padding: 13px; background: var(--cream); border: 1px solid black;
       font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: .28em; text-transform: uppercase;
@@ -228,9 +240,11 @@ background: linear-gradient(
     .list-controls { display: flex; gap: 10px; margin-bottom: 20px; align-items: center; }
     .filter-tabs { display: flex; gap: 2px; flex: 1; overflow-x: auto; }
     .filter-tab {
-      font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: .2em; text-transform: uppercase;
-      padding: 8px 14px; border: 1px solid var(--rule); background: #fff; color: var(--mist);
-      cursor: pointer; white-space: nowrap; transition: all .18s;
+    .filter-tab {
+      font-family: 'DM Mono', monospace;
+      font-size: 9px; /* middle of 8 and 10 */
+      letter-spacing: .2em;
+      text-transform: uppercase;
     }
     .filter-tab:hover { color: var(--ink); border-color: var(--ink); }
     .filter-tab.on { background: var(--ink); color: var(--paper); border-color: var(--ink); }
@@ -243,15 +257,24 @@ background: linear-gradient(
       animation: up .3s ease both; animation-delay: calc(var(--i,0) * 40ms);
     }
     .item-row:hover { border-color: var(--accent); background: var(--cream); }
-    .item-cat {
-      font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: .18em; text-transform: uppercase;
-      padding: 3px 8px; background: var(--ink); color: var(--ash); flex-shrink: 0; width: 76px; text-align: center;
-    }
-    .item-cat.starters { background: #1e1e2e; color: #ffffff; }
-    .item-cat.mains    { background: #1a1a0e; color: #ffffff; }
-    .item-cat.sides    { background: #0e1e0e; color: #ffffff; }
-    .item-cat.desserts { background: #2e1a1a; color: #ffffff; }
-    .item-cat.drinks   { background: #0e1e2e; color: #ffffff; }
+  .item-cat {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    background: var(--ink);
+    color: var(--ash);
+    flex-shrink: 0;
+    width: 76px;
+    text-align: center;
+  }
+
+  .item-cat.starters { background: #1e1e2e; color: #8080c0; }
+  .item-cat.mains    { background: #1a1a0e; color: #b0a060; }
+  .item-cat.sides    { background: #0e1e0e; color: #70b070; }
+  .item-cat.desserts { background: #2e1a1a; color: #c08080; }
+  .item-cat.drinks   { background: #0e1e2e; color: #6090c0; }
 
     .item-info { flex: 1; min-width: 0; }
     .item-info strong { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: .04em; display: block; line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -294,4 +317,4 @@ background: linear-gradient(
       .content { padding: 20px; }
       .topbar { padding: 0 20px; }
       .stats { grid-template-columns: repeat(3, 1fr); }
-    }
+    }}
