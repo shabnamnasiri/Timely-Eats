@@ -3,11 +3,15 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Timely Eats — Menu · Table 07</title>
+  <title>Timely Eats — Menu · Table {{ table_number or '?' }}</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/Menu.css') }}"/>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant:ital,wght@0,400;0,600;1,300;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <script>
+    const SESSION_ID = "{{ session_id }}";
+  </script>
 </head>
 <body>
+
 {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
     {% for category, message in messages %}
@@ -24,14 +28,14 @@
 
 <header class="topbar">
   <div class="logo"><b>Timely<span>Eats</span></b><small>Restaurant</small></div>
-  <div class="table-badge"><span>Table</span><strong>07</strong></div>
-  <a href="/Customer/Cart" class="cart">⊡ Cart</a>
+  <div class="table-badge"><span>Table</span><strong>{{ table_number or '?' }}</strong></div>
+  <a href="/Customer/Cart?session_id={{ session_id }}" class="cart">⊡ Cart</a>
   <a href="/logout" class="cart">Logout</a>
 </header>
 
 <section class="hero">
   <div class="hero-inner">
-    <small>Dine-in Menu · Table 07</small>
+    <small>Dine-in Menu · Table {{ table_number or '?' }}</small>
     <h1>Today's<span>Menu</span></h1>
     <p>Locally sourced. Freshly prepared. Served with care.</p>
   </div>
@@ -74,6 +78,7 @@
           <input type="hidden" name="item_id" value="{{ item[0] }}">
           <input type="hidden" name="item_name" value="{{ item[1] }}">
           <input type="hidden" name="item_price" value="{{ item[4] }}">
+          <input type="hidden" name="session_id" value="{{ session_id }}">
           <button type="submit" class="order-btn">Add to Order</button>
         </form>
       </div>
@@ -108,6 +113,7 @@
           <input type="hidden" name="item_id" value="{{ item[0] }}">
           <input type="hidden" name="item_name" value="{{ item[1] }}">
           <input type="hidden" name="item_price" value="{{ item[4] }}">
+          <input type="hidden" name="session_id" value="{{ session_id }}">
           <button type="submit" class="order-btn">Add to Order</button>
         </form>
       </div>
@@ -137,6 +143,7 @@
           <input type="hidden" name="item_id" value="{{ item[0] }}">
           <input type="hidden" name="item_name" value="{{ item[1] }}">
           <input type="hidden" name="item_price" value="{{ item[4] }}">
+          <input type="hidden" name="session_id" value="{{ session_id }}">
           <button type="submit" class="order-btn">Add to Order</button>
         </form>
       </div>
@@ -166,6 +173,7 @@
           <input type="hidden" name="item_id" value="{{ item[0] }}">
           <input type="hidden" name="item_name" value="{{ item[1] }}">
           <input type="hidden" name="item_price" value="{{ item[4] }}">
+          <input type="hidden" name="session_id" value="{{ session_id }}">
           <button type="submit" class="order-btn">Add to Order</button>
         </form>
       </div>
@@ -195,6 +203,7 @@
           <input type="hidden" name="item_id" value="{{ item[0] }}">
           <input type="hidden" name="item_name" value="{{ item[1] }}">
           <input type="hidden" name="item_price" value="{{ item[4] }}">
+          <input type="hidden" name="session_id" value="{{ session_id }}">
           <button type="submit" class="order-btn">Add to Order</button>
         </form>
       </div>
@@ -205,22 +214,19 @@
   </section>
 
 </main>
+
 <script>
   window.addEventListener("load", function () {
     const toasts = document.querySelectorAll(".popup-toast");
-
     toasts.forEach((toast) => {
       setTimeout(() => {
         toast.style.opacity = "0";
         toast.style.transform = "translateY(-10px)";
-        
-        // remove from DOM after animation
-        setTimeout(() => {
-          toast.remove();
-        }, 400);
+        setTimeout(() => { toast.remove(); }, 400);
       }, 2500);
     });
   });
 </script>
+
 </body>
 </html>

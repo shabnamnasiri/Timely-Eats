@@ -1,10 +1,29 @@
-from flask import render_template, redirect, session
+from flask import render_template, redirect, session, request
 
 def register_menu_routes(app, mysql):
-    @app.route("/menu", methods=["GET"])
+
+    @app.route("/menu", methods=["GET", "POST"])
     def menu():
-        if "user_id" not in session:
-            return redirect("/signin")
+
+        # ✅ read from Flask session instead of URL parameter
+        session_id = session.get('table_session_id')
+
+        if not session_id:
+            return redirect('/scan-required')  # ✅ not a 400 error
+
+        cursor = mysql.connection.cursor()
+
+        cursor.execute("""
+            SELECT table_number FROM Table_Session 
+            WHERE session_id=%s AND status='active'
+        """, (session_id,))
+        result = cursor.fetchone()
+        cursor.close()
+
+        if not result:
+            return redirect('/scan-required')  # ✅ not a 400 error
+
+        table_number = result[0]
 
         cursor = mysql.connection.cursor()
         cursor.execute("""
@@ -15,7 +34,7 @@ def register_menu_routes(app, mysql):
         items = cursor.fetchall()
         cursor.close()
 
-        return render_template("Menu.html", items=items)
-
-
-    
+        return render_template("Menu.html", 
+                               session_id=session_id, 
+                               table_number=table_number, 
+                               items=items)
