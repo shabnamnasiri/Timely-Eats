@@ -1,4 +1,4 @@
-from flask import render_template, request, redirect, session
+from flask import render_template, request, redirect, session,flash
 from werkzeug.security import check_password_hash
 
 
@@ -46,3 +46,12 @@ def register_login_routes(app, mysql):
             return "Invalid username or password"
 
         return render_template("Sign_In.html")
+    
+    @app.route("/logout")
+    def logout():
+        username = session.get("username")  # ✅ grab before clearing
+        session.clear()
+        response = redirect("/signin")
+        response.delete_cookie('session')
+        flash(f"Goodbye {username}! You have been logged out.", "success")
+        return response

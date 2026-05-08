@@ -5,11 +5,12 @@ import phonenumbers, re
 
 def register_admin_add_staff_routes(app, mysql):
 
-    # ── helper: admin-only guard ──
     def admin_required():
         if "user_id" not in session:
+            flash("Please sign in to access this page.", "warning")
             return redirect("/signin")
         if session.get("role_id") != 3:
+            flash("Access denied. Admins only.", "danger")
             return redirect("/signin")
         return None
 
@@ -27,10 +28,14 @@ def register_admin_add_staff_routes(app, mysql):
         if guard:
             return guard
 
+        user_id = session.get('user_id')
         cursor = mysql.connection.cursor()
         staffs = get_all_staff(cursor)
+        cursor.execute("SELECT username FROM user WHERE user_id = %s", (user_id,))
+        user = cursor.fetchone()
         cursor.close()
-        return render_template("add_staff.html", staffs=staffs, form_data={})
+
+        return render_template("add_staff.html", staffs=staffs, form_data={}, user=user)
 
     @app.route("/admin/add_new_staff", methods=["POST"])
     def admin_add_staff():
@@ -42,41 +47,36 @@ def register_admin_add_staff_routes(app, mysql):
         phone            = request.form.get("phone")
         password         = request.form.get("password")
         confirm_password = request.form.get("confirm_password")
+        form_data        = {"username": username, "phone": phone}
 
-        form_data = {"username": username, "phone": phone}
+        user_id = session.get('user_id')
+        cursor = mysql.connection.cursor()
+        staffs = get_all_staff(cursor)
+        # ✅ fetch user here so it's always available
+        cursor.execute("SELECT username FROM user WHERE user_id = %s", (user_id,))
+        user = cursor.fetchone()
+        cursor.close()
 
-        # Password validation
+        # ── Validation ──────────────────────────────
         pattern = r'^(?=.*[0-9])(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$'
         if not re.match(pattern, password):
-            cursor = mysql.connection.cursor()
-            staffs = get_all_staff(cursor)
-            cursor.close()
-            flash("Password must be at least 8 characters long, include a number and a symbol", "error")
-            return render_template("add_staff.html", form_data=form_data, staffs=staffs)
+            flash("Password must be at least 8 characters, include a number and a symbol.", "danger")
+            return render_template("add_staff.html", form_data=form_data, staffs=staffs, user=user)  # ✅
 
         if password != confirm_password:
-            cursor = mysql.connection.cursor()
-            staffs = get_all_staff(cursor)
-            cursor.close()
-            flash("Passwords do not match", "error")
-            return render_template("add_staff.html", form_data=form_data, staffs=staffs)
+            flash("Passwords do not match.", "danger")
+            return render_template("add_staff.html", form_data=form_data, staffs=staffs, user=user)  # ✅
 
-        # Phone validation
         try:
             parsed_number = phonenumbers.parse(phone, None)
             if not phonenumbers.is_valid_number(parsed_number):
-                cursor = mysql.connection.cursor()
-                staffs = get_all_staff(cursor)
-                cursor.close()
-                flash("Invalid phone number", "error")
-                return render_template("add_staff.html", form_data=form_data, staffs=staffs)
+                flash("Invalid phone number.", "danger")
+                return render_template("add_staff.html", form_data=form_data, staffs=staffs, user=user)  # ✅
         except phonenumbers.NumberParseException:
-            cursor = mysql.connection.cursor()
-            staffs = get_all_staff(cursor)
-            cursor.close()
-            flash("Phone must start with + and country code", "error")
-            return render_template("add_staff.html", form_data=form_data, staffs=staffs)
+            flash("Phone must start with + and country code.", "danger")
+            return render_template("add_staff.html", form_data=form_data, staffs=staffs, user=user)  # ✅
 
+        # ── DB Insert ────────────────────────────────
         cursor = mysql.connection.cursor()
         try:
             cursor.execute("""
@@ -85,8 +85,39 @@ def register_admin_add_staff_routes(app, mysql):
             """, (username, phone))
 
             if cursor.fetchone():
+                flash("Username or phone number already exists.", "warning")
                 staffs = get_all_staff(cursor)
-                flash("Username or phone already exists", "error")
+                return render_template("add_staff.html", form_data=form_data, staffs=staffs, user=user)  # ✅
+
+            hashed_password = generate_password_hash(password)
+            cursor.execute("""
+                INSERT INTO user (username, password, phone_number, role_id)
+                VALUES (%s, %s, %s, 2)
+            """, (username, hashed_password, phone))
+            mysql.connection.commit()
+
+        except IntegrityError:
+            staffs = get_all_staff(cursor)
+            flash("Database error. Please try again.", "danger")
+            return render_template("add_staff.html", form_data=form_data, staffs=staffs, user=user)  # ✅
+
+        finally:
+            cursor.close()
+
+        flash(f"Staff member '{username}' added successfully!", "success")
+        return redirect(url_for('admin_staff'))
+
+        # ── DB Insert ────────────────────────────────
+        cursor = mysql.connection.cursor()
+        try:
+            cursor.execute("""
+                SELECT user_id FROM user
+                WHERE username=%s OR phone_number=%s
+            """, (username, phone))
+
+            if cursor.fetchone():
+                flash("Username or phone number already exists.", "warning")
+                staffs = get_all_staff(cursor)
                 return render_template("add_staff.html", form_data=form_data, staffs=staffs)
 
             hashed_password = generate_password_hash(password)
@@ -98,16 +129,16 @@ def register_admin_add_staff_routes(app, mysql):
 
         except IntegrityError:
             staffs = get_all_staff(cursor)
-            flash("Database error", "error")
+            flash("Database error. Please try again.", "danger")
             return render_template("add_staff.html", form_data=form_data, staffs=staffs)
 
         finally:
             cursor.close()
 
-        flash("Staff member added successfully!", "success")
+        flash(f"Staff member '{username}' added successfully!", "success")
         return redirect(url_for('admin_staff'))
 
-    # ── edit staff ──
+    # ── EDIT STAFF ───────────────────────────────────
     @app.route("/admin/edit_staff/<int:user_id>", methods=["POST"])
     def edit_staff(user_id):
         guard = admin_required()
@@ -121,24 +152,25 @@ def register_admin_add_staff_routes(app, mysql):
 
         cursor = mysql.connection.cursor()
         try:
-            # Check duplicate username/phone excluding this user
             cursor.execute("""
                 SELECT user_id FROM user
                 WHERE (username=%s OR phone_number=%s) AND user_id != %s
             """, (username, phone, user_id))
+
             if cursor.fetchone():
-                flash("Username or phone already exists", "error")
+                flash("Username or phone number already exists.", "warning")
                 return redirect(url_for('admin_staff'))
 
             if password:
-                # Validate new password if provided
                 pattern = r'^(?=.*[0-9])(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$'
                 if not re.match(pattern, password):
-                    flash("Password must be at least 8 characters, include a number and symbol", "error")
+                    flash("Password must be at least 8 characters, include a number and symbol.", "danger")
                     return redirect(url_for('admin_staff'))
+
                 if password != confirm_password:
-                    flash("Passwords do not match", "error")
+                    flash("Passwords do not match.", "danger")
                     return redirect(url_for('admin_staff'))
+
                 hashed_password = generate_password_hash(password)
                 cursor.execute("""
                     UPDATE user SET username=%s, phone_number=%s, password=%s
@@ -151,29 +183,39 @@ def register_admin_add_staff_routes(app, mysql):
                 """, (username, phone, user_id))
 
             mysql.connection.commit()
-            flash("Staff member updated successfully!", "success")
+            flash(f"Staff member '{username}' updated successfully!", "success")
 
-        except Exception as e:
-            flash("Error updating staff member", "error")
+        except Exception:
+            flash("Error updating staff member. Please try again.", "danger")
         finally:
             cursor.close()
 
         return redirect(url_for('admin_staff'))
 
-    # ── delete staff ──
+    # ── DELETE STAFF ─────────────────────────────────
     @app.route("/delete_staff/<int:user_id>", methods=["POST"])
     def delete_staff(user_id):
         guard = admin_required()
         if guard:
             return guard
 
+        cursor = mysql.connection.cursor()
         try:
-            cursor = mysql.connection.cursor()
-            # Only allow deleting staff (role_id=2), never admins or customers
+            # Get username before deleting for the flash message
+            cursor.execute("SELECT username FROM user WHERE user_id=%s AND role_id=2", (user_id,))
+            staff = cursor.fetchone()
+
+            if not staff:
+                flash("Staff member not found.", "warning")
+                return redirect(url_for('admin_staff'))
+
             cursor.execute("DELETE FROM user WHERE user_id=%s AND role_id=2", (user_id,))
             mysql.connection.commit()
+            flash(f"Staff member '{staff[0]}' deleted successfully.", "success")
+
+        except Exception:
+            flash("Error deleting staff member. Please try again.", "danger")
+        finally:
             cursor.close()
-        except Exception as e:
-            flash("Error deleting staff member", "error")
 
         return redirect(url_for('admin_staff'))

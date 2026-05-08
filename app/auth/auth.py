@@ -33,3 +33,4 @@ def role_required(role_id):
         return decorated_function
 
     return decorator
+

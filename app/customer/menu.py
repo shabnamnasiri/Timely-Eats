@@ -9,7 +9,7 @@ def register_menu_routes(app, mysql):
         session_id = session.get('table_session_id')
 
         if not session_id:
-            return redirect('/scan-required')  # ✅ not a 400 error
+            return redirect('/Customer/scan-required')  # ✅ not a 400 error
 
         cursor = mysql.connection.cursor()
 
@@ -21,7 +21,7 @@ def register_menu_routes(app, mysql):
         cursor.close()
 
         if not result:
-            return redirect('/scan-required')  # ✅ not a 400 error
+            return redirect('/Customer/scan-required')  # ✅ not a 400 error
 
         table_number = result[0]
 

@@ -15,8 +15,8 @@ def register_customer_place_order_routes(app, mysql):
         session_id = session.get('table_session_id')
 
         if not session_id:
-            flash("No table session found. Please scan the QR code again.", "warning")
-            return redirect('/scan-required')
+            flash("No table session found. Please scan the QR code on your table.", "warning")
+            return redirect('/signin') 
 
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
 

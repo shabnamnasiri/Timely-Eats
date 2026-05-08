@@ -25,7 +25,7 @@ app.secret_key = "secret_key_123"
 
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = ''
+app.config['MYSQL_PASSWORD'] = '22703380'
 app.config['MYSQL_DB'] = 'timlyeats'
 app.config['MYSQL_PORT'] = 3306
 
@@ -44,14 +44,8 @@ register_admin_add_staff_routes(app, mysql)
 register_staff_api(app, mysql)
 register_session_routes(app, mysql)
 
-@app.route("/logout")
-def logout():
-    session.clear()
-    return redirect("/signin")
 
-@app.route('/staff/orders')
-def staff_orders():
-    return render_template('EmpOrder.html')
+
 
 if __name__ == "__main__":
     app.run(debug=True)

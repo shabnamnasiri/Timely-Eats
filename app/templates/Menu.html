@@ -1,3 +1,5 @@
+{% from 'macros/toast.html' import render_toast %}
+{% from 'macros/toast_script.html' import render_toast_script %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,27 +7,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Timely Eats — Menu · Table {{ table_number or '?' }}</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/Menu.css') }}"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/toast.css') }}"/>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant:ital,wght@0,400;0,600;1,300;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
   <script>
     const SESSION_ID = "{{ session_id }}";
   </script>
 </head>
 <body>
-
-{% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    {% for category, message in messages %}
-      <div class="popup-toast">
-        <span class="toast-icon">🛒</span>
-        <div>
-          <div class="toast-title">Added to Cart</div>
-          <div class="toast-msg">{{ message }}</div>
-        </div>
-      </div>
-    {% endfor %}
-  {% endif %}
-{% endwith %}
-
+    {{ render_toast() }}  
 <header class="topbar">
   <div class="logo"><b>Timely<span>Eats</span></b><small>Restaurant</small></div>
   <div class="table-badge"><span>Table</span><strong>{{ table_number or '?' }}</strong></div>
@@ -215,18 +204,6 @@
 
 </main>
 
-<script>
-  window.addEventListener("load", function () {
-    const toasts = document.querySelectorAll(".popup-toast");
-    toasts.forEach((toast) => {
-      setTimeout(() => {
-        toast.style.opacity = "0";
-        toast.style.transform = "translateY(-10px)";
-        setTimeout(() => { toast.remove(); }, 400);
-      }, 2500);
-    });
-  });
-</script>
-
+{{ render_toast_script() }}  
 </body>
 </html>

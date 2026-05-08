@@ -1,19 +1,19 @@
 import os
-from flask import request, jsonify, render_template, Response, redirect, url_for, session
+from flask import request, jsonify, render_template, Response, redirect, url_for, session, flash
 from werkzeug.utils import secure_filename
 
-#allowed pic extensions
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'webp'}
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def register_admin_add_menu_routes(app, mysql):
 
-    # ── helper: admin-only guard ──
     def admin_required():
         if "user_id" not in session:
+            flash("Please sign in to access this page.", "warning")
             return redirect("/signin")
         if session.get("role_id") != 3:
+            flash("Access denied. Admins only.", "danger")
             return redirect("/signin")
         return None
 
@@ -23,11 +23,15 @@ def register_admin_add_menu_routes(app, mysql):
         if guard:
             return guard
 
+        user_id = session.get('user_id')
         cursor = mysql.connection.cursor()
         cursor.execute("SELECT item_id, name, description, preparation_time, price, category FROM item")
         items = cursor.fetchall()
+        cursor.execute("SELECT username FROM user WHERE user_id = %s", (user_id,))
+        user = cursor.fetchone()
         cursor.close()
-        return render_template("Add_menu.html", items=items)
+
+        return render_template("Add_menu.html", items=items, user=user)
 
     @app.route("/admin/add_menu_item", methods=["POST"])
     def admin_add_menu():
@@ -43,11 +47,19 @@ def register_admin_add_menu_routes(app, mysql):
         photo_data      = None
         photo_mimetype  = None
 
+        if not name or not price or not category:
+            flash("Name, price and category are required.", "danger")
+            return redirect(url_for('admin_menu'))
+
         if 'photo' in request.files:
             file = request.files['photo']
-            if file and allowed_file(file.filename):
-                photo_data     = file.read()
-                photo_mimetype = file.mimetype
+            if file and file.filename:
+                if allowed_file(file.filename):
+                    photo_data     = file.read()
+                    photo_mimetype = file.mimetype
+                else:
+                    flash("Invalid file type. Allowed: png, jpg, jpeg, webp.", "danger")
+                    return redirect(url_for('admin_menu'))
 
         try:
             cursor = mysql.connection.cursor()
@@ -57,8 +69,10 @@ def register_admin_add_menu_routes(app, mysql):
             """, (name, description, price, prep_time, category, photo_data, photo_mimetype))
             mysql.connection.commit()
             cursor.close()
+            flash(f"'{name}' added to menu successfully!", "success")
+
         except Exception as e:
-            return jsonify({'error': str(e)}), 500
+            flash(f"Database error: {str(e)}", "danger")
 
         return redirect(url_for('admin_menu'))
 
@@ -96,7 +110,10 @@ def register_admin_add_menu_routes(app, mysql):
 
             if 'photo' in request.files:
                 file = request.files['photo']
-                if file and file.filename and allowed_file(file.filename):
+                if file and file.filename:
+                    if not allowed_file(file.filename):
+                        flash("Invalid file type. Allowed: png, jpg, jpeg, webp.", "danger")
+                        return redirect(url_for('admin_menu'))
                     photo_data     = file.read()
                     photo_mimetype = file.mimetype
                     cursor.execute("""
@@ -119,10 +136,12 @@ def register_admin_add_menu_routes(app, mysql):
 
             mysql.connection.commit()
             cursor.close()
-            return redirect(url_for('admin_menu'))
+            flash(f"'{name}' updated successfully!", "success")
 
         except Exception as e:
-            return jsonify({'error': str(e)}), 500
+            flash(f"Error updating item: {str(e)}", "danger")
+
+        return redirect(url_for('admin_menu'))
 
     # ── delete item ──
     @app.route("/delete_item/<int:item_id>", methods=["POST"])
@@ -133,12 +152,24 @@ def register_admin_add_menu_routes(app, mysql):
 
         try:
             cursor = mysql.connection.cursor()
+
+            # Get name before deleting for flash message
+            cursor.execute("SELECT name FROM item WHERE item_id=%s", (item_id,))
+            item = cursor.fetchone()
+
+            if not item:
+                flash("Item not found.", "warning")
+                return redirect(url_for('admin_menu'))
+
             cursor.execute("DELETE FROM review WHERE item_id=%s", (item_id,))
             cursor.execute("DELETE FROM cart_item WHERE item_id=%s", (item_id,))
             cursor.execute("DELETE FROM order_details WHERE item_id=%s", (item_id,))
             cursor.execute("DELETE FROM item WHERE item_id=%s", (item_id,))
             mysql.connection.commit()
             cursor.close()
-            return redirect(url_for('admin_menu'))
+            flash(f"'{item[0]}' deleted from menu successfully.", "success")
+
         except Exception as e:
-            return jsonify({'error': str(e)}), 500
+            flash(f"Error deleting item: {str(e)}", "danger")
+
+        return redirect(url_for('admin_menu'))

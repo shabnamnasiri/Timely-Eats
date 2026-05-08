@@ -1,3 +1,5 @@
+{% from 'macros/toast.html' import render_toast %}
+{% from 'macros/toast_script.html' import render_toast_script %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -25,25 +27,7 @@
   </div>
 </header>
 
-<!-- FLASH TOAST -->
-{% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    {% for category, message in messages %}
-      <div class="popup-toast">
-        <span class="toast-icon">
-          {% if category == 'success' %}✅
-          {% elif category == 'warning' %}⚠️
-          {% else %}❌
-          {% endif %}
-        </span>
-        <div>
-          <div class="toast-title">{{ category | capitalize }}</div>  
-          <div class="toast-msg">{{ message }}</div>
-        </div>
-      </div>
-    {% endfor %}
-  {% endif %}
-{% endwith %}
+{{ render_toast() }}  
 
 <!-- PAGE WRAPPER → GRID inside -->
 <div class="page">
@@ -228,18 +212,8 @@
   const bar = document.querySelector('.loyalty-bar-fill[data-progress]');
   if (bar) bar.style.width = bar.dataset.progress + '%';
 
-  window.addEventListener("load", function () {
-    const toasts = document.querySelectorAll(".popup-toast");
-    toasts.forEach((toast) => {
-      setTimeout(() => {
-        toast.style.opacity = "0";
-        toast.style.transform = "translateY(-10px)";  /* ✅ matches your CSS */
-        toast.style.transition = "all 0.4s ease";
-        setTimeout(() => { toast.remove(); }, 400);
-      }, 3000);
-    });
-  });
 </script>
+{{ render_toast_script() }}  
 
 </body>
 </html>
