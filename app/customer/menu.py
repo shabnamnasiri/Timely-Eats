@@ -1,4 +1,4 @@
-from flask import render_template, session, request
+from flask import render_template, session, request,redirect
 
 def register_menu_routes(app, mysql):
 

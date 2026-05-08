@@ -102,8 +102,7 @@ def register_session_routes(app, mysql):
 
         file_name = f"session_{session_id}.png"
         file_path = os.path.join(folder, file_name)
-        img.save(file_path)
-
+        img.save(file_path)  # type: ignore
         public_path = f"qrcodes/{file_name}"
 
         # Save QR path
