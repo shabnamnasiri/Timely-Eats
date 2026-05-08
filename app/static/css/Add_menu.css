@@ -3,42 +3,164 @@
     :root {
       --ink: #0e0e0e; --ink2: #1a1a1a; --smoke: #3d3d3d;
       --mist: #000000; --ash: #b0b0b0; --cream: #f3f0ea;
-      --paper: #f9f7f4; --accent: #c8933a; --rule: #d4cfc6;
+      --paper: #f9f7f4; --accent: #000000; --rule: #d4cfc6;
       --danger: #9e3737; --success: #3a6b3a;
+      --canvas: #ebe6dc;
     }
     html { scroll-behavior: smooth; }
-    body { font-family: 'DM Sans', sans-serif; background: var(--paper); color: var(--ink); display: flex; min-height: 100vh; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--canvas); color: var(--ink); display: flex; min-height: 100vh; }
 
     /* ── SIDEBAR ── */
     .sidebar {
-      width: 220px; flex-shrink: 0; background: #2e2b26; display: flex;
-      flex-direction: column; position: sticky; top: 0; height: 100vh; overflow-y: auto;
-    }
-    .sidebar::before {
-      content: ''; position: absolute; inset: 0; pointer-events: none;
-      background: linear-gradient(rgba(200,147,58,.05) 1px,transparent 1px),
-                  linear-gradient(90deg,rgba(200,147,58,.05) 1px,transparent 1px);
-      background-size: 32px 32px;
-    }
-    .sidebar-logo { position: relative; z-index: 1; padding: 28px 24px 20px; border-bottom: 1px solid rgba(255,255,255,.08); }
-    .sidebar-logo b { font-family: 'Bebas Neue', sans-serif; font-size: 26px; letter-spacing: .07em; color: var(--paper); font-weight: 400; display: block; line-height: 1; }
-    .sidebar-logo b span { color: var(--accent); }
-    .sidebar-logo small { font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: .28em; text-transform: uppercase; color: #9a9488; }
-    .sidebar-section { font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: .28em; text-transform: uppercase; color: #6a6560; padding: 20px 24px 8px; position: relative; z-index: 1; }
-    .sidebar-nav { list-style: none; position: relative; z-index: 1; flex: 1; }
-    .sidebar-nav a {
-      display: flex; align-items: center; gap: 10px; padding: 11px 24px;
-      font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: .2em;
-      text-transform: uppercase; color: #9a9488; text-decoration: none;
-      border-left: 2px solid transparent; transition: color .2s, border-color .2s, background .2s;
-    }
-    .sidebar-nav a:hover { color: var(--paper); background: rgba(255,255,255,.06); }
-    .sidebar-nav a.active { color: var(--accent); border-left-color: var(--accent); background: rgba(200,147,58,.1); }
-    .sidebar-nav .ico { width: 14px; text-align: center; font-style: normal; font-size: 11px; }
-    .sidebar-user { position: relative; z-index: 1; padding: 16px 24px; border-top: 1px solid rgba(255,255,255,.08); }
-    .sidebar-user small { font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: .2em; text-transform: uppercase; color: #6a6560; display: block; }
-    .sidebar-user span { font-size: 12px; color: #9a9488; }
+  width: 220px;
+  flex-shrink: 0;
+  background: #2e2b26;
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  /* ADDED: Stronger shadow for depth */
+  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
+  /* ADDED: Slight border-right for definition */
+  border-right: 1px solid rgba(200, 147, 58, 0.2);
+}
 
+.sidebar::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+   background: linear-gradient(rgba(200, 147, 58, 0.06) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(200, 147, 58, 0.06) 1px, transparent 1px);
+  background-size: 32px 32px;
+      opacity: 0.15;
+
+}
+
+.sidebar-logo {
+  position: relative;
+  z-index: 1;
+  padding: 28px 24px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  /* ADDED: Background highlight */
+  background: rgba(200, 147, 58, 0.05);
+}
+
+.sidebar-logo b {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px; /* INCREASED from 26px */
+  letter-spacing: 0.07em;
+  color: var(--paper);
+  font-weight: 400;
+  display: block;
+  line-height: 1;
+  /* ADDED: Text shadow for contrast */
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.sidebar-logo b span {
+  color: var(--accent);
+}
+
+.sidebar-logo small {
+  font-family: 'DM Mono', monospace;
+  font-size: 13px; /* INCREASED from 12px */
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: #d4d0c8; /* LIGHTENED from #ffffff (too bright) */
+  font-weight: 500; /* ADDED */
+}
+
+.sidebar-section {
+  font-family: 'DM Mono', monospace;
+  font-size: 13px; /* INCREASED from 12px */
+  letter-spacing: 0.32em; /* INCREASED slightly */
+  text-transform: uppercase;
+  color: #e8c48c; /* CHANGED to accent-tinted for visibility */
+  padding: 24px 24px 10px; /* INCREASED top padding */
+  position: relative;
+  z-index: 1;
+  font-weight: bold;
+  /* ADDED: Subtle bottom border */
+  border-bottom: 1px solid rgba(200, 147, 58, 0.2);
+  margin-bottom: 16px;
+}
+
+.sidebar-nav {
+  list-style: none;
+  position: relative;
+  z-index: 1;
+  flex: 1;
+}
+
+.sidebar-nav a {
+  display: flex;
+  align-items: center;
+  gap: 14px; /* INCREASED from 10px */
+  padding: 13px 24px; /* INCREASED from 11px for better click area */
+  font-family: 'DM Mono', monospace;
+  font-size: 11px; /* INCREASED from 9px */
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #b8b2a6; /* LIGHTENED from #9a9488 */
+  text-decoration: none;
+  border-left: 3px solid transparent; /* INCREASED from 2px */
+  transition: all 0.2s ease;
+  /* ADDED: Slight margin for separation */
+  margin: 2px 0;
+}
+
+.sidebar-nav a:hover {
+  color: #fff5e8; /* BRIGHTER hover color */
+  background: rgba(255, 255, 255, 0.1); /* STRONGER background */
+  border-left-color: rgba(200, 147, 58, 0.6);
+  /* ADDED: Slight padding-left effect */
+  padding-left: 22px;
+}
+
+.sidebar-nav a.active {
+
+  border-left-color: #f0b347; /* BRIGHTER accent */
+background: linear-gradient(
+    90deg,
+    rgba(200,147,58,0.25),
+    rgba(200,147,58,0.05)
+  );
+   color: #fff;
+  border-left: 3px solid var(--accent-strong);
+  font-weight: 600;
+  font-weight: bold; /* ADDED */
+}
+
+.sidebar-nav .ico {
+  width: 18px; /* INCREASED from 14px */
+  text-align: center;
+  font-style: normal;
+  font-size: 13px; /* INCREASED from 11px */
+  /* ADDED: Filter for better icon rendering if using emoji/font icons */
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.3));
+}
+
+.sidebar-user {
+  position: relative;
+  z-index: 1;
+  padding: 20px 24px; /* INCREASED from 16px */
+  border-top: 1px solid rgba(200, 147, 58, 0.2); /* CHANGED to accent-tinted */
+  /* ADDED: Background gradient for depth */
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.2), transparent);
+}
+
+.sidebar-user small {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px; /* INCREASED from 8px */
+  letter-spacing: 0.22em; /* ADJUSTED */
+  text-transform: uppercase;
+  color: #e8c48c; /* CHANGED to accent-tinted */
+  display: block;
+  margin-bottom: 6px; /* ADDED */
+}
     /* ── MAIN ── */
     .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
 
@@ -50,7 +172,7 @@
     .badge-items { background: var(--cream); color: var(--mist); border: 1px solid var(--rule); }
 
     /* ── CONTENT AREA ── */
-    .content { padding: 36px 40px; display: grid; grid-template-columns: 1fr 400px; gap: 32px; align-items: start; background: #f4f1ec; }
+    .content { padding: 36px 40px; display: grid; grid-template-columns: 1fr 400px; gap: 32px; align-items: start; background: var(--canvas); }
 
     /* ── SECTION LABEL ── */
     .label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: .28em; text-transform: uppercase; color: var(--accent); margin-bottom: 14px; display: block; }
@@ -95,8 +217,8 @@
     .tag-toggle:checked + label { border-color: var(--accent); color: white; background: rgb(0, 0, 0); }
 
     .btn-submit {
-      width: 100%; padding: 13px; background: var(--accent); border: none; color: var(--ink);
-      font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: .28em; text-transform: uppercase;
+      width: 100%; padding: 13px; background: var(--cream); border: 1px solid black;
+      font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: .28em; text-transform: uppercase;
       cursor: pointer; transition: background .2s; position: relative; z-index: 1; margin-top: 4px;
     }
     .btn-submit:hover { background: #d9a248; }

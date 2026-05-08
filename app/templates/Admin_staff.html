@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Staff Directory | Admin</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Mono:wght@300;400&family=Bebas+Neue&display=swap" rel="stylesheet">
+
+  <!-- CHART (loaded but kept for future use, no chart at all for now) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="../static/css/Revenue.css">
+</head>
+
+<body>
+
+<!-- ================= SIDEBAR ================= -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+      <b>Timely<span style="color: #c8933a;">Eats</span></b>
+    <small>Admin Panel</small>
+  </div>
+  <div class="sidebar-section">Menu</div>
+  <ul class="sidebar-nav">
+    <li><a href="Add_menu.html"><i class="ico">▤</i> Menu Items</a></li>
+    <li><a href="Categories.html" class=""><i class="ico">⊞</i> Categories</a></li>
+  </ul>
+  <div class="sidebar-section">Live_feed</div>
+  <ul class="sidebar-nav">
+    <li><a href="Admin_order.html"><i class="ico">⊙</i> Orders</a></li>
+    <li><a href="Admin_table.html"><i class="ico">◫</i> Tables</a></li>
+  </ul> 
+   <div class="sidebar-section">Users</div>
+    <ul class="sidebar-nav">
+    <li><a href="Admin_staff.html" class="active"><i class="ico">⊙</i>Staff</a></li>
+    <li><a href="Admin_customer.html"><i class="ico">◫</i> Customers</a></li>
+  </ul>
+  <div class="sidebar-section">Analaytics</div>
+  <ul class="sidebar-nav">
+    <li><a href="Revenue.html"><i class="ico">▦</i> Revenue</a></li>
+    <li><a href="Order_Report.html"><i class="ico">▦</i> Order_Report</a></li>
+        <li><a href="Customer_report"><i class="ico">▦</i>Customer_Report</a></li>
+            <li><a href=" Table_report.html"><i class="ico">▦</i>Table_Report</a></li>
+
+  </ul>
+</aside>
+<!-- ================= MAIN ================= -->
+<main class="main">
+
+<header class="topbar">
+  <h1>Staff Directory</h1>
+</header>
+
+<div class="content">
+
+<!-- ================= TABLE ================= -->
+<section style="flex:2;">
+
+<div class="panel">
+
+  <span class="label">Kitchen Workforce</span>
+  <h2 class="panel-title">Staff (Paginated View)</h2>
+
+  <!-- SEARCH -->
+  <input id="searchInput" type="text" placeholder="Search staff..." style="width:100%; margin-bottom:15px; padding:10px; border:1px solid var(--rule); background:transparent; font-family:'DM Mono';">
+
+  <!-- HEADER -->
+  <div class="item-row" style="opacity:0.7; font-weight:600;">
+    <div class="item-info">
+      <strong>Staff Member</strong>
+      <span>Role / Performance</span>
+    </div>
+
+    <div style="display:flex; gap:10px;">
+      <span>Status</span>
+      <span>Actions</span>
+    </div>
+  </div>
+
+  <!-- TABLE BODY -->
+  <div id="tableBody">
+      <div class="item-row">
+
+        <div class="item-info">
+          <strong>Staff 1</strong>
+          <span>Chef • Efficiency 78%</span>
+        </div>
+
+        <div style="display:flex; gap:10px; align-items:center;">
+          <span class="analytics-date" style="color:#27ae60;">On Shift</span>
+          <button class="date-select-btn">Edit</button>
+          <button class="date-select-btn" style="background:#e74c3c;">Delete</button>
+        </div>
+
+      </div>
+    
+      <div class="item-row">
+
+        <div class="item-info">
+          <strong>Staff 2</strong>
+          <span>Cook • Efficiency 70%</span>
+        </div>
+
+        <div style="display:flex; gap:10px; align-items:center;">
+          <span class="analytics-date" style="color:#f39c12;">Break</span>
+          <button class="date-select-btn">Edit</button>
+          <button class="date-select-btn" style="background:#e74c3c;">Delete</button>
+        </div>
+
+      </div>
+    
+      <div class="item-row">
+
+        <div class="item-info">
+          <strong>Staff 3</strong>
+          <span>Waiter • Efficiency 91%</span>
+        </div>
+
+        <div style="display:flex; gap:10px; align-items:center;">
+          <span class="analytics-date" style="color:#e74c3c;">Off Duty</span>
+          <button class="date-select-btn">Edit</button>
+          <button class="date-select-btn" style="background:#e74c3c;">Delete</button>
+        </div>
+
+      </div>
+    
+      <div class="item-row">
+
+        <div class="item-info">
+          <strong>Staff 4</strong>
+          <span>Manager • Efficiency 98%</span>
+        </div>
+
+        <div style="display:flex; gap:10px; align-items:center;">
+          <span class="analytics-date" style="color:#27ae60;">On Shift</span>
+          <button class="date-select-btn">Edit</button>
+          <button class="date-select-btn" style="background:#e74c3c;">Delete</button>
+        </div>
+
+      </div>
+    
+      <div class="item-row">
+
+        <div class="item-info">
+          <strong>Staff 5</strong>
+          <span>Chef • Efficiency 98%</span>
+        </div>
+
+        <div style="display:flex; gap:10px; align-items:center;">
+          <span class="analytics-date" style="color:#f39c12;">Break</span>
+          <button class="date-select-btn">Edit</button>
+          <button class="date-select-btn" style="background:#e74c3c;">Delete</button>
+        </div>
+
+      </div>
+    
+      <div class="item-row">
+
+        <div class="item-info">
+          <strong>Staff 6</strong>
+          <span>Cook • Efficiency 79%</span>
+        </div>
+
+        <div style="display:flex; gap:10px; align-items:center;">
+          <span class="analytics-date" style="color:#e74c3c;">Off Duty</span>
+          <button class="date-select-btn">Edit</button>
+          <button class="date-select-btn" style="background:#e74c3c;">Delete</button>
+        </div>
+
+      </div>
+    
+      <div class="item-row">
+
+        <div class="item-info">
+          <strong>Staff 7</strong>
+          <span>Waiter • Efficiency 80%</span>
+        </div>
+
+        <div style="display:flex; gap:10px; align-items:center;">
+          <span class="analytics-date" style="color:#27ae60;">On Shift</span>
+          <button class="date-select-btn">Edit</button>
+          <button class="date-select-btn" style="background:#e74c3c;">Delete</button>
+        </div>
+
+      </div>
+    
+      <div class="item-row">
+
+        <div class="item-info">
+          <strong>Staff 8</strong>
+          <span>Manager • Efficiency 89%</span>
+        </div>
+
+        <div style="display:flex; gap:10px; align-items:center;">
+          <span class="analytics-date" style="color:#f39c12;">Break</span>
+          <button class="date-select-btn">Edit</button>
+          <button class="date-select-btn" style="background:#e74c3c;">Delete</button>
+        </div>
+
+      </div>
+    
+      <div class="item-row">
+
+        <div class="item-info">
+          <strong>Staff 9</strong>
+          <span>Chef • Efficiency 95%</span>
+        </div>
+
+        <div style="display:flex; gap:10px; align-items:center;">
+          <span class="analytics-date" style="color:#e74c3c;">Off Duty</span>
+          <button class="date-select-btn">Edit</button>
+          <button class="date-select-btn" style="background:#e74c3c;">Delete</button>
+        </div>
+
+      </div>
+    
+      <div class="item-row">
+
+        <div class="item-info">
+          <strong>Staff 10</strong>
+          <span>Cook • Efficiency 96%</span>
+        </div>
+
+        <div style="display:flex; gap:10px; align-items:center;">
+          <span class="analytics-date" style="color:#27ae60;">On Shift</span>
+          <button class="date-select-btn">Edit</button>
+          <button class="date-select-btn" style="background:#e74c3c;">Delete</button>
+        </div>
+
+      </div>
+    </div>
+
+  <!-- PAGINATION -->
+  <div id="pagination" style="display:flex; gap:8px; margin-top:15px; justify-content:center;">
+      <button onclick="goTo(1)" style="padding:6px 10px; border:1px solid var(--rule);
+        background:#c8933a;
+        color:#000;
+        font-family:'DM Mono';">
+        1
+      </button>
+    
+      <button onclick="goTo(2)" style="padding:6px 10px; border:1px solid var(--rule);
+        background:transparent;
+        color:inherit;
+        font-family:'DM Mono';">
+        2
+      </button>
+    
+      <button onclick="goTo(3)" style="padding:6px 10px; border:1px solid var(--rule);
+        background:transparent;
+        color:inherit;
+        font-family:'DM Mono';">
+        3
+      </button>
+    
+      <button onclick="goTo(4)" style="padding:6px 10px; border:1px solid var(--rule);
+        background:transparent;
+        color:inherit;
+        font-family:'DM Mono';">
+        4
+      </button>
+    
+      <button onclick="goTo(5)" style="padding:6px 10px; border:1px solid var(--rule);
+        background:transparent;
+        color:inherit;
+        font-family:'DM Mono';">
+        5
+      </button>
+    </div>
+
+</div>
+
+</section>
+
+<!-- ================= ADD STAFF ================= -->
+<aside class="side-panel">
+
+  <span class="label">Admin Tools</span>
+  <h2 class="panel-title">Add Staff</h2>
+
+  <div class="insight">
+    <small>Note</small>
+    <strong>Staff roles affect kitchen workflow allocation</strong>
+  </div>
+
+  <form style="display:flex; flex-direction:column; gap:10px; margin-top:15px;">
+
+    <input type="text" placeholder="First Name" style="padding:10px; border:1px solid var(--rule); background:transparent; font-family:'DM Mono'; font-size:12px;">
+
+    <input type="text" placeholder="Last Name" style="padding:10px; border:1px solid var(--rule); background:transparent; font-family:'DM Mono'; font-size:12px;">
+
+    <input type="email" placeholder="Email" style="padding:10px; border:1px solid var(--rule); background:transparent; font-family:'DM Mono'; font-size:12px;">
+
+    <input type="password" placeholder="Password" style="padding:10px; border:1px solid var(--rule); background:transparent; font-family:'DM Mono'; font-size:12px;">
+
+    <!-- ROLE -->
+    <select style="padding:10px; border:1px solid var(--rule); background:transparent;">
+      <option selected="selected">Chef</option>
+      <option>Cook</option>
+      <option>Waiter</option>
+      <option>Manager</option>
+    </select>
+
+    <!-- STATUS -->
+    <select style="padding:10px; border:1px solid var(--rule); background:transparent;">
+      <option selected="selected">On Shift</option>
+      <option>Break</option>
+      <option>Off Duty</option>
+    </select>
+
+    <button class="date-select-btn" style="margin-top:10px; justify-content:center;">
+      + Create Staff
+    </button>
+
+  </form>
+
+</aside>
+
+</div>
+</main>
+
+<!-- ================= JS ================= -->
+<script>
+
+const staff = Array.from({length: 42}, (_, i) => ({
+  name: `Staff ${i + 1}`,
+  email: `staff${i+1}@mail.com`,
+  role: ["Chef", "Cook", "Waiter", "Manager"][i % 4],
+  performance: Math.floor(Math.random() * 30) + 70,
+  status: ["On Shift", "Break", "Off Duty"][i % 3]
+}));
+
+const rowsPerPage = 10;
+let currentPage = 1;
+
+const tableBody = document.getElementById("tableBody");
+const pagination = document.getElementById("pagination");
+const searchInput = document.getElementById("searchInput");
+
+let filtered = [...staff];
+
+function renderTable() {
+
+  tableBody.innerHTML = "";
+
+  const start = (currentPage - 1) * rowsPerPage;
+  const pageData = filtered.slice(start, start + rowsPerPage);
+
+  pageData.forEach(s => {
+
+    let color = "#27ae60";
+    if (s.status === "Break") color = "#f39c12";
+    if (s.status === "Off Duty") color = "#e74c3c";
+
+    tableBody.innerHTML += `
+      <div class="item-row">
+
+        <div class="item-info">
+          <strong>${s.name}</strong>
+          <span>${s.role} • Efficiency ${s.performance}%</span>
+        </div>
+
+        <div style="display:flex; gap:10px; align-items:center;">
+          <span class="analytics-date" style="color:${color};">${s.status}</span>
+          <button class="date-select-btn">Edit</button>
+          <button class="date-select-btn" style="background:#e74c3c;">Delete</button>
+        </div>
+
+      </div>
+    `;
+  });
+}
+
+function renderPagination() {
+
+  pagination.innerHTML = "";
+  const pages = Math.ceil(filtered.length / rowsPerPage);
+
+  for (let i = 1; i <= pages; i++) {
+    pagination.innerHTML += `
+      <button onclick="goTo(${i})"
+        style="padding:6px 10px; border:1px solid var(--rule);
+        background:${i === currentPage ? '#c8933a' : 'transparent'};
+        color:${i === currentPage ? '#000' : 'inherit'};
+        font-family:'DM Mono';">
+        ${i}
+      </button>
+    `;
+  }
+}
+
+function goTo(page) {
+  currentPage = page;
+  renderTable();
+  renderPagination();
+}
+
+searchInput.addEventListener("input", e => {
+
+  const v = e.target.value.toLowerCase();
+
+  filtered = staff.filter(s =>
+    s.name.toLowerCase().includes(v) ||
+    s.role.toLowerCase().includes(v) ||
+    s.email.toLowerCase().includes(v)
+  );
+
+  currentPage = 1;
+  renderTable();
+  renderPagination();
+});
+
+renderTable();
+renderPagination();
+
+</script>
+
+
+</aside></body></html>

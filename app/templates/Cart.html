@@ -4,422 +4,532 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Timely Eats — Your Order</title>
-    <link rel="stylesheet" href="../static/css/Cart.css">
 
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Existing CSS -->
+  <link rel="stylesheet" href="../static/css/Cart.css">
+
+  <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
-  
 </head>
-<body>
+
+<body class="overflow-x-hidden">
 
 <!-- ══ TOPBAR ══ -->
-<header class="topbar">
-  <a href="Menu.html" class="logo">
+<header class="topbar flex items-center justify-between px-4 md:px-8">
+
+  <a href="Menu.html" class="logo flex items-end gap-2">
     <b>Timely<span>Eats</span></b>
     <small>← Menu</small>
   </a>
-  <div class="topbar-center">
+
+  <div class="topbar-center hidden sm:flex items-center gap-2">
     <span class="table-pill">Table</span>
     <span class="table-num">07</span>
   </div>
-  <div class="loyalty-pill">
+
+  <div class="loyalty-pill hidden md:flex">
     <small>Points</small>
     <b>340</b>
   </div>
+
 </header>
 
-<!-- ══ FLASH TOAST — order placed notification ══ -->
-<div class="toast">
+<!-- ══ TOAST ══ -->
+<div class="toast flex items-center gap-4">
+
   <span class="toast-icon">🍽️</span>
-  <div>
+
+  <div class="flex-1">
     <div class="toast-title">Order Placed!</div>
     <div class="toast-msg">Your order #TE-2407 is now in the kitchen.</div>
   </div>
+
   <a href="#" class="toast-close">✕</a>
+
 </div>
 
 <!-- ══ PAGE GRID ══ -->
-<div class="page">
+<div class="page grid grid-cols-1 xl:grid-cols-[1fr_360px] gap-7">
 
-  <!-- ══════════════════════════════════════
-       LEFT COLUMN
-  ══════════════════════════════════════ -->
-  <div class="left-col">
+  <!-- LEFT COLUMN -->
+  <div class="left-col min-w-0">
 
-    <!-- ── ORDER ITEMS ── -->
-    <div class="mb32">
-      <span class="sec-label">Your Selection</span>
-      <div class="sec-title">Order Summary</div>
+    <!-- ORDER SUMMARY -->
+    <section class="mb32">
 
-      <div class="item-list">
+      <span class="sec-label">
+        Your Selection
+      </span>
 
-        <!-- Item 1: Ribeye — with customisations + note -->
-        <div class="order-item" style="--i:0">
-          <div>
-            <span class="item-cat">Mains</span>
-            <div class="item-name">28-Day Dry-Aged Ribeye</div>
-            <div class="item-customs">
-              <span class="custom-tag">Medium Rare</span>
-              <span class="custom-tag">Peppercorn Sauce</span>
-              <span class="custom-tag">No Watercress</span>
+      <div class="sec-title">
+        Order Summary
+      </div>
+
+      <div class="item-list flex flex-col gap-3">
+
+        <!-- ITEM -->
+        <div class="order-item flex flex-col md:grid md:grid-cols-[1fr_auto] gap-5">
+
+          <div class="min-w-0">
+
+            <span class="item-cat">
+              Mains
+            </span>
+
+            <div class="item-name">
+              28-Day Dry-Aged Ribeye
             </div>
-            <p class="item-note">Please rest the steak for 3 minutes before serving.</p>
+
+            <div class="item-customs flex flex-wrap gap-2">
+
+              <span class="custom-tag">
+                Medium Rare
+              </span>
+
+              <span class="custom-tag">
+                Peppercorn Sauce
+              </span>
+
+              <span class="custom-tag">
+                No Watercress
+              </span>
+
+            </div>
+
+            <p class="item-note">
+              Please rest the steak for 3 minutes before serving.
+            </p>
+
           </div>
-          <div class="item-right">
-            <div class="item-price">$48.00</div>
+
+          <div class="item-right flex-row md:flex-col items-start md:items-end w-full md:w-auto">
+
+            <div class="item-price">
+              $48.00
+            </div>
+
             <div class="qty-control">
-              <button class="qty-btn">−</button>
-              <div class="qty-val">1</div>
-              <button class="qty-btn">+</button>
+
+              <button class="qty-btn">
+                −
+              </button>
+
+              <div class="qty-val">
+                1
+              </div>
+
+              <button class="qty-btn">
+                +
+              </button>
+
             </div>
-            <button class="btn-remove">Remove</button>
+
+            <button class="btn-remove">
+              Remove
+            </button>
+
           </div>
+
         </div>
 
-        <!-- Item 2: Burrata — no customisations -->
-        <div class="order-item" style="--i:1">
+        <!-- ITEM -->
+        <div class="order-item flex flex-col md:grid md:grid-cols-[1fr_auto] gap-5">
+
           <div>
-            <span class="item-cat">Starters</span>
-            <div class="item-name">Burrata &amp; Heritage Tomato</div>
-          </div>
-          <div class="item-right">
-            <div class="item-price">$14.00</div>
-            <div class="qty-control">
-              <button class="qty-btn">−</button>
-              <div class="qty-val">1</div>
-              <button class="qty-btn">+</button>
+
+            <span class="item-cat">
+              Starters
+            </span>
+
+            <div class="item-name">
+              Burrata &amp; Heritage Tomato
             </div>
-            <button class="btn-remove">Remove</button>
+
           </div>
+
+          <div class="item-right flex-row md:flex-col items-start md:items-end w-full md:w-auto">
+
+            <div class="item-price">
+              $14.00
+            </div>
+
+            <div class="qty-control">
+
+              <button class="qty-btn">
+                −
+              </button>
+
+              <div class="qty-val">
+                1
+              </div>
+
+              <button class="qty-btn">
+                +
+              </button>
+
+            </div>
+
+            <button class="btn-remove">
+              Remove
+            </button>
+
+          </div>
+
         </div>
 
-        <!-- Item 3: Negroni — qty 2 -->
-        <div class="order-item" style="--i:2">
+        <!-- ITEM -->
+        <div class="order-item flex flex-col md:grid md:grid-cols-[1fr_auto] gap-5">
+
           <div>
-            <span class="item-cat">Drinks</span>
-            <div class="item-name">Classic Negroni</div>
-            <div class="item-customs">
-              <span class="custom-tag">Extra Ice</span>
+
+            <span class="item-cat">
+              Drinks
+            </span>
+
+            <div class="item-name">
+              Classic Negroni
             </div>
+
+            <div class="item-customs flex flex-wrap gap-2">
+              <span class="custom-tag">
+                Extra Ice
+              </span>
+            </div>
+
           </div>
-          <div class="item-right">
-            <div class="item-price">$28.00</div>
+
+          <div class="item-right flex-row md:flex-col items-start md:items-end w-full md:w-auto">
+
+            <div class="item-price">
+              $28.00
+            </div>
+
             <div class="qty-control">
-              <button class="qty-btn">−</button>
-              <div class="qty-val">2</div>
-              <button class="qty-btn">+</button>
-            </div>
-            <button class="btn-remove">Remove</button>
-          </div>
-        </div>
 
-        <!-- Item 4: Chips -->
-        <div class="order-item" style="--i:3">
-          <div>
-            <span class="item-cat">Sides</span>
-            <div class="item-name">Hand-Cut Chips</div>
-          </div>
-          <div class="item-right">
-            <div class="item-price">$6.00</div>
-            <div class="qty-control">
-              <button class="qty-btn">−</button>
-              <div class="qty-val">1</div>
-              <button class="qty-btn">+</button>
+              <button class="qty-btn">
+                −
+              </button>
+
+              <div class="qty-val">
+                2
+              </div>
+
+              <button class="qty-btn">
+                +
+              </button>
+
             </div>
-            <button class="btn-remove">Remove</button>
+
+            <button class="btn-remove">
+              Remove
+            </button>
+
           </div>
+
         </div>
 
       </div>
-    </div>
 
-    <!-- ── CUSTOMISATION ACCORDIONS ── -->
-    <div class="mb32">
-      <span class="sec-label">Preferences</span>
-      <div class="sec-title" style="font-size:24px">Customise Items</div>
+    </section>
 
-      <!-- Ribeye customisation (open by default for demo) -->
-      <div class="cust-block">
-        <input class="cust-checkbox" type="checkbox" id="cust-ribeye" checked>
-        <label class="cust-header" for="cust-ribeye">
-          <span class="cust-header-name">28-Day Dry-Aged Ribeye</span>
-          <span class="cust-toggle-icon">▾</span>
-        </label>
-        <div class="cust-body">
+    <!-- CUSTOMISE -->
+    <section class="mb32">
 
-          <div class="cust-group">
-            <span class="cust-group-label">Cooking Level</span>
-            <div class="cust-opts">
-              <input class="opt-r" type="radio" name="ribeye-cook" id="cook-rare"><label class="opt-r-lbl" for="cook-rare">Rare</label>
-              <input class="opt-r" type="radio" name="ribeye-cook" id="cook-medr" checked><label class="opt-r-lbl" for="cook-medr">Medium Rare</label>
-              <input class="opt-r" type="radio" name="ribeye-cook" id="cook-med"><label class="opt-r-lbl" for="cook-med">Medium</label>
-              <input class="opt-r" type="radio" name="ribeye-cook" id="cook-well"><label class="opt-r-lbl" for="cook-well">Well Done</label>
-            </div>
-          </div>
+      <span class="sec-label">
+        Preferences
+      </span>
 
-          <div class="cust-group">
-            <span class="cust-group-label">Sauce</span>
-            <div class="cust-opts">
-              <input class="opt-r" type="radio" name="ribeye-sauce" id="sauce-pep" checked><label class="opt-r-lbl" for="sauce-pep">Peppercorn</label>
-              <input class="opt-r" type="radio" name="ribeye-sauce" id="sauce-bea"><label class="opt-r-lbl" for="sauce-bea">Béarnaise</label>
-              <input class="opt-r" type="radio" name="ribeye-sauce" id="sauce-chim"><label class="opt-r-lbl" for="sauce-chim">Chimichurri</label>
-              <input class="opt-r" type="radio" name="ribeye-sauce" id="sauce-none"><label class="opt-r-lbl" for="sauce-none">No Sauce</label>
-            </div>
-          </div>
-
-          <div class="cust-group">
-            <span class="cust-group-label">Remove Ingredients</span>
-            <div class="cust-opts">
-              <input class="opt-c" type="checkbox" id="rm-watercress" checked><label class="opt-c-lbl" for="rm-watercress">No Watercress</label>
-              <input class="opt-c" type="checkbox" id="rm-marrow"><label class="opt-c-lbl" for="rm-marrow">No Bone Marrow</label>
-              <input class="opt-c" type="checkbox" id="rm-chips"><label class="opt-c-lbl" for="rm-chips">No Chips</label>
-            </div>
-          </div>
-
-          <div class="cust-group">
-            <span class="cust-group-label">Add-ons</span>
-            <div class="cust-opts">
-              <input class="opt-c" type="checkbox" id="add-egg"><label class="opt-c-lbl" for="add-egg">Fried Egg +$2.00</label>
-              <input class="opt-c" type="checkbox" id="add-shrimp"><label class="opt-c-lbl" for="add-shrimp">Grilled Shrimp +$6.00</label>
-              <input class="opt-c" type="checkbox" id="add-truffle"><label class="opt-c-lbl" for="add-truffle">Truffle Shavings +$8.00</label>
-            </div>
-          </div>
-
-          <div class="cust-group" style="margin-bottom:0">
-            <span class="cust-group-label">Special Instructions</span>
-            <textarea class="special-req field-base" placeholder="Allergies, preferences, or notes for the kitchen…">Please rest the steak for 3 minutes before serving.</textarea>
-          </div>
-
-        </div>
+      <div class="sec-title text-[24px]">
+        Customise Items
       </div>
 
-      <!-- Negroni customisation (collapsed) -->
-      <div class="cust-block">
-        <input class="cust-checkbox" type="checkbox" id="cust-negroni">
-        <label class="cust-header" for="cust-negroni">
-          <span class="cust-header-name">Classic Negroni</span>
-          <span class="cust-toggle-icon">▾</span>
-        </label>
-        <div class="cust-body">
+      <!-- ACCORDION -->
+      <details class="cust-block group" open>
+
+        <summary class="cust-header list-none flex items-center justify-between cursor-pointer">
+
+          <span class="cust-header-name">
+            28-Day Dry-Aged Ribeye
+          </span>
+
+          <span class="cust-toggle-icon transition-transform group-open:rotate-180">
+            ▾
+          </span>
+
+        </summary>
+
+        <div class="cust-body block">
+
           <div class="cust-group">
-            <span class="cust-group-label">Ice Preference</span>
-            <div class="cust-opts">
-              <input class="opt-r" type="radio" name="negroni-ice" id="ice-reg" checked><label class="opt-r-lbl" for="ice-reg">Regular</label>
-              <input class="opt-r" type="radio" name="negroni-ice" id="ice-extra"><label class="opt-r-lbl" for="ice-extra">Extra Ice</label>
-              <input class="opt-r" type="radio" name="negroni-ice" id="ice-none"><label class="opt-r-lbl" for="ice-none">No Ice</label>
+
+            <span class="cust-group-label">
+              Cooking Level
+            </span>
+
+            <div class="cust-opts flex flex-wrap gap-2">
+
+              <input class="opt-r" type="radio" name="ribeye-cook" id="cook-rare">
+
+              <label class="opt-r-lbl" for="cook-rare">
+                Rare
+              </label>
+
+              <input class="opt-r" type="radio" name="ribeye-cook" id="cook-medr" checked>
+
+              <label class="opt-r-lbl" for="cook-medr">
+                Medium Rare
+              </label>
+
+              <input class="opt-r" type="radio" name="ribeye-cook" id="cook-med">
+
+              <label class="opt-r-lbl" for="cook-med">
+                Medium
+              </label>
+
             </div>
-          </div>
-          <div class="cust-group" style="margin-bottom:0">
-            <span class="cust-group-label">Special Instructions</span>
-            <textarea class="special-req field-base" placeholder="Any preferences for your drink…"></textarea>
-          </div>
-        </div>
-      </div>
 
-      <!-- Burrata + Chips: no customisation options, collapsed -->
-      <div class="cust-block">
-        <input class="cust-checkbox" type="checkbox" id="cust-burrata">
-        <label class="cust-header" for="cust-burrata">
-          <span class="cust-header-name">Burrata &amp; Heritage Tomato</span>
-          <span class="cust-toggle-icon">▾</span>
-        </label>
-        <div class="cust-body">
-          <div class="cust-group" style="margin-bottom:0">
-            <span class="cust-group-label">Special Instructions</span>
-            <textarea class="special-req field-base" placeholder="Allergies, preferences, or notes for the kitchen…"></textarea>
           </div>
-        </div>
-      </div>
 
-      <div class="cust-block">
-        <input class="cust-checkbox" type="checkbox" id="cust-chips">
-        <label class="cust-header" for="cust-chips">
-          <span class="cust-header-name">Hand-Cut Chips</span>
-          <span class="cust-toggle-icon">▾</span>
-        </label>
-        <div class="cust-body">
           <div class="cust-group">
-            <span class="cust-group-label">Seasoning</span>
-            <div class="cust-opts">
-              <input class="opt-r" type="radio" name="chips-season" id="s-sea" checked><label class="opt-r-lbl" for="s-sea">Sea Salt</label>
-              <input class="opt-r" type="radio" name="chips-season" id="s-ros"><label class="opt-r-lbl" for="s-ros">Rosemary Salt</label>
-              <input class="opt-r" type="radio" name="chips-season" id="s-none"><label class="opt-r-lbl" for="s-none">Unseasoned</label>
-            </div>
+
+            <span class="cust-group-label">
+              Special Instructions
+            </span>
+
+            <textarea class="special-req field-base">
+Please rest the steak for 3 minutes before serving.
+            </textarea>
+
           </div>
-          <div class="cust-group" style="margin-bottom:0">
-            <span class="cust-group-label">Special Instructions</span>
-            <textarea class="special-req field-base" placeholder="Any preferences…"></textarea>
-          </div>
+
         </div>
-      </div>
 
-      <button class="btn-save">Save Preferences</button>
-    </div>
+      </details>
 
-    <!-- ── RATINGS — shown after order is placed ── -->
-    <div class="ratings-section">
-      <span class="sec-label">After Your Meal</span>
-      <div class="sec-title" style="font-size:24px">Rate Your Items</div>
-      <div class="panel" style="margin-bottom:16px">
+      <button class="btn-save">
+        Save Preferences
+      </button>
 
-        <div class="rating-row">
-          <span class="rating-name">28-Day Dry-Aged Ribeye</span>
-          <div class="stars">
-            <input class="star-r" type="radio" name="rate-ribeye" id="sr5-ribeye" value="5"><label class="star-lbl" for="sr5-ribeye">★</label>
-            <input class="star-r" type="radio" name="rate-ribeye" id="sr4-ribeye" value="4"><label class="star-lbl" for="sr4-ribeye">★</label>
-            <input class="star-r" type="radio" name="rate-ribeye" id="sr3-ribeye" value="3"><label class="star-lbl" for="sr3-ribeye">★</label>
-            <input class="star-r" type="radio" name="rate-ribeye" id="sr2-ribeye" value="2"><label class="star-lbl" for="sr2-ribeye">★</label>
-            <input class="star-r" type="radio" name="rate-ribeye" id="sr1-ribeye" value="1"><label class="star-lbl" for="sr1-ribeye">★</label>
-          </div>
-        </div>
-        <input class="review-box field-base" type="text" placeholder="Comment on 28-Day Dry-Aged Ribeye…" style="margin-bottom:12px">
+    </section>
 
-        <div class="rating-row">
-          <span class="rating-name">Burrata &amp; Heritage Tomato</span>
-          <div class="stars">
-            <input class="star-r" type="radio" name="rate-burrata" id="sr5-burrata" value="5"><label class="star-lbl" for="sr5-burrata">★</label>
-            <input class="star-r" type="radio" name="rate-burrata" id="sr4-burrata" value="4"><label class="star-lbl" for="sr4-burrata">★</label>
-            <input class="star-r" type="radio" name="rate-burrata" id="sr3-burrata" value="3"><label class="star-lbl" for="sr3-burrata">★</label>
-            <input class="star-r" type="radio" name="rate-burrata" id="sr2-burrata" value="2"><label class="star-lbl" for="sr2-burrata">★</label>
-            <input class="star-r" type="radio" name="rate-burrata" id="sr1-burrata" value="1"><label class="star-lbl" for="sr1-burrata">★</label>
-          </div>
-        </div>
-        <input class="review-box field-base" type="text" placeholder="Comment on Burrata &amp; Heritage Tomato…" style="margin-bottom:12px">
+  </div>
 
-        <div class="rating-row">
-          <span class="rating-name">Classic Negroni</span>
-          <div class="stars">
-            <input class="star-r" type="radio" name="rate-negroni" id="sr5-negroni" value="5"><label class="star-lbl" for="sr5-negroni">★</label>
-            <input class="star-r" type="radio" name="rate-negroni" id="sr4-negroni" value="4"><label class="star-lbl" for="sr4-negroni">★</label>
-            <input class="star-r" type="radio" name="rate-negroni" id="sr3-negroni" value="3"><label class="star-lbl" for="sr3-negroni">★</label>
-            <input class="star-r" type="radio" name="rate-negroni" id="sr2-negroni" value="2"><label class="star-lbl" for="sr2-negroni">★</label>
-            <input class="star-r" type="radio" name="rate-negroni" id="sr1-negroni" value="1"><label class="star-lbl" for="sr1-negroni">★</label>
-          </div>
-        </div>
-        <input class="review-box field-base" type="text" placeholder="Comment on Classic Negroni…" style="margin-bottom:12px">
+  <!-- RIGHT COLUMN -->
+  <aside class="summary-col flex flex-col gap-5">
 
-        <div class="rating-row">
-          <span class="rating-name">Hand-Cut Chips</span>
-          <div class="stars">
-            <input class="star-r" type="radio" name="rate-chips" id="sr5-chips" value="5"><label class="star-lbl" for="sr5-chips">★</label>
-            <input class="star-r" type="radio" name="rate-chips" id="sr4-chips" value="4"><label class="star-lbl" for="sr4-chips">★</label>
-            <input class="star-r" type="radio" name="rate-chips" id="sr3-chips" value="3"><label class="star-lbl" for="sr3-chips">★</label>
-            <input class="star-r" type="radio" name="rate-chips" id="sr2-chips" value="2"><label class="star-lbl" for="sr2-chips">★</label>
-            <input class="star-r" type="radio" name="rate-chips" id="sr1-chips" value="1"><label class="star-lbl" for="sr1-chips">★</label>
-          </div>
-        </div>
-        <input class="review-box field-base" type="text" placeholder="Comment on Hand-Cut Chips…">
-
-      </div>
-      <button class="btn-save">Submit Ratings</button>
-    </div>
-
-  </div><!-- end left-col -->
-
-  <!-- ══════════════════════════════════════
-       RIGHT COLUMN
-  ══════════════════════════════════════ -->
-  <div class="summary-col">
-
-    <!-- LOYALTY PANEL -->
+    <!-- LOYALTY -->
     <div class="panel">
-      <div class="loyalty-header">
-        <h3>Loyalty Points</h3>
+
+      <div class="loyalty-header flex items-center justify-between">
+
+        <h3>
+          Loyalty Points
+        </h3>
+
         <div class="pts-big">
-          <small>Balance</small>
-          <b>340 <span>pts</span></b>
+
+          <small>
+            Balance
+          </small>
+
+          <b>
+            340 <span>pts</span>
+          </b>
+
         </div>
+
       </div>
+
       <div class="loyalty-bar-wrap">
-        <!-- 340 / 500 = 68% -->
-        <div class="loyalty-bar-fill" style="width:68%"></div>
+        <div class="loyalty-bar-fill w-[68%]"></div>
       </div>
-      <p class="loyalty-hint"><b>160 pts</b> until your next free starter reward.</p>
-      <div class="redeem-row">
-        <p>Redeem 100 pts → <b style="color:var(--accent)">$5 off</b></p>
-        <input class="redeem-toggle" type="checkbox" id="redeem-toggle">
-        <label class="redeem-lbl" for="redeem-toggle">Redeem</label>
+
+      <p class="loyalty-hint">
+        <b>160 pts</b> until your next free starter reward.
+      </p>
+
+      <div class="redeem-row flex items-center justify-between">
+
+        <p>
+          Redeem 100 pts → <b style="color:var(--accent)">$5 off</b>
+        </p>
+
+        <div>
+
+          <input class="redeem-toggle" type="checkbox" id="redeem-toggle">
+
+          <label class="redeem-lbl" for="redeem-toggle">
+            Redeem
+          </label>
+
+        </div>
+
       </div>
+
     </div>
 
-    <!-- BILL SUMMARY -->
+    <!-- BILL -->
     <div class="panel">
-      <span class="sec-label">Bill</span>
 
-      <div class="bill-row"><span>28-Day Dry-Aged Ribeye</span><b>$48.00</b></div>
-      <div class="bill-row"><span>Burrata &amp; Heritage Tomato</span><b>$14.00</b></div>
-      <div class="bill-row"><span>2× Classic Negroni</span><b>$28.00</b></div>
-      <div class="bill-row"><span>Hand-Cut Chips</span><b>$6.00</b></div>
+      <span class="sec-label">
+        Bill
+      </span>
 
-      <!-- Loyalty discount row — shown when redeem is active -->
-      <div class="discount-row" style="display:none" id="discount-row">
-        <span>⭐ Loyalty Discount</span>
-        <b>− $5.00</b>
+      <div class="bill-row">
+        <span>28-Day Dry-Aged Ribeye</span>
+        <b>$48.00</b>
+      </div>
+
+      <div class="bill-row">
+        <span>Burrata &amp; Heritage Tomato</span>
+        <b>$14.00</b>
+      </div>
+
+      <div class="bill-row">
+        <span>2× Classic Negroni</span>
+        <b>$28.00</b>
+      </div>
+
+      <div class="bill-row">
+        <span>Hand-Cut Chips</span>
+        <b>$6.00</b>
       </div>
 
       <div class="bill-total">
         <span>Total</span>
         <b>$96.00</b>
       </div>
-      <p class="earn-note">This order earns <b>192</b> loyalty points.</p>
+
+      <p class="earn-note">
+        This order earns <b>192</b> loyalty points.
+      </p>
+
     </div>
 
     <!-- PAYMENT -->
-    <div class="pay-panel">
-      <h3>Payment Method</h3>
-      <div class="pay-opts">
+    <div class="pay-panel relative overflow-hidden">
+
+      <h3>
+        Payment Method
+      </h3>
+
+      <div class="pay-opts flex flex-col gap-3">
+
         <input class="pay-r" type="radio" name="pay" id="pay-card" checked>
-        <label class="pay-lbl" for="pay-card">
-          <div class="pay-icon">💳</div>
-          <div>
-            <span class="pay-name">Card Payment</span>
-            <span class="pay-desc">Visa · Mastercard · Amex</span>
+
+        <label class="pay-lbl flex items-center gap-4" for="pay-card">
+
+          <div class="pay-icon">
+            💳
           </div>
+
+          <div>
+
+            <span class="pay-name">
+              Card Payment
+            </span>
+
+            <span class="pay-desc">
+              Visa · Mastercard · Amex
+            </span>
+
+          </div>
+
         </label>
+
         <input class="pay-r" type="radio" name="pay" id="pay-cash">
-        <label class="pay-lbl" for="pay-cash">
-          <div class="pay-icon">💵</div>
-          <div>
-            <span class="pay-name">Cash on Collection</span>
-            <span class="pay-desc">Pay your server when ready</span>
+
+        <label class="pay-lbl flex items-center gap-4" for="pay-cash">
+
+          <div class="pay-icon">
+            💵
           </div>
+
+          <div>
+
+            <span class="pay-name">
+              Cash on Collection
+            </span>
+
+            <span class="pay-desc">
+              Pay your server when ready
+            </span>
+
+          </div>
+
         </label>
+
       </div>
 
-      <!-- Card fields: CSS-only, visible when #pay-card is checked -->
       <div class="card-fields">
-        <input class="card-input" type="text" placeholder="Cardholder Name" maxlength="26" autocomplete="cc-name"/>
-        <input class="card-input" type="text" placeholder="•••• •••• •••• ••••" maxlength="19" autocomplete="cc-number"/>
+
+        <input class="card-input" type="text" placeholder="Cardholder Name"/>
+
+        <input class="card-input" type="text" placeholder="•••• •••• •••• ••••"/>
+
         <div class="card-row">
-          <input class="card-input" type="text" placeholder="MM / YY" maxlength="7" autocomplete="cc-exp"/>
-          <input class="card-input" type="text" placeholder="CVV" maxlength="4" autocomplete="cc-csc"/>
+
+          <input class="card-input" type="text" placeholder="MM / YY"/>
+
+          <input class="card-input" type="text" placeholder="CVV"/>
+
         </div>
+
       </div>
 
-      <button class="btn-place">Place Order →</button>
+      <button class="btn-place">
+        Place Order →
+      </button>
+
     </div>
 
-    <!-- ORDER TIMER — shown after order is placed -->
-    <div class="timer-panel">
-      <span class="timer-eyebrow">Order #TE-2407 · Preparing</span>
+    <!-- TIMER -->
+    <div class="timer-panel relative overflow-hidden">
+
+      <span class="timer-eyebrow">
+        Order #TE-2407 · Preparing
+      </span>
+
       <div class="timer-clock">
         <span>08</span>:<span>34</span>
       </div>
-      <p class="timer-sub">Estimated preparation time remaining</p>
+
+      <p class="timer-sub">
+        Estimated preparation time remaining
+      </p>
+
       <div class="timer-progress">
-        <!-- 28% elapsed: (12:00 - 8:34) / 12:00 ≈ 28% -->
-        <div class="timer-bar" style="width:28%"></div>
+        <div class="timer-bar w-[28%]"></div>
       </div>
+
       <div class="timer-stages">
-        <span class="t-stage done">Received</span>
-        <span class="t-stage now">Preparing</span>
-        <span class="t-stage">Ready</span>
-        <span class="t-stage">Served</span>
+
+        <span class="t-stage done">
+          Received
+        </span>
+
+        <span class="t-stage now">
+          Preparing
+        </span>
+
+        <span class="t-stage">
+          Ready
+        </span>
+
+        <span class="t-stage">
+          Served
+        </span>
+
       </div>
+
     </div>
 
-  </div><!-- end summary-col -->
+  </aside>
 
-</div><!-- end page -->
+</div>
 
 </body>
 </html>

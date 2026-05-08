@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Timely Eats — Menu Manager</title>
+
+  <link rel="stylesheet" href="../static/css/Add_menu.css">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+</head>
+<style>/* ───────────────── TABLES GRID ───────────────── */
+/* ───────────────── TABLES GRID ───────────────── */
+.tables-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 18px;
+}
+
+/* TABLE CARD BASE */
+.table-card {
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  padding: 18px;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  animation: fadeUp 0.4s ease backwards;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 140px;
+}
+
+/* HOVER = lift + highlight */
+.table-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 22px rgba(0,0,0,0.06);
+  border-color: var(--accent);
+}
+
+/* CLICKED / ACTIVE TABLE */
+.table-card.active {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(200,147,58,0.25);
+  transform: translateY(-2px);
+}
+
+/* TABLE LABEL */
+.table-card .label {
+  font-size: 10px;
+  margin-bottom: 6px;
+}
+
+/* STATUS ICON */
+.table-status-icon {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+/* INFO */
+.table-info {
+  margin: 10px 0;
+}
+
+.table-info strong {
+  font-family: 'Bebas Neue';
+  font-size: 22px;
+  line-height: 1;
+}
+
+.table-info span {
+  font-size: 11px;
+  color: var(--mist);
+}
+
+/* FOOTER */
+.table-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid var(--rule);
+  padding-top: 10px;
+  margin-top: auto;
+}
+
+.table-footer small {
+  font-family: 'DM Mono';
+  font-size: 9px;
+  color: var(--mist);
+}
+
+.table-footer strong {
+  font-family: 'DM Mono';
+  font-size: 11px;
+}
+
+/* ───────── STATUS STATES (IMPROVED) ───────── */
+
+/* OCCUPIED */
+.table-card.occupied {
+  border-left: 4px solid var(--accent);
+}
+.table-card.occupied .table-status-icon {
+  color: var(--accent);
+}
+
+/* AVAILABLE */
+.table-card.available {
+  border-left: 4px solid #9bbf9b;
+}
+.table-card.available .table-status-icon {
+  color: #9bbf9b;
+}
+
+/* ATTENTION */
+.table-card.attention {
+  border-left: 4px solid #d96e4c;
+  background: #fffbf9;
+}
+.table-card.attention .table-status-icon {
+  color: #d96e4c;
+  font-weight: bold;
+}
+
+/* subtle pulse for attention tables */
+.table-card.attention::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgba(217,110,76,0.2);
+  animation: softPulse 2s infinite;
+  pointer-events: none;
+}
+</style>
+<body>
+
+ <aside class="sidebar">
+  <div class="sidebar-logo">
+    <b>Timely<span>Eats</span></b>
+    <small>Employee Panel</small>
+  </div>
+  <div class="sidebar-section">Menu</div>
+ <aside class="sidebar">
+
+        <div class="sidebar-section">Management</div>
+        <nav class="sidebar-nav">
+            <a href="EmpOrder.html" ><i class="ico">⬢</i> Live Orders</a>
+            <a href="EmpQR.html"><i class="ico">▤</i>QR GENERATOR</a>
+            <a href="Emp_table.html" class = "Active"><i class="ico">◈</i>Tables</a>
+            <a href="#"><i class="ico">⚙</i> Settings</a>
+        </nav>
+
+        <div class="sidebar-user">
+            <small>Active Staff</small>
+            <span>Alex Thompson</span>
+        </div>
+    </aside>
+
+
+<main class="main">
+  <header class="topbar">
+    <h1>Table Management</h1>
+    <div class="analytics-date-group">
+      <span class="analytics-date-label">Status:</span>
+      <span class="analytics-date">Live Floor</span>
+    </div>
+  </header>
+
+  <section class="content">
+    <div class="tables-area">
+      <div class="stats">
+        <div class="stat">
+          <dt>Total Tables</dt>
+          <dd>24</dd>
+        </div>
+        <div class="stat">
+          <dt>Occupied</dt>
+          <dd>18 <span>(75%)</span></dd>
+        </div>
+        <div class="stat">
+          <dt>Open</dt>
+          <dd>06</dd>
+        </div>
+        <div class="stat">
+          <dt>Average Turn</dt>
+          <dd>42 <span>min</span></dd>
+        </div>
+      </div>
+
+      <div class="tables-grid">
+        <div class="table-card occupied">
+          <span class="label">Table 01</span>
+          <div class="table-status-icon">●</div>
+          <div class="table-info">
+            <strong>4 Guests</strong>
+            <span>Order: Entrées Served</span>
+          </div>
+          <div class="table-footer">
+            <small>Active 45m</small>
+            <strong>$142.50</strong>
+          </div>
+        </div>
+
+        <div class="table-card available">
+          <span class="label">Table 02</span>
+          <div class="table-status-icon">○</div>
+          <div class="table-info">
+            <strong>Ready</strong>
+            <span>Cleaned & Set</span>
+          </div>
+          <div class="table-footer">
+            <small>Idle 12m</small>
+          </div>
+        </div>
+
+        <div class="table-card attention">
+          <span class="label">Table 03</span>
+          <div class="table-status-icon">!</div>
+          <div class="table-info">
+            <strong>2 Guests</strong>
+            <span>Bill Requested</span>
+          </div>
+          <div class="table-footer">
+            <small>Active 1h 10m</small>
+            <strong>$64.00</strong>
+          </div>
+        </div>
+        
+        </div>
+    </div>
+
+    <aside class="side-panel">
+      <span class="label">Waitlist</span>
+      <div class="insight">
+        <small>Party of 4</small>
+        <strong>Thompson</strong>
+      </div>
+      <div class="insight">
+        <small>Party of 2</small>
+        <strong>Miller (VIP)</strong>
+      </div>
+      <hr style="border: 0; border-top: 1px solid var(--rule); margin: 20px 0;">
+      <span class="label">Quick Actions</span>
+      <button class="date-select-btn" style="width: 100%; margin-bottom: 10px;">Reserve Table</button>
+      <button class="date-select-btn" style="width: 100%;">Floor Shift Log</button>
+    </aside>
+  </section>
+</main>

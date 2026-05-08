@@ -96,7 +96,7 @@ body {
   position: relative;
   z-index: 1;
   font-family: 'DM Mono', monospace;
-  font-size: 9px;
+  font-size: 14px;
   letter-spacing: .22em;
   text-transform: uppercase;
   color: var(--ash);
@@ -161,9 +161,11 @@ body {
 /* CATEGORY NAV */
 
 .cat-nav {
+  font-weight: bold; 
   background: var(--paper);
   border-bottom: 1px solid var(--rule);
   position: sticky;
+  
   top: 64px;
   z-index: 90;
 }
@@ -180,10 +182,10 @@ body {
 .cat-nav a {
   display: block;
   font-family: 'DM Mono', monospace;
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: .26em;
   text-transform: uppercase;
-  color: var(--mist);
+  color: var(--ink);
   text-decoration: none;
   padding: 16px 22px;
   border-bottom: 2px solid transparent;
