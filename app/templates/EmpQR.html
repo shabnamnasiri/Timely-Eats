@@ -4,144 +4,192 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QR Terminal | System</title>
-        <link rel="stylesheet" href="../static/css/Add_menu.css">
-
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Add_menu.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
+
 <body>
 
-    <aside class="sidebar">
-        <div class="sidebar-logo">
-            <b>ORDER<span>FLOW</span></b>
-            <small>Internal Terminal v2.0</small>
+<aside class="sidebar">
+    <div class="sidebar-logo">
+        <b>ORDER<span>FLOW</span></b>
+        <small>Internal Terminal v2.0</small>
+    </div>
+
+    <div class="sidebar-section">Navigation</div>
+    <nav class="sidebar-nav">
+        <a href="/staff/orders"><i class="ico">⬢</i> Live Orders</a>
+        <a href="/staff/qr" class="active"><i class="ico">▣</i> QR Generator</a>
+        <a href="/logout" class="cart">Logout</a>
+
+    </nav>
+
+    <div class="sidebar-user">
+        <small>Active Staff</small>
+        <span>Alex Thompson</span>
+    </div>
+</aside>
+
+<main class="main">
+    <header class="topbar">
+        <h1>QR Code Management</h1>
+        <div class="topbar-right">
+            <span class="badge badge-items">Printer: Ready</span>
+            <span class="badge badge-items" id="activeCount">Active Links: 0</span>
         </div>
-        
-        <div class="sidebar-section">Navigation</div>
-        <nav class="sidebar-nav">
-            <a href="EmpOrder.html"><i class="ico">⬢</i> Live Orders</a>
-            <a href="" class="active"><i class="ico">▣</i> QR Generator</a>
-            <a href="Emp_table.html"><i class="ico">◈</i>Tables</a>
-            <a href="#"><i class="ico">⚙</i> Settings</a>
-        </nav>
+    </header>
 
-        <div class="sidebar-user">
-            <small>Active Staff</small>
-            <span>Alex Thompson</span>
+    <div class="content">
+
+        <div class="list-panel">
+            <span class="label">Active QR Registry</span>
+
+            <div class="item-list" id="sessionList"></div>
         </div>
-    </aside>
 
-    <main class="main">
-        <header class="topbar">
-            <h1>QR Code Management</h1>
-            <div class="topbar-right">
-                <span class="badge badge-items">Printer: Ready</span>
-                <span class="badge badge-items">Active Links: 24</span>
-            </div>
-        </header>
+        <aside class="form-panel">
+            <h2>Generate New Code</h2>
+            <p>Create QR codes for tables</p>
 
-        <div class="content">
-            <div class="list-panel">
-                <span class="label">Active QR Registry</span>
-                
-                <div class="list-controls">
-                    <div class="filter-tabs">
-                        <div class="filter-tab on">All Codes</div>
-                        <div class="filter-tab">Table QR</div>
-                        <div class="filter-tab">Promo QR</div>
-                        <div class="filter-tab">Staff ID</div>
+            <div class="form-divider"></div>
+
+            
+            <form onsubmit="generateQR(event)">
+                <div class="field">
+                    <label>Select Table</label>
+                    <div class="select-wrap">
+                        <select id="tableNumber"></select>
                     </div>
                 </div>
 
-                <div class="item-list">
-                    <div class="item-row" style="--i: 1">
-                        <div class="item-cat mains">TABLE 01</div>
-                        <div class="item-info">
-                            <b>Permanent Table Link</b>
-                            <span>Last Generated: Oct 12 • Scans Today: 14</span>
-                        </div>
-                        <div class="item-price">v1.2</div>
-                        <div class="item-actions">
-                            <button class="btn-icon">Print</button>
-                            <button class="btn-icon">Regen</button>
-                        </div>
-                    </div>
+                <button type="submit" class="btn-submit">Generate QR</button>
+            </form>
+        </aside>
 
-                    <div class="item-row" style="--i: 2">
-                        <div class="item-cat starters">TABLE 02</div>
-                        <div class="item-info">
-                            <b>Permanent Table Link</b>
-                            <span>Last Generated: Oct 12 • Scans Today: 08</span>
-                        </div>
-                        <div class="item-price">v1.2</div>
-                        <div class="item-actions">
-                            <button class="btn-icon">Print</button>
-                            <button class="btn-icon">Regen</button>
-                        </div>
-                    </div>
+    </div>
+</main>
 
-                    <div class="item-row" style="--i: 3">
-                        <div class="item-cat drinks">WIFI-GUEST</div>
-                        <div class="item-info">
-                            <b>Guest Network Access</b>
-                            <span>Auto-expires in 48h</span>
-                        </div>
-                        <div class="item-price">SEC</div>
-                        <div class="item-actions">
-                            <button class="btn-icon">Print</button>
-                            <button class="btn-icon del">Revoke</button>
-                        </div>
-                    </div>
+<script>
+
+const ALL_TABLES = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]; // adjust if needed
+
+function generateQR(event) {
+    event.preventDefault();
+
+    const tableNumber = document.getElementById("tableNumber").value;
+
+    if (!tableNumber) {
+        alert("Select a table");
+        return;
+    }
+
+    fetch(`/staff/start-session/${tableNumber}`, { method: "POST" })
+    .then(res => res.json())
+    .then(data => {
+
+        if (data.message && data.message.includes("active")) {
+            alert(data.message);
+            return;
+        }
+
+        window.location.href = `/staff/print/${data.session_id}`;
+
+        loadSessions();
+    });
+}
+
+function loadSessions() {
+
+    fetch('/staff/sessions')
+    .then(res => res.json())
+    .then(data => {
+
+        // ✅ SORT AFTER DATA ARRIVES
+        data.sort((a, b) => {
+            if (a.status === "active") return -1;
+            if (b.status === "active") return 1;
+            return 0;
+        });
+
+        const container = document.getElementById("sessionList");
+        container.innerHTML = "";
+
+        document.getElementById("activeCount").innerText =
+            "Active Links: " + data.length;
+
+        data.forEach((s, i) => {
+
+            const row = document.createElement("div");
+            row.className = "item-row";
+            row.style.setProperty("--i", i + 1);
+
+            row.innerHTML = `
+                <div class="item-cat mains">TABLE ${s.table_number}</div>
+
+                <div class="item-info">
+                    <b>Session #${s.session_id}</b>
+                    <span>${formatTime(s.created_at)}</span>
                 </div>
-            </div>
 
-            <aside class="form-panel">
-                <h2>Generate New Code</h2>
-                <p>Create high-resolution QR codes for tables, marketing, or temporary guest access.</p>
-                <div class="form-divider"></div>
+                <div class="item-price">${s.status}</div>
 
-                <div style="background: var(--cream); border: 1px dashed var(--rule); padding: 40px; text-align: center; margin-bottom: 24px;">
-                    <div style="width: 140px; height: 140px; background: white; margin: 0 auto; display: flex; align-items: center; justify-content: center; border: 1px solid var(--rule);">
-                        <span style="font-family: 'DM Mono'; font-size: 8px; color: var(--ash); letter-spacing: 0.1em;">[QR PREVIEW]</span>
-                    </div>
+                <div class="item-actions">
+                    <button class="btn-icon" onclick="printQR(${s.session_id})">Print</button>
+                    <button class="btn-icon del" onclick="closeSession(${s.session_id})">Close</button>
                 </div>
+            `;
 
-                <form>
-                    <div class="field">
-                        <label>Target Assignment</label>
-                        <div class="select-wrap">
-                            <select>
-                                <option>Select Table...</option>
-                                <option>Table 03 (Available)</option>
-                                <option>Table 04 (Available)</option>
-                                <option>Promotional Menu</option>
-                                <option>Staff login Access</option>
-                            </select>
-                        </div>
-                    </div>
+            container.appendChild(row);
+        });
 
-                    <div class="field">
-                        <label>Destination URL/Data</label>
-                        <input type="text" placeholder="https://menu.system.com/t03">
-                    </div>
+        // ✅ THIS WILL NOW WORK
+        updateDropdown(data);
+    })
+    .catch(err => {
+        console.error("LOAD ERROR:", err);
+    });
+}
 
-                    <label class="label">Output Format</label>
-                    <div class="tags-group">
-                        <input type="checkbox" id="fmt1" class="tag-toggle" checked>
-                        <label for="fmt1">Standard</label>
-                        
-                        <input type="checkbox" id="fmt2" class="tag-toggle">
-                        <label for="fmt2">Vector (SVG)</label>
-                        
-                        <input type="checkbox" id="fmt3" class="tag-toggle">
-                        <label for="fmt3">Large Label</label>
-                    </div>
+function updateDropdown(sessions) {
+    const select = document.getElementById("tableNumber");
 
-                    <button type="submit" class="btn-submit">Generate & Save</button>
-                    <button type="button" class="btn-submit" style="background: var(--ink); color: white; margin-top: 10px;">Quick Print All</button>
-                </form>
-            </aside>
-        </div>
-    </main>
+    select.innerHTML = `<option value="">Select Table...</option>`;
+
+    ALL_TABLES.forEach(table => {
+
+        const active = sessions.some(s => s.table_number == table && s.status == "active");
+
+        if (active) {
+            select.innerHTML +=
+                `<option disabled>Table ${table} (In Use)</option>`;
+        } else {
+            select.innerHTML +=
+                `<option value="${table}">Table ${table}</option>`;
+        }
+    });
+}
+
+function closeSession(id) {
+    fetch(`/staff/close-session/${id}`, { method: "POST" })
+    .then(() => loadSessions());
+}
+
+function printQR(id) {
+    window.open(`/staff/print/${id}`);
+}
+
+function formatTime(dateStr) {
+    const d = new Date(dateStr);
+    return d.toLocaleString();
+}
+
+// 🔄 AUTO REFRESH EVERY 5s
+setInterval(loadSessions, 5000);
+
+// FIRST LOAD
+window.onload = loadSessions;
+
+</script>
 
 </body>
 </html>

@@ -1,0 +1,15 @@
+{% macro render_toast_script() %}
+<script>
+  window.addEventListener("load", function () {
+    const toasts = document.querySelectorAll(".popup-toast");
+    toasts.forEach((toast) => {
+      setTimeout(() => {
+        toast.style.opacity = "0";
+        toast.style.transform = "translateY(-10px)";
+        toast.style.transition = "all 0.4s ease";
+        setTimeout(() => { toast.remove(); }, 400);
+      }, 3000);
+    });
+  });
+</script>
+{% endmacro %}

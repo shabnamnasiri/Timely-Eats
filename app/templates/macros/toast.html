@@ -1,0 +1,20 @@
+{% macro render_toast() %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="popup-toast">
+        <span class="toast-icon">
+          {% if category == 'success' %}✅
+          {% elif category == 'warning' %}⚠️
+          {% else %}❌
+          {% endif %}
+        </span>
+        <div>
+          <div class="toast-title">{{ category | capitalize }}</div>
+          <div class="toast-msg">{{ message }}</div>
+        </div>
+      </div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+{% endmacro %}

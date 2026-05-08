@@ -1,30 +1,37 @@
+{% from 'macros/toast.html' import render_toast %}
+{% from 'macros/toast_script.html' import render_toast_script %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Timely Eats — Menu · Table 07</title>
-  <link rel="stylesheet" href="../static/css/Menu.css"/>
+  <title>Timely Eats — Menu · Table {{ table_number or '?' }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/Menu.css') }}"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/toast.css') }}"/>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant:ital,wght@0,400;0,600;1,300;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <script>
+    const SESSION_ID = "{{ session_id }}";
+  </script>
 </head>
 <body>
-
+    {{ render_toast() }}  
 <header class="topbar">
   <div class="logo"><b>Timely<span>Eats</span></b><small>Restaurant</small></div>
-
-  <a href="Cart.html" class="cart"> Cart</a>
+  <div class="table-badge"><span>Table</span><strong>{{ table_number or '?' }}</strong></div>
+  <a href="/Customer/Cart?session_id={{ session_id }}" class="cart">⊡ Cart</a>
+  <a href="/logout" class="cart">Logout</a>
 </header>
 
 <section class="hero">
   <div class="hero-inner">
-    <div class="table-badge"><span>Table</span><strong>07</strong></div>
+    <small>Dine-in Menu · Table {{ table_number or '?' }}</small>
     <h1>Today's<span>Menu</span></h1>
     <p>Locally sourced. Freshly prepared. Served with care.</p>
   </div>
 </section>
 
 <nav class="cat-nav">
- <b> <ul>
+  <ul>
     <li><a href="#starters">Starters</a></li>
     <li><a href="#mains">Mains</a></li>
     <li><a href="#sides">Sides</a></li>
@@ -35,89 +42,168 @@
 
 <main class="content">
 
+  <!-- STARTERS -->
+  {% set starters = items | selectattr('5', 'equalto', 'starters') | list %}
   <section class="menu-section" id="starters">
     <div class="section-header">
       <h2>Starters</h2>
-      <span id="starters-count">0 dishes</span>
+      <span id="starters-count">{{ starters | length }} dishes</span>
     </div>
     <div class="grid" id="starters-grid">
-      <!-- Cards injected by backend -->
+      {% for item in starters %}
+      <div class="card" style="--i:{{ loop.index0 }}">
+        <img src="/item_photo/{{ item[0] }}" class="card-photo" alt="{{ item[1] }}" onerror="this.style.display='none'">
+        <div class="card-row">
+          <h3>{{ item[1] }}</h3>
+          <span class="price">${{ item[4] }}</span>
+        </div>
+        <p>{{ item[2] }}</p>
+        <footer>
+          <div class="tags">
+            <span class="tag">⏱ {{ item[3] or '—' }} min</span>
+          </div>
+        </footer>
+        <form action="{{ url_for('add_to_cart') }}" method="post">
+          <input type="hidden" name="item_id" value="{{ item[0] }}">
+          <input type="hidden" name="item_name" value="{{ item[1] }}">
+          <input type="hidden" name="item_price" value="{{ item[4] }}">
+          <input type="hidden" name="session_id" value="{{ session_id }}">
+          <button type="submit" class="order-btn">Add to Order</button>
+        </form>
+      </div>
+      {% else %}
+      <p class="empty-cat">No starters available today.</p>
+      {% endfor %}
     </div>
   </section>
 
+  <!-- MAINS -->
+  {% set mains = items | selectattr('5', 'equalto', 'mains') | list %}
   <section class="menu-section" id="mains">
     <div class="section-header">
       <h2>Mains</h2>
-      <span id="mains-count">0 dishes</span>
+      <span id="mains-count">{{ mains | length }} dishes</span>
     </div>
     <div class="grid" id="mains-grid">
-      <!-- Cards injected by backend -->
+      {% for item in mains %}
+      <div class="card" style="--i:{{ loop.index0 }}">
+        <img src="/item_photo/{{ item[0] }}" class="card-photo" alt="{{ item[1] }}" onerror="this.style.display='none'">
+        <div class="card-row">
+          <h3>{{ item[1] }}</h3>
+          <span class="price">${{ item[4] }}</span>
+        </div>
+        <p>{{ item[2] }}</p>
+        <footer>
+          <div class="tags">
+            <span class="tag">⏱ {{ item[3] or '—' }} min</span>
+          </div>
+        </footer>
+        <form action="{{ url_for('add_to_cart') }}" method="post">
+          <input type="hidden" name="item_id" value="{{ item[0] }}">
+          <input type="hidden" name="item_name" value="{{ item[1] }}">
+          <input type="hidden" name="item_price" value="{{ item[4] }}">
+          <input type="hidden" name="session_id" value="{{ session_id }}">
+          <button type="submit" class="order-btn">Add to Order</button>
+        </form>
+      </div>
+      {% else %}
+      <p class="empty-cat">No mains available today.</p>
+      {% endfor %}
     </div>
   </section>
 
+  <!-- SIDES -->
+  {% set sides = items | selectattr('5', 'equalto', 'sides') | list %}
   <section class="menu-section" id="sides">
     <div class="section-header">
       <h2>Sides</h2>
-      <span id="sides-count">0 items</span>
+      <span id="sides-count">{{ sides | length }} items</span>
     </div>
     <div class="grid" id="sides-grid">
-      <!-- Cards injected by backend -->
+      {% for item in sides %}
+      <div class="card" style="--i:{{ loop.index0 }}">
+        <img src="/item_photo/{{ item[0] }}" class="card-photo" alt="{{ item[1] }}" onerror="this.style.display='none'">
+        <div class="card-row">
+          <h3>{{ item[1] }}</h3>
+          <span class="price">${{ item[4] }}</span>
+        </div>
+        <p>{{ item[2] }}</p>
+        <form action="{{ url_for('add_to_cart') }}" method="post">
+          <input type="hidden" name="item_id" value="{{ item[0] }}">
+          <input type="hidden" name="item_name" value="{{ item[1] }}">
+          <input type="hidden" name="item_price" value="{{ item[4] }}">
+          <input type="hidden" name="session_id" value="{{ session_id }}">
+          <button type="submit" class="order-btn">Add to Order</button>
+        </form>
+      </div>
+      {% else %}
+      <p class="empty-cat">No sides available today.</p>
+      {% endfor %}
     </div>
   </section>
 
+  <!-- DESSERTS -->
+  {% set desserts = items | selectattr('5', 'equalto', 'desserts') | list %}
   <section class="menu-section" id="desserts">
     <div class="section-header">
       <h2>Desserts</h2>
-      <span id="desserts-count">0 dishes</span>
+      <span id="desserts-count">{{ desserts | length }} dishes</span>
     </div>
     <div class="grid" id="desserts-grid">
-      <!-- Cards injected by backend -->
+      {% for item in desserts %}
+      <div class="card" style="--i:{{ loop.index0 }}">
+        <img src="/item_photo/{{ item[0] }}" class="card-photo" alt="{{ item[1] }}" onerror="this.style.display='none'">
+        <div class="card-row">
+          <h3>{{ item[1] }}</h3>
+          <span class="price">${{ item[4] }}</span>
+        </div>
+        <p>{{ item[2] }}</p>
+        <form action="{{ url_for('add_to_cart') }}" method="post">
+          <input type="hidden" name="item_id" value="{{ item[0] }}">
+          <input type="hidden" name="item_name" value="{{ item[1] }}">
+          <input type="hidden" name="item_price" value="{{ item[4] }}">
+          <input type="hidden" name="session_id" value="{{ session_id }}">
+          <button type="submit" class="order-btn">Add to Order</button>
+        </form>
+      </div>
+      {% else %}
+      <p class="empty-cat">No desserts available today.</p>
+      {% endfor %}
     </div>
   </section>
 
+  <!-- DRINKS -->
+  {% set drinks = items | selectattr('5', 'equalto', 'drinks') | list %}
   <section class="menu-section" id="drinks">
     <div class="section-header">
       <h2>Drinks</h2>
-      <span id="drinks-count">0 items</span>
+      <span id="drinks-count">{{ drinks | length }} items</span>
     </div>
     <div class="grid" id="drinks-grid">
-      <!-- Cards injected by backend -->
+      {% for item in drinks %}
+      <div class="card" style="--i:{{ loop.index0 }}">
+        <img src="/item_photo/{{ item[0] }}" class="card-photo" alt="{{ item[1] }}" onerror="this.style.display='none'">
+        <div class="card-row">
+          <h3>{{ item[1] }}</h3>
+          <span class="price">${{ item[4] }}</span>
+        </div>
+        <p>{{ item[2] }}</p>
+        <form action="{{ url_for('add_to_cart') }}" method="post">
+          <input type="hidden" name="item_id" value="{{ item[0] }}">
+          <input type="hidden" name="item_name" value="{{ item[1] }}">
+          <input type="hidden" name="item_price" value="{{ item[4] }}">
+          <input type="hidden" name="session_id" value="{{ session_id }}">
+          <button type="submit" class="order-btn">Add to Order</button>
+        </form>
+      </div>
+      {% else %}
+      <p class="empty-cat">No drinks available today.</p>
+      {% endfor %}
     </div>
   </section>
 
 </main>
 
-
-<!--
-═══════════════════════════════════════════════════════
-  CARD TEMPLATE — copy & populate for each menu item
-  ───────────────────────────────────────────────────
-  • style="--i:N"  → 0-based index, drives stagger animation
-  • <footer> block → optional; omit for sides / drinks
-  • Tags           → add only applicable: .tag.v / .tag.gf / .tag.s
-  • id attributes  → must be unique per checkbox + label pair
-═══════════════════════════════════════════════════════
-
-<div class="card" style="--i:0">
-  <div class="card-row">
-    <h3>Dish Name</h3>
-    <span class="price">$00</span>
-  </div>
-  <p>Dish description text goes here.</p>
-  <footer>
-    <div class="tags">
-      <span class="tag v">V</span>
-      <span class="tag gf">GF</span>
-      <span class="tag s">Spicy</span>
-    </div>
-    <span class="kcal">000 kcal</span>
-  </footer>
-  <input class="order-toggle" type="checkbox" id="UNIQUE_ID">
-  <label class="order-btn" for="UNIQUE_ID">Add to Order</label>
-</div>
-
-═══════════════════════════════════════════════════════
--->
-
+{{ render_toast_script() }}  
 </body>
 </html>

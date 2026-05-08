@@ -7,7 +7,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500;600&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../static/css/Add_menu.css">
     <style>
-        /* Customer-specific layout override */
         .customer-container {
             max-width: 600px;
             margin: 40px auto;
@@ -42,6 +41,24 @@
             border: 1px solid var(--rule);
             margin-bottom: 32px;
         }
+        .success-msg {
+            display: none;
+            background: #e6f4ea;
+            color: #2d6a4f;
+            padding: 12px 16px;
+            border: 1px solid #95d5b2;
+            margin-bottom: 16px;
+            font-family: 'DM Sans';
+        }
+        .error-msg {
+            display: none;
+            background: #fde8e8;
+            color: #c0392b;
+            padding: 12px 16px;
+            border: 1px solid #f5c6c6;
+            margin-bottom: 16px;
+            font-family: 'DM Sans';
+        }
     </style>
 </head>
 <body style="display: block; background: var(--paper);">
@@ -65,22 +82,29 @@
                 </div>
             </div>
 
-            <form>
+            <!-- success/error messages -->
+            <div class="success-msg" id="successMsg">✓ Review submitted successfully!</div>
+            <div class="error-msg" id="errorMsg"></div>
+
+            <form id="reviewForm">
+                <!-- hidden item_id — change value to match the item being reviewed -->
+                <input type="hidden" name="item_id" value="1">
+
                 <label class="label">Overall Rating</label>
                 <div class="rating-stars">
-                    <input type="radio" name="rate" id="r1" class="star-radio">
+                    <input type="radio" name="rating" id="r1" value="1" class="star-radio">
                     <label for="r1" class="star-label">1</label>
-                    
-                    <input type="radio" name="rate" id="r2" class="star-radio">
+
+                    <input type="radio" name="rating" id="r2" value="2" class="star-radio">
                     <label for="r2" class="star-label">2</label>
-                    
-                    <input type="radio" name="rate" id="r3" class="star-radio">
+
+                    <input type="radio" name="rating" id="r3" value="3" class="star-radio">
                     <label for="r3" class="star-label">3</label>
-                    
-                    <input type="radio" name="rate" id="r4" class="star-radio">
+
+                    <input type="radio" name="rating" id="r4" value="4" class="star-radio">
                     <label for="r4" class="star-label">4</label>
-                    
-                    <input type="radio" name="rate" id="r5" class="star-radio" checked>
+
+                    <input type="radio" name="rating" id="r5" value="5" class="star-radio" checked>
                     <label for="r5" class="star-label">5</label>
                 </div>
 
@@ -88,20 +112,21 @@
                 <div class="tags-group">
                     <input type="checkbox" id="t1" class="tag-toggle">
                     <label for="t1">Service</label>
-                    
+
                     <input type="checkbox" id="t2" class="tag-toggle">
                     <label for="t2">Speed</label>
-                    
+
                     <input type="checkbox" id="t3" class="tag-toggle">
                     <label for="t3">Food Quality</label>
-                    
+
                     <input type="checkbox" id="t4" class="tag-toggle">
                     <label for="t4">Ambiance</label>
                 </div>
 
                 <div class="field">
                     <label>Additional Comments</label>
-                    <textarea placeholder="Tell us more about your experience..." style="min-height: 120px;"></textarea>
+                    <!-- added name="comment" -->
+                    <textarea name="comment" placeholder="Tell us more about your experience..." style="min-height: 120px;"></textarea>
                 </div>
 
                 <button type="submit" class="btn-submit" style="margin-top: 20px;">Submit My Review</button>
@@ -114,6 +139,43 @@
             </small>
         </div>
     </div>
+
+    <script>
+        document.getElementById('reviewForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const form = e.target;
+            const formData = new FormData(form);
+
+            // get item_id from hidden field for the URL
+            const itemId = formData.get('item_id');
+
+            const successMsg = document.getElementById('successMsg');
+            const errorMsg = document.getElementById('errorMsg');
+            successMsg.style.display = 'none';
+            errorMsg.style.display = 'none';
+
+            try {
+                const response = await fetch(`/${itemId}/review`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    successMsg.style.display = 'block';
+                    form.reset();
+                } else {
+                    errorMsg.textContent = '✗ ' + data.error;
+                    errorMsg.style.display = 'block';
+                }
+            } catch (err) {
+                errorMsg.textContent = '✗ Something went wrong. Please try again.';
+                errorMsg.style.display = 'block';
+            }
+        });
+    </script>
 
 </body>
 </html>

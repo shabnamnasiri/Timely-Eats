@@ -8,7 +8,7 @@ def login_required(f):
     def decorated_function(*args, **kwargs):
 
         if "user_id" not in session:
-            return redirect("/login")
+            return redirect("/signin")
 
         return f(*args, **kwargs)
 
@@ -23,7 +23,7 @@ def role_required(role_id):
         def decorated_function(*args, **kwargs):
 
             if "user_id" not in session:
-                return redirect("/login")
+                return redirect("/signin")
 
             if session["role_id"] != role_id:
                 return "Access denied"
@@ -33,3 +33,4 @@ def role_required(role_id):
         return decorated_function
 
     return decorator
+

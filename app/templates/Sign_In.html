@@ -1,11 +1,14 @@
+{% from 'macros/toast.html' import render_toast %}
+{% from 'macros/toast_script.html' import render_toast_script %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Timely Eats — Sign In</title>
-    <link rel="stylesheet" href="../static/css/Sign_in.css">
-
+  <link rel="stylesheet" href="../static/css/Sign_in.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/toast.css') }}"/>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 </head>
 <body>
@@ -13,6 +16,7 @@
 <div class="layout">
 
   <!-- LEFT -->
+
   <aside class="panel-left">
     <div class="logo-block">
       <div class="logo-wordmark">Timely<span>Eats</span></div>
@@ -32,6 +36,8 @@
   </aside>
 
   <!-- RIGHT -->
+  {{ render_toast() }}  
+
   <main class="panel-right">
     <div class="form-shell">
       <h2 class="form-title">Sign In</h2>
@@ -68,6 +74,6 @@
   </main>
 
 </div>
-
+{{ render_toast_script() }}  
 </body>
 </html>

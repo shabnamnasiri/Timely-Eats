@@ -1,391 +1,282 @@
+{% from 'macros/toast.html' import render_toast %}
+{% from 'macros/toast_script.html' import render_toast_script %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Timely Eats — Menu Manager</title>
-
-  <!-- Tailwind -->
-  <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- Your CSS -->
-  <link rel="stylesheet" href="../static/css/Add_menu.css">
-
-  <!-- Fonts -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/Add_menu.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/toast.css') }}"/>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 </head>
+<body>
 
-<body class="overflow-x-hidden">
-
-<!-- ───────────────── SIDEBAR ───────────────── -->
-<aside class="sidebar hidden lg:flex lg:flex-col">
-
+<aside class="sidebar">
   <div class="sidebar-logo">
-    <b>Timely<span style = "color: #c8933a;">Eats</span></b>
+    <b>Timely<span>Eats</span></b>
     <small>Admin Panel</small>
   </div>
-
   <div class="sidebar-section">Menu</div>
-
-  <ul class="sidebar-nav flex-1">
-    <li>
-      <a href="Add_menu.html" class="active">
-        <i class="ico">▤</i>
-        Menu Items
-      </a>
-    </li>
-
-    <li>
-      <a href="Categories.html">
-        <i class="ico">⊞</i>
-        Categories
-      </a>
-    </li>
-
-    </li>
-  </ul>
-
-  <div class="sidebar-section">Live_Feed</div>
-
   <ul class="sidebar-nav">
-    <li>
-      <a href="Admin_order.html">
-        <i class="ico">⊙</i>
-        Orders
-      </a>
-    </li>
-
-    <li>
-      <a href="Admin_table.html">
-        <i class="ico">◫</i>
-        Tables
-      </a>
-    </li>
+    <li><a href="#" class="active"><i class="ico">▤</i> Menu Items</a></li>
+    <!-- <li><a href="#"><i class="ico">⊞</i> Categories</a></li>
+    <li><a href="#"><i class="ico">◈</i> Modifiers</a></li> -->
   </ul>
-
-  <div class="sidebar-section">Users</div>
-
+  <div class="sidebar-section">Operations</div>
   <ul class="sidebar-nav">
-    <li>
-      <a href="Admin_staff.html">
-        <i class="ico">⊙</i>
-        Staff
-      </a>
-    </li>
-
-    <li>
-      <a href="Admin_customer.html">
-        <i class="ico">◫</i>
-        Customers
-      </a>
-    </li>
+    <li><a href="/admin/add_staff"><i class="ico">⊙</i>Add Staff</a></li>
   </ul>
-
-  <div class="sidebar-section">Analytics</div>
-
+  <div class="sidebar-section">Reports</div>
   <ul class="sidebar-nav">
-    <li>
-      <a href="Revenue.html">
-        <i class="ico">▦</i>
-        Revenue
-      </a>
-    </li>
-
-    <li>
-      <a href="Order_Report.html">
-        <i class="ico">▦</i>
-        Order Report
-      </a>
-    </li>
-
-    <li>
-      <a href="Customer_report.html">
-        <i class="ico">▦</i>
-        Customer Report
-      </a>
-    </li>
-
-    <li>
-      <a href="Table_report.html">
-        <i class="ico">▦</i>
-        Table Report
-      </a>
-    </li>
+    <li><a href="#"><i class="ico">◈</i> Analytics</a></li>
+    <li><a href="#"><i class="ico">▦</i> Revenue</a></li>
   </ul>
-
+  <div class="sidebar-user">
+    <small>Signed in as</small>
+    <span> Admin  · {{ user[0] }}</span>
+    <a href="/logout" class="sidebar-logout">⏻ Logout</a>
+  </div>
 </aside>
 
-<!-- ───────────────── MAIN ───────────────── -->
-<div class="main flex-1 min-w-0 flex flex-col">
-
-  <!-- TOPBAR -->
-  <div class="topbar sticky top-0">
-
-    <div class="flex items-center gap-4">
-      <!-- Mobile menu button -->
-      <button class="lg:hidden border border-black px-3 py-1 text-xs font-mono uppercase tracking-[0.2em]">
-        Menu
-      </button>
-
-      <h1>Menu Manager</h1>
-    </div>
-
+<div class="main">
+  <div class="topbar">
+    <h1>Menu Manager</h1>
     <div class="topbar-right">
-      <span class="badge badge-items" id="item-count">
-        0 items
-      </span>
+      <span class="badge badge-items">{{ items|length }} items</span>
     </div>
-
   </div>
 
-  <!-- CONTENT -->
-  <div class="content grid grid-cols-1 xl:grid-cols-[1fr_400px] gap-8 items-start">
+  <div class="content">
 
-    <!-- ───────────────── LEFT PANEL ───────────────── -->
-    <div class="list-panel min-w-0">
-
+    <!-- LEFT: ITEM LIST -->
+    <div class="list-panel">
       <span class="label">Current Menu</span>
 
-      <!-- STATS -->
-      <dl class="stats grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-2">
-
-        <div class="stat">
-          <dt>Starters</dt>
-          <dd id="ct-starters">0</dd>
-        </div>
-
-        <div class="stat">
-          <dt>Mains</dt>
-          <dd id="ct-mains">0</dd>
-        </div>
-
-        <div class="stat">
-          <dt>Sides</dt>
-          <dd id="ct-sides">0</dd>
-        </div>
-
-        <div class="stat">
-          <dt>Desserts</dt>
-          <dd id="ct-desserts">0</dd>
-        </div>
-
-        <div class="stat">
-          <dt>Drinks</dt>
-          <dd id="ct-drinks">0</dd>
-        </div>
-
+      <dl class="stats">
+        <div class="stat"><dt>Starters</dt><dd>{{ items|selectattr('5','equalto','starters')|list|length }}</dd></div>
+        <div class="stat"><dt>Mains</dt><dd>{{ items|selectattr('5','equalto','mains')|list|length }}</dd></div>
+        <div class="stat"><dt>Sides</dt><dd>{{ items|selectattr('5','equalto','sides')|list|length }}</dd></div>
+        <div class="stat"><dt>Desserts</dt><dd>{{ items|selectattr('5','equalto','desserts')|list|length }}</dd></div>
+        <div class="stat"><dt>Drinks</dt><dd>{{ items|selectattr('5','equalto','drinks')|list|length }}</dd></div>
       </dl>
 
-      <!-- FILTERS -->
-      <div class="list-controls flex flex-col sm:flex-row sm:items-center gap-3">
-
-        <div class="filter-tabs flex overflow-x-auto pb-1">
-
-          <button class="filter-tab on" data-filter="all">
-            All
-          </button>
-
-          <button class="filter-tab" data-filter="starters">
-            Starters
-          </button>
-
-          <button class="filter-tab" data-filter="mains">
-            Mains
-          </button>
-
-          <button class="filter-tab" data-filter="sides">
-            Sides
-          </button>
-
-          <button class="filter-tab" data-filter="desserts">
-            Desserts
-          </button>
-
-          <button class="filter-tab" data-filter="drinks">
-            Drinks
-          </button>
-
+      <div class="list-controls">
+        <div class="filter-tabs">
+          <button class="filter-tab on" data-filter="all">All</button>
+          <button class="filter-tab" data-filter="starters">Starters</button>
+          <button class="filter-tab" data-filter="mains">Mains</button>
+          <button class="filter-tab" data-filter="sides">Sides</button>
+          <button class="filter-tab" data-filter="desserts">Desserts</button>
+          <button class="filter-tab" data-filter="drinks">Drinks</button>
         </div>
-
       </div>
 
-      <!-- ITEM LIST -->
-      <div
-        class="item-list flex flex-col gap-2"
-        id="item-list"
-      >
+      <div class="item-list" id="item-list">
+        {% if items %}
+          {% for item in items %}
+          <div class="item-row" style="--i:{{ loop.index0 }}" data-category="{{ item[5] }}">
 
-        <div class="empty">
+            <img src="/item_photo/{{ item[0] }}" class="item-photo" alt="{{ item[1] }}">
 
-          <b>No Items Yet</b>
+            <span class="item-cat {{ item[5] }}">{{ item[5] }}</span>
 
-          <span>
-            Use the form to add your first menu item.
-          </span>
+            <div class="item-info">
+              <strong>{{ item[1] }}</strong>
+              <span>{{ item[2] }}</span>
+            </div>
 
-        </div>
+            <span class="item-price">${{ item[4] }}</span>
 
+            <div class="item-actions">
+              <button class="btn-icon"
+                onclick="openModal({{ item[0] }}, '{{ item[1]|replace("'", "\\'") }}', '{{ item[2]|replace("'", "\\'") }}', {{ item[4] }}, {{ item[3] or 0 }}, '{{ item[5] }}')">
+                Edit
+              </button>
+              <form action="/delete_item/{{ item[0] }}" method="POST" style="display:inline">
+                <button type="submit" class="btn-icon del">Delete</button>
+              </form>
+            </div>
+
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="empty">
+            <b>No Items Yet</b>
+            <span>Use the form to add your first menu item.</span>
+          </div>
+        {% endif %}
       </div>
-
     </div>
 
-    <!-- ───────────────── FORM PANEL ───────────────── -->
-    <div class="form-panel xl:sticky xl:top-24">
-
+    <!-- RIGHT: ADD FORM -->
+    {{ render_toast() }}  
+    <div class="form-panel">
       <div class="form-divider"></div>
-
       <h2>Add Menu Item</h2>
+      <p>Fill in the details below to add a new item to the customer menu.</p>
 
-      <p>
-        Fill in the details below to add a new item to the customer menu.
-      </p>
+      <form method="POST" action="/admin/add_menu_item" enctype="multipart/form-data" autocomplete="off">
 
-      <form
-        id="item-form"
-        autocomplete="off"
-        class="space-y-5"
-      >
-
-        <!-- ITEM NAME -->
         <div class="field">
-
-          <label for="f-name">
-            Item Name *
-          </label>
-
-          <input
-            type="text"
-            id="f-name"
-            placeholder="e.g. Seared Scallops"
-            required
-          />
-
+          <label>Item Name *</label>
+          <input type="text" name="name" placeholder="e.g. Seared Scallops" required/>
         </div>
 
-        <!-- DESCRIPTION -->
         <div class="field">
-
-          <label for="f-desc">
-            Description *
-          </label>
-
-          <textarea
-            id="f-desc"
-            placeholder="Describe the dish — ingredients, preparation, accompaniments…"
-            required
-          ></textarea>
-
+          <label>Description *</label>
+          <textarea name="description" placeholder="Describe the dish…" required></textarea>
         </div>
 
-        <!-- GRID FIELDS -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
-          <div class="field">
-
-            <label for="f-price">
-              Price ($) *
-            </label>
-
-            <input
-              type="number"
-              id="f-price"
-              placeholder="0.00"
-              step="0.01"
-              min="0"
-              required
-            />
-
-          </div>
-
-          <div class="field">
-
-            <label for="f-kcal">
-              Calories (kcal)
-            </label>
-
-            <input
-              type="number"
-              id="f-kcal"
-              placeholder="e.g. 480"
-              min="0"
-            />
-
-          </div>
-
-          <div class="field sm:col-span-2">
-
-            <label for="f-prep">
-              Prep Time (mins)
-            </label>
-
-            <input
-              type="number"
-              id="f-prep"
-              placeholder="e.g. 15"
-              min="1"
-              max="180"
-            />
-
-          </div>
-
-        </div>
-
-        <!-- CATEGORY -->
+      <div class="field-row">
         <div class="field">
+          <label>Price ($) *</label>
+          <input type="number" name="price" step="0.01" min="0" required/>
+        </div>
+        <div class="field">
+          <label>Prep Time (mins)</label>
+          <input type="number" name="prep_time" min="1" max="180"/>
+        </div>
+      </div>
 
-          <label for="f-cat">
-            Category *
-          </label>
-
+        <div class="field">
+          <label>Category *</label>
           <div class="select-wrap">
-
-            <select id="f-cat" required>
-
-              <option value="">
-                Select category…
-              </option>
-
-              <option value="starters">
-                Starters
-              </option>
-
-              <option value="mains">
-                Mains
-              </option>
-
-              <option value="sides">
-                Sides
-              </option>
-
-              <option value="desserts">
-                Desserts
-              </option>
-
-              <option value="drinks">
-                Drinks
-              </option>
-
+            <select name="category" required>
+              <option value="">Select category…</option>
+              <option value="starters">Starters</option>
+              <option value="mains">Mains</option>
+              <option value="sides">Sides</option>
+              <option value="desserts">Desserts</option>
+              <option value="drinks">Drinks</option>
             </select>
-
           </div>
-
         </div>
 
-        <!-- SUBMIT -->
-        <button
-          type="submit"
-          class="btn-submit hover:scale-[1.01] active:scale-[0.99]"
-        >
-          + Add to Menu
-        </button>
+        <div class="field">
+          <label>Photo (optional)</label>
+          <input type="file" name="photo" accept="image/*" class="file-input"/>
+          <div class="file-preview" id="add-preview"></div>
+        </div>
 
+        <button type="submit" class="btn-submit">+ Add to Menu</button>
       </form>
-
     </div>
 
   </div>
-
 </div>
+
+<!-- ── EDIT MODAL ── -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal()"></div>
+<div class="modal" id="editModal">
+  <div class="modal-header">
+    <h2>Edit Item</h2>
+    <button class="modal-close" onclick="closeModal()">✕</button>
+  </div>
+
+  <form id="editForm" method="POST" enctype="multipart/form-data" autocomplete="off">
+
+    <div class="field">
+      <label>Item Name *</label>
+      <input type="text" name="name" id="edit-name" required/>
+    </div>
+
+    <div class="field">
+      <label>Description</label>
+      <textarea name="description" id="edit-desc"></textarea>
+    </div>
+
+    <div class="field-row">
+      <div class="field">
+        <label>Price ($) *</label>
+        <input type="number" name="price" id="edit-price" step="0.01" min="0" required/>
+      </div>
+      <div class="field">
+        <label>Prep Time (mins)</label>
+        <input type="number" name="prep_time" id="edit-prep" min="1" max="180"/>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Category *</label>
+      <div class="select-wrap">
+        <select name="category" id="edit-cat" required>
+          <option value="starters">Starters</option>
+          <option value="mains">Mains</option>
+          <option value="sides">Sides</option>
+          <option value="desserts">Desserts</option>
+          <option value="drinks">Drinks</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Replace Photo (optional)</label>
+      <input type="file" name="photo" accept="image/*" class="file-input"/>
+      <div class="file-preview" id="edit-preview"></div>
+      <div class="current-photo-wrap">
+        <span class="label" style="margin-bottom:6px;">Current Photo</span>
+        <img id="edit-current-photo" src="" class="current-photo" alt="current"/>
+      </div>
+    </div>
+
+    <button type="submit" class="btn-submit">Save Changes</button>
+  </form>
+</div>
+
+<script>
+function openModal(id, name, desc, price, prep, cat) {
+  document.getElementById('editForm').action = '/update_item/' + id;
+  document.getElementById('edit-name').value  = name;
+  document.getElementById('edit-desc').value  = desc;
+  document.getElementById('edit-price').value = price;
+  document.getElementById('edit-prep').value  = prep;
+  document.getElementById('edit-cat').value   = cat;
+  document.getElementById('edit-current-photo').src = '/item_photo/' + id;
+  document.getElementById('edit-preview').innerHTML = '';
+  document.getElementById('modalOverlay').classList.add('active');
+  document.getElementById('editModal').classList.add('active');
+}
+
+  function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('active');
+    document.getElementById('editModal').classList.remove('active');
+  }
+
+  // ── PHOTO PREVIEW (add form) ──
+  document.querySelector('input[name="photo"]').addEventListener('change', function() {
+    previewPhoto(this, 'add-preview');
+  });
+
+  // ── PHOTO PREVIEW (edit form) ──
+  document.querySelector('#editForm input[name="photo"]').addEventListener('change', function() {
+    previewPhoto(this, 'edit-preview');
+  });
+
+  function previewPhoto(input, previewId) {
+    const preview = document.getElementById(previewId);
+    preview.innerHTML = '';
+    if (input.files && input.files[0]) {
+      const img = document.createElement('img');
+      img.src = URL.createObjectURL(input.files[0]);
+      img.className = 'preview-img';
+      preview.appendChild(img);
+    }
+  }
+
+  // ── FILTER TABS ──
+  document.querySelectorAll('.filter-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('on'));
+      btn.classList.add('on');
+      const filter = btn.dataset.filter;
+      document.querySelectorAll('.item-row').forEach(row => {
+        row.style.display = (filter === 'all' || row.dataset.category === filter) ? 'flex' : 'none';
+      });
+    });
+  });
+</script>
+{{ render_toast_script() }}  
 
 </body>
 </html>
