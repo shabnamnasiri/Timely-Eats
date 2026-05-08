@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Timely Eats — Menu · Table 07</title>
+  <link rel="stylesheet" href="../static/css/Menu.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant:ital,wght@0,400;0,600;1,300;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="logo"><b>Timely<span>Eats</span></b><small>Restaurant</small></div>
+  <div class="table-badge"><span>Table</span><strong>07</strong></div>
+  <a href="#" class="cart">⊡ Order</a>
+</header>
+
+<section class="hero">
+  <div class="hero-inner">
+    <small>Dine-in Menu · Table 07</small>
+    <h1>Today's<span>Menu</span></h1>
+    <p>Locally sourced. Freshly prepared. Served with care.</p>
+  </div>
+</section>
+
+<nav class="cat-nav">
+  <ul>
+    <li><a href="#starters">Starters</a></li>
+    <li><a href="#mains">Mains</a></li>
+    <li><a href="#sides">Sides</a></li>
+    <li><a href="#desserts">Desserts</a></li>
+    <li><a href="#drinks">Drinks</a></li>
+  </ul>
+</nav>
+
+<main class="content">
+
+  <section class="menu-section" id="starters">
+    <div class="section-header">
+      <h2>Starters</h2>
+      <span id="starters-count">0 dishes</span>
+    </div>
+    <div class="grid" id="starters-grid">
+      <!-- Cards injected by backend -->
+    </div>
+  </section>
+
+  <section class="menu-section" id="mains">
+    <div class="section-header">
+      <h2>Mains</h2>
+      <span id="mains-count">0 dishes</span>
+    </div>
+    <div class="grid" id="mains-grid">
+      <!-- Cards injected by backend -->
+    </div>
+  </section>
+
+  <section class="menu-section" id="sides">
+    <div class="section-header">
+      <h2>Sides</h2>
+      <span id="sides-count">0 items</span>
+    </div>
+    <div class="grid" id="sides-grid">
+      <!-- Cards injected by backend -->
+    </div>
+  </section>
+
+  <section class="menu-section" id="desserts">
+    <div class="section-header">
+      <h2>Desserts</h2>
+      <span id="desserts-count">0 dishes</span>
+    </div>
+    <div class="grid" id="desserts-grid">
+      <!-- Cards injected by backend -->
+    </div>
+  </section>
+
+  <section class="menu-section" id="drinks">
+    <div class="section-header">
+      <h2>Drinks</h2>
+      <span id="drinks-count">0 items</span>
+    </div>
+    <div class="grid" id="drinks-grid">
+      <!-- Cards injected by backend -->
+    </div>
+  </section>
+
+</main>
+
+
+<!--
+═══════════════════════════════════════════════════════
+  CARD TEMPLATE — copy & populate for each menu item
+  ───────────────────────────────────────────────────
+  • style="--i:N"  → 0-based index, drives stagger animation
+  • <footer> block → optional; omit for sides / drinks
+  • Tags           → add only applicable: .tag.v / .tag.gf / .tag.s
+  • id attributes  → must be unique per checkbox + label pair
+═══════════════════════════════════════════════════════
+
+<div class="card" style="--i:0">
+  <div class="card-row">
+    <h3>Dish Name</h3>
+    <span class="price">$00</span>
+  </div>
+  <p>Dish description text goes here.</p>
+  <footer>
+    <div class="tags">
+      <span class="tag v">V</span>
+      <span class="tag gf">GF</span>
+      <span class="tag s">Spicy</span>
+    </div>
+    <span class="kcal">000 kcal</span>
+  </footer>
+  <input class="order-toggle" type="checkbox" id="UNIQUE_ID">
+  <label class="order-btn" for="UNIQUE_ID">Add to Order</label>
+</div>
+
+═══════════════════════════════════════════════════════
+-->
+
+</body>
+</html>
