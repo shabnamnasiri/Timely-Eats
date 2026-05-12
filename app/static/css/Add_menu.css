@@ -296,3 +296,54 @@ body { font-family: 'DM Sans', sans-serif; background: var(--paper); color: var(
 .field-row .field {
   margin-bottom: 0;
 }
+
+.item-actions form {
+  margin: 0;
+}
+
+.btn-icon.disabled,
+.btn-icon:disabled {
+  cursor: not-allowed;
+  opacity: .45;
+  border-color: var(--rule);
+  color: var(--ash);
+}
+
+.item-cat.pending,
+.item-cat.pending-cash { background: #2e1a1a; color: #d5977b; }
+.item-cat.preparing { background: #1a1a0e; color: #d2be74; }
+.item-cat.ready { background: #0e1e0e; color: #82c98a; }
+.item-cat.completed { background: #13261d; color: #a5ddb0; }
+.item-cat.voided,
+.item-cat.closed { background: #3a3a3a; color: #d0d0d0; }
+.item-cat.active { background: #10241d; color: #91d4b3; }
+
+.flash-stack {
+  padding: 18px 40px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.flash-message {
+  border: 1px solid var(--rule);
+  background: #fff;
+  padding: 12px 14px;
+  font-size: 12px;
+}
+
+.flash-message.success {
+  border-color: rgba(58,107,58,.35);
+  color: var(--success);
+}
+
+.flash-message.warning {
+  border-color: rgba(200,147,58,.35);
+  color: #8b651d;
+}
+
+.flash-message.danger,
+.flash-message.error {
+  border-color: rgba(158,55,55,.35);
+  color: var(--danger);
+}

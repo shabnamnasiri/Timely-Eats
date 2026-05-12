@@ -17,17 +17,19 @@ from app.admin.add_menu import register_admin_add_menu_routes
 from app.admin.add_staff import register_admin_add_staff_routes
 from app.staff.api.staff_api import register_staff_api
 from app.staff.session_routes import register_session_routes
+from app.staff.orders import register_staff_order_routes
 template_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "app", "templates")
 static_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "app", "static")
 
 app = Flask(__name__, template_folder=template_path, static_folder=static_path)
-app.secret_key = "secret_key_123"
+app.secret_key = os.getenv("SECRET_KEY", "secret_key_123")
 
-app.config['MYSQL_HOST'] = 'localhost'
-app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = '22703380'
-app.config['MYSQL_DB'] = 'timlyeats'
-app.config['MYSQL_PORT'] = 3306
+app.config['MYSQL_HOST'] = os.getenv("MYSQL_HOST", "localhost")
+app.config['MYSQL_USER'] = os.getenv("MYSQL_USER", "root")
+app.config['MYSQL_PASSWORD'] = os.getenv("MYSQL_PASSWORD", "")
+app.config['MYSQL_DB'] = os.getenv("MYSQL_DB", "timlyeats")
+app.config['MYSQL_PORT'] = int(os.getenv("MYSQL_PORT", "3306"))
+app.config['PUBLIC_BASE_URL'] = os.getenv("PUBLIC_BASE_URL", "").rstrip("/")
 
 mysql = MySQL(app)
 

@@ -1,6 +1,6 @@
 import qrcode
 import os
-from flask import jsonify, redirect, render_template,url_for
+from flask import jsonify, redirect, render_template, request, url_for
 
 def register_session_routes(app, mysql):
 
@@ -94,7 +94,13 @@ def register_session_routes(app, mysql):
 
         session_id = cursor.lastrowid
 
-        qr_data = f"http://127.0.0.1:5000/session/{session_id}"
+        configured_base = app.config.get("PUBLIC_BASE_URL", "")
+        if configured_base:
+            base_url = configured_base
+        else:
+            base_url = request.host_url.rstrip("/")
+
+        qr_data = f"{base_url}/session/{session_id}"
         img = qrcode.make(qr_data)
 
         folder = os.path.join(app.static_folder, "qrcodes")
@@ -129,11 +135,27 @@ def register_session_routes(app, mysql):
         cursor = mysql.connection.cursor()
 
         cursor.execute("""
+            SELECT COUNT(*)
+            FROM orders
+            WHERE session_id = %s
+              AND LOWER(COALESCE(status, '')) NOT IN ('completed', 'voided')
+        """, (session_id,))
+
+        open_order_count = cursor.fetchone()[0]
+
+        if open_order_count:
+            cursor.close()
+            return jsonify({
+                "message": "Finish or void all orders before closing this session"
+            }), 400
+
+        cursor.execute("""
             UPDATE Table_Session
             SET status='closed'
             WHERE session_id=%s
         """, (session_id,))
 
         mysql.connection.commit()
+        cursor.close()
 
         return jsonify({"message": "Session closed"})
