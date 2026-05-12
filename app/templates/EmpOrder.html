@@ -1,3 +1,5 @@
+{% from 'macros/toast.html' import render_toast %}
+{% from 'macros/toast_script.html' import render_toast_script %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,6 +8,7 @@
     <title>Employee Order Portal | System</title>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/Add_menu.css') }}">
+      <link rel="stylesheet" href="{{ url_for('static', filename='css/toast.css') }}"/>
 </head>
 <body>
 
@@ -29,6 +32,8 @@
     </aside>
 
     <main class="main">
+        {{ render_toast() }}  
+
         <header class="topbar">
             <h1>Current Expeditions</h1>
             <div class="topbar-right">
@@ -56,8 +61,7 @@
                     <div class="stat"><dt>Preparing</dt><dd>{{ stats.preparing_orders }}</dd></div>
                     <div class="stat"><dt>Ready</dt><dd>{{ stats.ready_orders }}</dd></div>
                     <div class="stat"><dt>Avg Time</dt><dd>{{ stats.avg_wait_minutes }}<span>min</span></dd></div>
-                    <div class="stat"><dt>Revenue</dt><dd><span>$</span>{{ "%.2f"|format(stats.revenue) }}</dd></div>
-                </div>
+                                </div>
 
                 <div class="list-controls">
                     <div class="filter-tabs">
@@ -68,19 +72,31 @@
                     </div>
                 </div>
 
-                <div class="item-list" id="orderList">
-                    {% if orders %}
-                        {% for order in orders %}
-                    <div class="item-row" style="--i: {{ loop.index }}" data-status="{{ order.status }}">
-                        <div class="item-cat {{ order.status_class }}">#{{ order.order_id }}</div>
-                        <div class="item-info">
-                            <strong>Table {{ order.table_number or "?" }} - {{ order.summary }}</strong>
-                            <span>Status: {{ order.status|title }} • Wait: {{ order.wait_minutes }}m • {{ order.payment_label }}</span>
-                            <span>Customer: {{ order.customer_name }} • Created: {{ order.created_label }}</span>
-                            {% if order.notes %}
-                                <span>Notes: {{ order.notes|join(" | ") }}</span>
-                            {% endif %}
-                        </div>
+            <div class="item-list" id="orderList">
+        {% if orders %}
+            {% for order in orders %}
+            <div class="item-row" style="--i: {{ loop.index }}" data-status="{{ order.status }}">
+                <div class="item-cat {{ order.status_class }}">#{{ order.order_id }}</div>
+                <div class="item-info">
+                    <strong>Table {{ order.table_number or "?" }}</strong>
+                    <span>
+                        Status: {{ order.status|title }} •
+                        {% if order.status == 'ready' %}
+                            Ready!
+                        {% elif order.remaining_minutes > 0 %}
+                            Ready in: {{ order.remaining_minutes }}m
+                        {% else %}
+                            Ready!
+                        {% endif %}
+                        • {{ order.payment_label }}
+                    </span>
+                    <!-- Each item on its own line, with its customization note if it has one -->
+                    <div class="item-lines">
+                        {% for line in order.lines %}
+                        <span>{{ line.item }}{% if line.note %} — <em>{{ line.note }}</em>{% endif %}</span>
+                        {% endfor %}
+                    </div>
+                </div>
                         <div class="item-price">${{ "%.2f"|format(order.total_amount) }}</div>
                         <div class="item-actions">
                             <button
@@ -90,13 +106,6 @@
                             >
                                 Manage
                             </button>
-                            {% if order.session_id %}
-                            <form method="POST" action="/staff/sessions/{{ order.session_id }}/close">
-                                <button type="submit" class="btn-icon {% if not order.can_close_session %}disabled{% endif %}" {% if not order.can_close_session %}disabled{% endif %}>
-                                    Close Session
-                                </button>
-                            </form>
-                            {% endif %}
                         </div>
                     </div>
                         {% endfor %}
@@ -115,13 +124,10 @@
                         <div class="item-cat {{ table_session.status }}">T{{ table_session.table_number }}</div>
                         <div class="item-info">
                             <strong>Session #{{ table_session.session_id }}</strong>
-                            <span>Status: {{ table_session.status|title }} • Orders: {{ table_session.order_count }} • Open: {{ table_session.open_order_count }}</span>
-                        </div>
+                        <span>Status: {{ table_session.status|title }} • Orders: {{ table_session.order_count }}</span>                        </div>
                         <div class="item-actions">
-                            <form method="POST" action="/staff/sessions/{{ table_session.session_id }}/close">
-                                <button type="submit" class="btn-icon {% if not table_session.can_close %}disabled{% endif %}" {% if not table_session.can_close %}disabled{% endif %}>
-                                    Close Session
-                                </button>
+                            <form method="POST" action="/staff/close-session/{{ table_session.session_id }}">
+                                <button type="submit" class="btn-icon">Close Session</button>
                             </form>
                         </div>
                     </div>
@@ -131,7 +137,6 @@
 
             <aside class="form-panel">
                 <h2>Order Assistance</h2>
-                <p>Update order status from the staff side. Sessions can only be closed after every order for that table is completed or voided.</p>
                 <div class="form-divider"></div>
 
                 <form method="POST" action="/staff/orders/update">
@@ -157,10 +162,7 @@
                         </div>
                     </div>
 
-                    <div class="field">
-                        <label>Workflow Guide</label>
-                        <textarea readonly>Use Pending/Pending Cash when the order is first received, move to Preparing when kitchen starts, Ready when it can be served, and Completed after service is done. Void only if the order is cancelled.</textarea>
-                    </div>
+                    
 
                     <button type="submit" class="btn-submit">Update Order Status</button>
                 </form>
@@ -187,5 +189,7 @@ document.querySelectorAll(".filter-tab").forEach((button) => {
     });
 });
 </script>
+{{ render_toast_script() }}  
+
 </body>
 </html>

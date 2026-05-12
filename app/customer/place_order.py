@@ -51,12 +51,11 @@ def register_customer_place_order_routes(app, mysql):
             return redirect('/Customer/Cart')
 
         total_amount = sum(item['quantity'] * float(item['price']) for item in cart_items)
+        order_status = 'pending'
 
         if payment_method == 'cash':
-            order_status = 'pending cash'
             payment_status = 'pending'
         elif payment_method == 'card':
-            order_status = 'pending'
             payment_status = 'confirmed'
         else:
             flash("Invalid payment method selected.", "danger")
@@ -85,23 +84,28 @@ def register_customer_place_order_routes(app, mysql):
 
         # Calculate points earned — 10% of discounted total
         points_earned = int(discounted_total * 0.10)
+        cursor.execute("""
+            SELECT MAX(i.preparation_time) AS max_prep
+            FROM cart_item ci
+            JOIN item i ON i.item_id = ci.item_id
+            WHERE ci.cart_id = %s
+        """, (cart_id,))
 
-        # Insert into orders
+        max_prep = cursor.fetchone()["max_prep"] or 10
+
         cursor.execute("""
             INSERT INTO orders
-            (user_id, cart_id, timestamp, status, payment_method, total_amount, session_id)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            (user_id, cart_id, timestamp, preparation_time, status, total_amount, session_id)
+            VALUES (%s, %s, %s, %s, 'pending', %s, %s)
         """, (
             user_id,
             cart_id,
             datetime.now(),
-            order_status,
-            payment_method,
+            max_prep,
             discounted_total,
             session_id
         ))
         order_id = cursor.lastrowid
-
         # Insert order_details
         for item in cart_items:
             cursor.execute("""
@@ -117,9 +121,9 @@ def register_customer_place_order_routes(app, mysql):
 
         # Insert payment
         cursor.execute("""
-            INSERT INTO payment (order_id, payment_status, date)
-            VALUES (%s, %s, %s)
-        """, (order_id, payment_status, datetime.now()))
+            INSERT INTO payment (order_id, payment_method,payment_status, date)
+            VALUES (%s, %s, %s, %s)
+        """, (order_id, payment_method, payment_status, datetime.now()))
 
         # Mark cart as closed
         cursor.execute("""

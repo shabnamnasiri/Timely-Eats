@@ -1,6 +1,6 @@
 import qrcode
 import os
-from flask import jsonify, redirect, render_template, request, url_for
+from flask import jsonify, redirect, render_template, request, flash
 
 def register_session_routes(app, mysql):
 
@@ -138,24 +138,18 @@ def register_session_routes(app, mysql):
             SELECT COUNT(*)
             FROM orders
             WHERE session_id = %s
-              AND LOWER(COALESCE(status, '')) NOT IN ('completed', 'voided')
+            AND LOWER(COALESCE(status, '')) NOT IN ('ready')
         """, (session_id,))
-
         open_order_count = cursor.fetchone()[0]
 
         if open_order_count:
             cursor.close()
-            return jsonify({
-                "message": "Finish or void all orders before closing this session"
-            }), 400
+            flash("Finish all orders before closing this session.", "warning")
+            return redirect(request.referrer)
 
-        cursor.execute("""
-            UPDATE Table_Session
-            SET status='closed'
-            WHERE session_id=%s
-        """, (session_id,))
-
+        cursor.execute("UPDATE Table_Session SET status='closed' WHERE session_id=%s", (session_id,))
         mysql.connection.commit()
         cursor.close()
 
-        return jsonify({"message": "Session closed"})
+        flash("Session closed successfully.", "success")
+        return redirect(request.referrer)
