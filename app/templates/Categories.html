@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Timely Eats — Categories</title>
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Your existing CSS (KEEPING DESIGN SYSTEM CONSISTENT) -->
+  <link rel="stylesheet" href="../static/css/Add_menu.css">
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+
+</head>
+
+<body class="overflow-x-hidden">
+
+<!-- ───────────────── SIDEBAR (UNCHANGED STRUCTURE) ───────────────── -->
+<aside class="sidebar hidden lg:flex lg:flex-col">
+
+  <div class="sidebar-logo">
+    <b>Timely<span style="color:#c8933a;">Eats</span></b>
+    <small>Admin Panel</small>
+  </div>
+
+  <div class="sidebar-section">Menu</div>
+  <ul class="sidebar-nav flex-1">
+    <li>
+      <a href="Add_menu.html">
+        <i class="ico">▤</i> Menu Items
+      </a>
+    </li>
+
+    <li>
+      <a href="Categories.html" class="active">
+        <i class="ico">⊞</i> Categories
+      </a>
+    </li>
+  </ul>
+
+  <div class="sidebar-section">Live_Feed</div>
+  <ul class="sidebar-nav">
+    <li><a href="Admin_order.html"><i class="ico">⊙</i> Orders</a></li>
+    <li><a href="Admin_table.html"><i class="ico">◫</i> Tables</a></li>
+  </ul>
+
+  <div class="sidebar-section">Users</div>
+  <ul class="sidebar-nav">
+    <li><a href="#"><i class="ico">⊙</i> Staff</a></li>
+    <li><a href="#"><i class="ico">◫</i> Customers</a></li>
+  </ul>
+
+  <div class="sidebar-section">Analytics</div>
+  <ul class="sidebar-nav">
+    <li><a href="Revenue.html"><i class="ico">▦</i> Revenue</a></li>
+    <li><a href="Order_Report.html"><i class="ico">▦</i> Order Report</a></li>
+    <li><a href="#"><i class="ico">▦</i> Customer Report</a></li>
+    <li><a href="#"><i class="ico">▦</i> Table Report</a></li>
+  </ul>
+
+</aside>
+
+<!-- ───────────────── MAIN ───────────────── -->
+<div class="main flex-1 min-w-0 flex flex-col">
+
+  <!-- TOPBAR -->
+  <div class="topbar sticky top-0 flex items-center justify-between">
+
+    <div class="flex items-center gap-4">
+      <button class="lg:hidden border border-black px-3 py-1 text-xs font-mono uppercase tracking-[0.2em]">
+        Menu
+      </button>
+
+      <h1>Categories</h1>
+    </div>
+
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content grid grid-cols-1 xl:grid-cols-[1fr_420px] gap-8 items-start">
+
+    <!-- ───────── LEFT: CATEGORY LIST ───────── -->
+    <div class="list-panel">
+
+      <span class="label">Current Categories</span>
+
+      <div class="item-list flex flex-col gap-2">
+
+        <!-- CATEGORY CARD -->
+        <div class="flex items-center justify-between bg-white border border-[#d4cfc6] p-4 hover:border-[#c8933a] transition">
+
+          <div>
+            <div class="font-bold text-lg">Starters</div>
+            <div class="text-xs text-[#7a7a7a] mono">slug: starters</div>
+          </div>
+
+          <div class="flex gap-2">
+
+            <button class="border border-[#d4cfc6] px-3 py-1 text-xs mono hover:border-[#c8933a]">
+              EDIT
+            </button>
+
+            <button class="border border-red-400 text-red-500 px-3 py-1 text-xs mono hover:bg-red-500 hover:text-white">
+              DELETE
+            </button>
+
+          </div>
+
+        </div>
+
+        <!-- CATEGORY CARD -->
+        <div class="flex items-center justify-between bg-white border border-[#d4cfc6] p-4 hover:border-[#c8933a] transition">
+
+          <div>
+            <div class="font-bold text-lg">Mains</div>
+            <div class="text-xs text-[#7a7a7a] mono">slug: mains</div>
+          </div>
+
+          <div class="flex gap-2">
+
+            <button class="border border-[#d4cfc6] px-3 py-1 text-xs mono hover:border-[#c8933a]">
+              EDIT
+            </button>
+
+            <button class="border border-red-400 text-red-500 px-3 py-1 text-xs mono hover:bg-red-500 hover:text-white">
+              DELETE
+            </button>
+
+          </div>
+
+        </div>
+
+        <!-- EMPTY STATE (optional) -->
+        <div class="text-center text-[#7a7a7a] mono text-xs py-10">
+          No more categories
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ───────── RIGHT: ADD FORM ───────── -->
+   
+
+  </div>
+</div>
+
+</body>
+</html>

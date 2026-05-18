@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Analytics | TimelyEats</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../static/css/Revenue.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        .search-input {
+            background: var(--canvas);
+            border: 1px solid var(--rule);
+            padding: 8px 16px;
+            font-family: 'DM Mono', monospace;
+            font-size: 11px;
+            width: 280px;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+        .search-input:focus {
+            border-color: var(--accent-strong);
+            background: #fff;
+            width: 320px;
+        }
+
+        .table-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 24px;
+            background: #faf9f6;
+            border-bottom: 1px solid var(--rule);
+            gap: 20px;
+        }
+        
+        .toolbar-select {
+            background: transparent;
+            font-family: 'DM Mono', monospace;
+            font-size: 10px;
+            text-transform: uppercase;
+            border: 1px solid var(--rule);
+            padding: 6px 12px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .pagination {
+            display: flex;
+            gap: 5px;
+            margin-top: 24px;
+            justify-content: center;
+        }
+        .page-link {
+            padding: 8px 16px;
+            border: 1px solid var(--rule);
+            background: var(--paper);
+            font-family: 'DM Mono', monospace;
+            font-size: 10px;
+            text-transform: uppercase;
+            cursor: pointer;
+        }
+        .page-link.active {
+            background: var(--ink);
+            color: var(--paper);
+        }
+    </style>
+</head>
+
+<body class="bg-[var(--canvas)]">
+
+<aside class="sidebar hidden lg:flex lg:flex-col">
+<div class="sidebar-logo">
+    <b>Timely<span style = "color: #c8933a;">Eats</span></b>
+    <small>Admin Panel</small>
+  </div>
+  <div class="sidebar-section">Menu</div>
+  <ul class="sidebar-nav">
+    <li><a href="Add_menu.html"><i class="ico">▤</i> Menu Items</a></li>
+    <li><a href="#"><i class="ico">⊞</i> Categories</a></li>
+  </ul>
+  <div class="sidebar-section">Live_feed</div>
+  <ul class="sidebar-nav">
+    <li><a href="Admin_order.html"><i class="ico">⊙</i> Orders</a></li>
+    <li><a href="Admin_table.html"><i class="ico">◫</i> Tables</a></li>
+  </ul> 
+   <div class="sidebar-section">Users</div>
+    <ul class="sidebar-nav">
+    <li><a href="Admin_staff.html"><i class="ico">⊙</i>Staff</a></li>
+    <li><a href="Admin_customer.html"><i class="ico">◫</i> Customers</a></li>
+  </ul>
+  <div class="sidebar-section">Analaytics</div>
+  <ul class="sidebar-nav">
+    <li><a href="Revenue.html"><i class="ico">▦</i> Revenue</a></li>
+    <li><a href="Order_Report.html"><i class="ico">▦</i> Order_Report</a></li>
+        <li><a href="Customer_report.html" class = "active"><i class="ico">▦</i>Customer_Report</a></li>
+            <li><a href="Table_report.html"><i class="ico">▦</i>Table_Report</a></li>
+
+  </ul>
+
+</aside>
+
+<main class="main flex-1 min-w-0">
+    <header class="topbar">
+        <h1>Customer Report</h1>
+        <div class="flex gap-4">
+            <button class="px-4 py-2 bg-[var(--ink)] text-[var(--paper)] font-['Bebas_Neue'] text-lg tracking-wide hover:bg-[var(--accent-strong)] transition-all">
+                Export Registry
+            </button>
+        </div>
+    </header>
+
+    <div class="content block">
+        <section class="max-w-6xl mx-auto">
+            <span class="label">User Growth & Retention</span>
+            
+            <div class="stats grid grid-cols-2 md:grid-cols-4 gap-[2px] mb-8">
+                <div class="stat">
+                    <dt>Total Registered</dt>
+                    <dd>4,829</dd>
+                </div>
+                <div class="stat">
+                    <dt>New (This Month)</dt>
+                    <dd>124</dd>
+                </div>
+                <div class="stat">
+                    <dt>Active Users</dt>
+                    <dd>82%</dd>
+                </div>
+                <div class="stat">
+                    <dt>Avg. Lifetime Value</dt>
+                    <dd><span>$</span>342</dd>
+                </div>
+            </div>
+
+        
+
+            <div class="panel !p-0 overflow-hidden shadow-sm">
+                
+                <div class="table-toolbar">
+                    <input type="text" placeholder="SEARCH BY NAME, EMAIL OR ID..." class="search-input">
+
+                    <div class="flex gap-4 items-center">
+                        <div class="flex items-center gap-2">
+                            <span class="font-mono text-[9px] text-[var(--mist)] uppercase">Status:</span>
+                            <select class="toolbar-select">
+                                <option>All Customers</option>
+                                <option>New Signups</option>
+                                <option>VIP / Top Spenders</option>
+                                <option>Inactive</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="font-mono text-[9px] text-[var(--mist)] uppercase">Sort By:</span>
+                            <select class="toolbar-select">
+                                <option>Join Date (Newest)</option>
+                                <option>Join Date (Oldest)</option>
+                                <option>Total Spend</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-[var(--rule)] bg-[#faf9f6]">
+                                <th class="py-4 px-8 font-mono text-[9px] uppercase tracking-widest text-[var(--mist)]">Customer ID</th>
+                                <th class="py-4 px-8 font-mono text-[9px] uppercase tracking-widest text-[var(--mist)]">Identity</th>
+                                <th class="py-4 px-8 font-mono text-[9px] uppercase tracking-widest text-[var(--mist)] text-center">Joined Date</th>
+                                <th class="py-4 px-8 font-mono text-[9px] uppercase tracking-widest text-[var(--mist)] text-right">Total Orders</th>
+                                <th class="py-4 px-8 font-mono text-[9px] uppercase tracking-widest text-[var(--mist)] text-right">Total Spend</th>
+                                <th class="py-4 px-8 font-mono text-[9px] uppercase tracking-widest text-[var(--mist)]">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-[var(--rule)]">
+                            <tr class="hover:bg-[#fcfaf7] transition-colors group">
+                                <td class="py-5 px-8 font-mono text-xs text-[var(--smoke)]">#USR-8821</td>
+                                <td class="py-5 px-8">
+                                    <div class="flex flex-col">
+                                        <b class="text-sm font-bold text-[var(--ink)]">Alexander Sterling</b>
+                                        <span class="text-[11px] text-[var(--mist)]">a.sterling@email.com</span>
+                                    </div>
+                                </td>
+                                <td class="py-5 px-8 text-center font-mono text-xs">May 07, 2026</td>
+                                <td class="py-5 px-8 text-right font-mono text-sm">12</td>
+                                <td class="py-5 px-8 text-right font-mono text-sm font-bold">$412.50</td>
+                                <td class="py-5 px-8">
+                                    <span class="text-[9px] font-mono text-[var(--ink)] bg-[var(--accent-strong)] px-2 py-1 border border-[var(--accent-strong)] uppercase font-bold">VIP</span>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-[#fcfaf7] transition-colors group">
+                                <td class="py-5 px-8 font-mono text-xs text-[var(--smoke)]">#USR-8822</td>
+                                <td class="py-5 px-8">
+                                    <div class="flex flex-col">
+                                        <b class="text-sm font-bold text-[var(--ink)]">Elena Rodriguez</b>
+                                        <span class="text-[11px] text-[var(--mist)]">elena.ro@email.com</span>
+                                    </div>
+                                </td>
+                                <td class="py-5 px-8 text-center font-mono text-xs text-[var(--accent-strong)] font-bold">Today</td>
+                                <td class="py-5 px-8 text-right font-mono text-sm">1</td>
+                                <td class="py-5 px-8 text-right font-mono text-sm font-bold">$24.00</td>
+                                <td class="py-5 px-8">
+                                    <span class="text-[9px] font-mono text-green-600 bg-green-50 px-2 py-1 border border-green-100 uppercase">New Signup</span>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-[#fcfaf7] transition-colors group">
+                                <td class="py-5 px-8 font-mono text-xs text-[var(--smoke)]">#USR-8790</td>
+                                <td class="py-5 px-8">
+                                    <div class="flex flex-col">
+                                        <b class="text-sm font-bold text-[var(--ink)]">Marcus Thorne</b>
+                                        <span class="text-[11px] text-[var(--mist)]">m.thorne@email.com</span>
+                                    </div>
+                                </td>
+                                <td class="py-5 px-8 text-center font-mono text-xs">Apr 28, 2026</td>
+                                <td class="py-5 px-8 text-right font-mono text-sm">24</td>
+                                <td class="py-5 px-8 text-right font-mono text-sm font-bold">$892.10</td>
+                                <td class="py-5 px-8">
+                                    <span class="text-[9px] font-mono text-[var(--mist)] bg-[var(--canvas)] px-2 py-1 border border-[var(--rule)] uppercase">Standard</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="pagination pb-10">
+                <button class="page-link">← Prev</button>
+                <button class="page-link active">1</button>
+                <button class="page-link">2</button>
+                <button class="page-link">3</button>
+                <button class="page-link">Next →</button>
+            </div>
+        </section>
+    </div>
+</main>
+</body>
+</html>
