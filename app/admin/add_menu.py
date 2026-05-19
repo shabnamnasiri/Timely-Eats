@@ -173,3 +173,6 @@ def register_admin_add_menu_routes(app, mysql):
             flash(f"Error deleting item: {str(e)}", "danger")
 
         return redirect(url_for('admin_menu'))
+
+
+        # ── logout and terminate session ──
