@@ -1,0 +1,210 @@
+{% from 'macros/toast.html' import render_toast %}
+{% from 'macros/toast_script.html' import render_toast_script %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Employee Order History | System</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght=0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Mono:wght@300;400;500&family=Bebas+Neue&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/Revenue.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/toast.css') }}">
+</head>
+
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <b>Timely<span>Eats</span></b>
+    <small>Internal Terminal v2.0</small>
+  </div>
+  <div class="sidebar-section">Live Feed</div>
+  <ul class="sidebar-nav">
+    <li><a href="/staff/orders"><i class="ico">⬢</i> Live Orders</a></li>
+    <li><a href="/staff/qr"><i class="ico">▣</i> QR Generator</a></li>
+    <li><a href="/staff/order_hist" class="active"><i class="ico">⬢</i> Order history</a></li>
+  </ul>
+
+  {% if staff_name %}
+  <div class="sidebar-user">
+    <small>Active Staff</small>
+    <span style="color: var(--paper); font-weight: 500;">{{ staff_name }}</span>
+    <a href="/logout" style="display: block; margin-top: 8px; color: #e74c3c; font-family: 'DM Mono'; font-size: 11px; text-decoration: none;">⏻ Logout</a>
+  </div>
+  {% endif %}
+</aside>
+
+<main class="main">
+
+  <header class="topbar">
+    <h1>Archive Logs</h1>
+  </header>
+
+  {{ render_toast() }}
+
+  <div class="content">
+    <section style="flex:2;">
+      <div class="panel">
+        <span class="label">Historical Workspace Log Management</span>
+
+        <div style="display: flex; gap: 10px; margin-bottom: 25px; align-items: center; flex-wrap: wrap;">
+          <input id="searchUserInput" type="text" placeholder="Search by Customer Name..." style="flex: 2; min-width: 200px; padding:10px; border:1px solid var(--rule); background:transparent; font-family:'DM Mono'; color: var(--ink);">
+
+          <select id="timeFilter" style="flex: 1; min-width: 160px; padding:10px; border:1px solid var(--rule); background:transparent; font-family:'DM Mono'; color: var(--ink);">
+            <option value="all">Time Range: All History</option>
+            <option value="today">Today</option>
+            <option value="week">Past 7 Days</option>
+          </select>
+
+          <select id="tableSort" style="flex: 1; min-width: 160px; padding:10px; border:1px solid var(--rule); background:transparent; font-family:'DM Mono'; color: var(--ink);">
+            <option value="newest">Date: Newest Workspace</option>
+            <option value="oldest">Date: Oldest Workspace</option>
+          </select>
+        </div>
+
+        <div id="historyContainer">
+          </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<script>
+  // Complete history matrix compiled down from data layers
+  const archivedSessions = [
+    {% for s in sessions %}
+    {
+      session_id: {{ s.session_id }},
+      table_number: {{ s.table_number }},
+      created_at: "{{ s.created_at }}",
+      formatted_date: "{{ s.formatted_date }}",
+      total_bill: {{ s.total_session_bill }},
+      customers: "{{ s.customer_list_string|replace('"', '\\"') }}",
+      orders: [
+        {% for o in s.orders %}
+        {
+          order_id: {{ o.order_id }},
+          status: "{{ o.status }}",
+          customer: "{{ o.customer|replace('"', '\\"') }}",
+          amount: {{ o.amount }},
+          summary: "{{ o.summary|replace('"', '\\"') }}"
+        }{% if not loop.last %},{% endif %}
+        {% endfor %}
+      ]
+    }{% if not loop.last %},{% endif %}
+    {% endfor %}
+  ];
+
+  const targetContainer = document.getElementById("historyContainer");
+
+  function renderHistoryTree(dataset) {
+    targetContainer.innerHTML = "";
+
+    if (dataset.length === 0) {
+      targetContainer.innerHTML = `
+        <div style="padding: 50px 0; border: 1px dashed var(--rule); text-align: center; background: #fff;">
+          <b style="font-family: 'Bebas Neue'; font-size: 22px; color: var(--mist);">No Archival Matches Found</b>
+          <p style="margin: 5px 0 0 0; font-size: 11px; color: var(--smoke); font-family: 'DM Mono';">Adjust filter criteria parameters.</p>
+        </div>`;
+      return;
+    }
+
+    dataset.forEach(session => {
+      let ordersHTML = "";
+
+      session.orders.forEach(order => {
+        const isCancelled = order.status === "cancelled";
+        ordersHTML += `
+          <div style="padding: 12px; border: 1px solid var(--rule); background: var(--paper); display: flex; flex-direction: column; gap: 4px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <strong style="font-size: 13px; color: var(--ink);">Ticket #${order.order_id} — <span style="font-weight: 400; color: var(--smoke);">${order.customer}</span></strong>
+              <span style="font-family:'DM Mono'; font-size: 9px; text-transform: uppercase; padding: 2px 6px; border: 1px solid; border-color: ${isCancelled?'#e74c3c':'#27ae60'}; color: ${isCancelled?'#e74c3c':'#27ae60'};">
+                ${order.status}
+              </span>
+            </div>
+            <p style="margin: 4px 0; font-size: 12px; color: var(--smoke); font-family:'DM Sans'; line-height:1.3;">${order.summary}</p>
+            <div style="text-align: right; font-family: 'DM Mono'; font-size: 11px; color: var(--ink); border-top: 1px dashed var(--rule); padding-top: 4px; margin-top: 2px;">
+              Total: <b>$${order.amount.toFixed(2)}</b>
+            </div>
+          </div>
+        `;
+      });
+
+      const sessionCard = `
+        <div style="margin-bottom: 25px; border: 1px solid var(--rule); background: #fff; padding: 20px;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid var(--ink); padding-bottom: 8px; margin-bottom: 15px;">
+            <div>
+              <span style="font-family:'Bebas Neue'; font-size: 24px; color: var(--ink); letter-spacing: 0.5px;">ORDER FOR TABLE ${session.table_number}</span>
+              <span style="font-family: 'DM Mono'; font-size: 11px; color: var(--smoke); display: block;">Session Logs: ${session.formatted_date} • ID: #${session.session_id}</span>
+            </div>
+            <div style="text-align: right;">
+              <small style="font-family: 'DM Mono'; font-size: 9px; color: var(--mist); display: block; text-transform: uppercase;">Workspace Total Spent</small>
+              <strong style="font-family: 'Bebas Neue'; font-size: 24px; color: #c8933a;">$${session.total_bill.toFixed(2)}</strong>
+            </div>
+          </div>
+
+          <div style="margin-bottom: 12px; font-family: 'DM Mono'; font-size: 11px; color: var(--smoke);">
+            <strong>Buyers in Session:</strong> ${session.customers || 'Anonymous'}
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px;">
+            ${ordersHTML}
+          </div>
+        </div>
+      `;
+      targetContainer.innerHTML += sessionCard;
+    });
+  }
+
+  function applyWorkspaceFilters() {
+    const searchVal = document.getElementById("searchUserInput").value.trim().toLowerCase();
+    const timeRange = document.getElementById("timeFilter").value;
+    const sortOrder = document.getElementById("tableSort").value;
+
+    let filtered = archivedSessions.filter(s => {
+      // 1. Text Search matching buyers inside the nested matrix
+      if (searchVal && !s.customers.toLowerCase().includes(searchVal)) {
+        return false;
+      }
+
+      // 2. Structural Time filter calculations
+      if (timeRange !== "all" && s.created_at) {
+        const sessionDate = new Date(s.created_at);
+        const boundaryDate = new Date();
+
+        if (timeRange === "today") {
+          return sessionDate.toDateString() === boundaryDate.toDateString();
+        } else if (timeRange === "week") {
+          boundaryDate.setDate(boundaryDate.getDate() - 7);
+          return sessionDate >= boundaryDate;
+        }
+      }
+      return true;
+    });
+
+    # Sort logic configurations
+    filtered.sort((a, b) => {
+      const timeA = a.created_at ? new Date(a.created_at).getTime() : 0;
+      const timeB = b.created_at ? new Date(b.created_at).getTime() : 0;
+      return sortOrder === "newest" ? timeB - timeA : timeA - timeB;
+    });
+
+    renderHistoryTree(filtered);
+  }
+
+  // Bind interface pipeline inputs
+  document.getElementById("searchUserInput").addEventListener("input", applyWorkspaceFilters);
+  document.getElementById("timeFilter").addEventListener("change", applyWorkspaceFilters);
+  document.getElementById("tableSort").addEventListener("change", applyWorkspaceFilters);
+
+  // Bootup initial layout pipeline
+  applyWorkspaceFilters();
+</script>
+
+{{ render_toast_script() }}
+
+</body>
+</html>
