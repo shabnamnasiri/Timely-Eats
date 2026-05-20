@@ -37,10 +37,21 @@
         <span class="font-mono-custom text-[9px] tracking-widest uppercase text-[#7a7a7a] hidden xs:inline">Table</span>
         <strong class="font-bebas text-lg tracking-wider text-[#f9f7f4] bg-[#c8933a] px-3 py-0.5 font-normal rounded-sm">{{ table_number or '?' }}</strong>
       </div>
+<a href="/Customer/Cart?session_id={{ session_id }}" class="relative inline-flex items-center justify-center gap-2 p-2 text-[#b0b0b0] hover:text-[#c8933a] transition-all duration-200 group" aria-label="Shopping Cart">
 
-      <a href="/Customer/Cart?session_id={{ session_id }}" class="font-mono-custom text-xs md:text-sm tracking-widest uppercase text-[#b0b0b0] hover:text-[#c8933a] transition-colors">
-        ⊡ Cart
-      </a>
+  <span class="font-mono-custom text-xs md:text-sm tracking-widest uppercase">Cart</span>
+
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 transition-transform group-hover:scale-105">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+  </svg>
+
+  {% if session.get('cart_count', 0) > 0 %}
+  <span class="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-[#c8933a] font-mono-custom text-[9px] font-bold text-[#0e0e0e] shadow-xs ring-2 ring-[#0e0e0e]">
+    {{ session['cart_count'] }}
+  </span>
+  {% endif %}
+
+</a>
 
       <div class="relative group">
         <button class="flex items-center justify-center w-8 h-8 rounded-full border border-[#c8933a] bg-[#1a1a1a] text-[#c8933a] hover:bg-[#c8933a] hover:text-[#0e0e0e] transition-all cursor-pointer focus:outline-hidden" aria-label="User Menu">

@@ -19,10 +19,11 @@ from app.staff.api.staff_api import register_staff_api
 from app.staff.session_routes import register_session_routes
 from app.customer.profile import register_profile_routes
 from app.customer.order_history import register_order_history_routes
+from app.customer.loyalty import register_loyalty_routes
+from app.staff.orders import register_staff_order_routes
 
 template_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "app", "templates")
 static_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "app", "static")
-
 app = Flask(__name__, template_folder=template_path, static_folder=static_path)
 app.secret_key = "secret_key_123"
 app.config['MYSQL_HOST'] = 'localhost'
@@ -32,7 +33,7 @@ app.config['MYSQL_DB'] = 'timlyeats'
 app.config['MYSQL_PORT'] = 3306
 
 mysql = MySQL(app)
-
+register_staff_order_routes(app, mysql)
 register_login_routes(app, mysql)
 register_register_routes(app, mysql)
 register_menu_routes(app, mysql)
@@ -47,6 +48,7 @@ register_staff_api(app, mysql)
 register_session_routes(app, mysql)
 register_profile_routes(app, mysql)
 register_order_history_routes(app,mysql)
+register_loyalty_routes(app, mysql)
 @app.route("/")
 def home():
     if "user_id" in session:

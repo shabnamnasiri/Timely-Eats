@@ -181,6 +181,27 @@ CREATE TABLE `user` (
   `loyalty_point` int DEFAULT '0',
   `email` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+CREATE TABLE `coupons` (
+  `coupon_id` int NOT NULL AUTO_INCREMENT,
+  `user_id` int NOT NULL,
+  `code` varchar(20) NOT NULL,
+  `discount_amount` decimal(10,2) DEFAULT '5.00',
+  `status` enum('available', 'used', 'expired') DEFAULT 'available',
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `used_at` datetime DEFAULT NULL,
+  `order_id` int DEFAULT NULL, -- Links to orders if status is 'used'
+  PRIMARY KEY (`coupon_id`)
+);
+
+CREATE TABLE `loyalty_history` (
+  `history_id` int NOT NULL AUTO_INCREMENT,
+  `user_id` int NOT NULL,
+  `points_changed` int NOT NULL, -- e.g., +15 for earning, -100 for redeeming
+  `transaction_type` enum('earned', 'redeemed') NOT NULL,
+  `description` varchar(255) NOT NULL, -- e.g., "Earned from Order #102" or "Redeemed for Coupon"
+  `timestamp` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`history_id`)
+);
 
 --
 -- Indexes for dumped tables

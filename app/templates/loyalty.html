@@ -1,0 +1,149 @@
+{% from 'macros/toast.html' import render_toast %}
+{% from 'macros/toast_script.html' import render_toast_script %}
+
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Timely Eats — Loyalty Hub</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+
+  <style>
+    body { font-family: 'DM Sans', sans-serif; }
+    .font-bebas { font-family: 'Bebas Neue', sans-serif; }
+    .font-mono-custom { font-family: 'DM Mono', monospace; }
+  </style>
+</head>
+<body class="bg-[#f9f7f4] text-[#0e0e0e] antialiased min-h-full pb-12">
+
+  <header class="bg-[#0e0e0e] text-white py-6 px-6 md:px-12 border-b-2 border-[#c8933a] sticky top-0 z-50 shadow-md">
+    <div class="max-w-6xl mx-auto flex justify-between items-center">
+      <a href="/menu" class="no-underline text-white flex flex-col line-height-[1.1] group">
+        <div class="font-bebas text-2xl tracking-wider">Timely<span class="text-[#c8933a]">Eats</span></div>
+      </a>
+      <a href="/menu" class="font-mono-custom text-xs uppercase tracking-wider bg-[#c8933a] text-[#0e0e0e] px-4 py-2 hover:bg-white hover:text-[#0e0e0e] transition-colors rounded-xs">
+        ← Back To Menu
+      </a>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-10">
+
+    <div class="bg-white border border-[#d4cfc6] rounded-xs p-6 mb-10 grid grid-cols-1 md:grid-cols-3 gap-6 items-center shadow-sm relative overflow-hidden">
+      <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-[#c8933a]"></div>
+
+      <div class="md:col-span-2 space-y-3">
+        <h1 class="text-3xl font-bold tracking-tight text-[#0e0e0e]">Loyalty Status</h1>
+        <p class="text-sm text-[#3d3d3d]">Every dollar spent earns you points balance toward unlocking major menu coupons.</p>
+
+        <div class="pt-2">
+          <div class="flex justify-between font-mono-custom text-xs text-[#7a7a7a] uppercase mb-1">
+            <span>Milestone Progress</span>
+            <span>{{ progress_percentage }}%</span>
+          </div>
+          <div class="h-3 bg-[#f3f0ea] border border-[#d4cfc6] w-full rounded-full overflow-hidden">
+            <div class="h-full bg-[#c8933a] rounded-full transition-all duration-700" style="width: {{ progress_percentage }}%;"></div>
+          </div>
+          <p class="text-xs italic text-[#7a7a7a] mt-1.5">Collect <b>{{ points_to_next_reward }}</b> more points to auto-generate your next $5.00 coupon reward.</p>
+        </div>
+      </div>
+
+      <div class="bg-[#0e0e0e] border border-[#0e0e0e] p-5 text-center rounded-xs md:justify-self-end w-full md:w-48">
+        <span class="block font-mono-custom text-[10px] text-[#b0b0b0] uppercase tracking-widest">Active Balance</span>
+        <span class="text-5xl font-bebas tracking-wide text-[#c8933a] block my-1">{{ current_points }}</span>
+        <span class="block font-mono-custom text-[9px] text-[#7a7a7a] uppercase tracking-wider">Points Available</span>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start mb-12">
+
+      <div class="lg:col-span-2 space-y-6">
+        <h2 class="text-xl font-bold tracking-tight text-[#0e0e0e] border-b border-[#d4cfc6] pb-3">Your Available Coupons</h2>
+
+        {% if not available_coupons %}
+        <div class="bg-white border border-[#d4cfc6] rounded-xs p-8 text-center shadow-xs">
+          <p class="text-sm text-[#7a7a7a]">No active reward vouchers unlocked yet.</p>
+        </div>
+        {% else %}
+        <div class="grid gap-4 sm:grid-cols-2">
+          {% for coupon in available_coupons %}
+          <div class="bg-white border-2 border-dashed border-[#c8933a] p-5 rounded-xs shadow-xs relative flex justify-between items-center bg-radial from-amber-50/20 to-white">
+            <div>
+              <span class="font-mono-custom text-[9px] uppercase tracking-wider text-[#7a7a7a]">Reward Voucher</span>
+              <div class="text-2xl font-bebas text-[#0e0e0e] mt-0.5">${{ "%.2f"|format(coupon.discount_amount) }} OFF</div>
+              <span class="text-[11px] font-mono-custom text-[#b0b0b0] block mt-2">Issued: {{ coupon.date_created }}</span>
+            </div>
+            <div class="text-right">
+              <span class="block font-mono-custom text-[10px] font-bold text-[#0e0e0e] bg-[#f3f0ea] border border-[#d4cfc6] px-2.5 py-1 select-all select-all tracking-wider rounded-xs">
+                {{ coupon.code }}
+              </span>
+              <small class="text-[8px] font-mono-custom uppercase tracking-widest text-[#b0b0b0] block mt-1">Copy code at checkout</small>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        <h2 class="text-xl font-bold tracking-tight text-[#0e0e0e] border-b border-[#d4cfc6] pb-3 pt-4">Used Coupon Receipts</h2>
+        {% if not used_coupons %}
+        <p class="text-xs text-[#7a7a7a] italic">No archived coupon vouchers on record.</p>
+        {% else %}
+        <div class="bg-white border border-[#d4cfc6] rounded-xs divide-y divide-[#f3f0ea] shadow-xs">
+          {% for coupon in used_coupons %}
+          <div class="p-4 flex justify-between items-center text-sm">
+            <div class="flex items-center gap-3">
+              <span class="text-lg opacity-60">🎟️</span>
+              <div>
+                <span class="font-mono-custom font-medium text-xs text-[#3d3d3d] line-through">{{ coupon.code }}</span>
+                <span class="block text-[11px] text-[#7a7a7a]">Redeemed on Order #{{ coupon.order_id }}</span>
+              </div>
+            </div>
+            <div class="text-right">
+              <span class="font-mono-custom text-xs font-semibold text-emerald-700">- ${{ "%.2f"|format(coupon.discount_amount) }}</span>
+              <span class="block text-[10px] text-[#b0b0b0] mt-0.5">{{ coupon.date_used }}</span>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+
+      <div class="space-y-6">
+        <h2 class="text-xl font-bold tracking-tight text-[#0e0e0e] border-b border-[#d4cfc6] pb-3">Points Ledger</h2>
+
+        {% if not points_ledger %}
+        <div class="bg-white border border-[#d4cfc6] p-6 text-center text-xs text-[#7a7a7a] italic">
+          No point activity logs found for this profile.
+        </div>
+        {% else %}
+        <div class="bg-white border border-[#d4cfc6] rounded-xs p-4 space-y-4 max-h-[500px] overflow-y-auto shadow-xs">
+          {% for log in points_ledger %}
+          <div class="flex justify-between items-start text-xs pb-3 border-b border-[#f3f0ea] last:border-b-0 last:pb-0">
+            <div>
+              <p class="font-medium text-[#0e0e0e]">{{ log.description }}</p>
+              <span class="text-[10px] font-mono-custom text-[#b0b0b0] mt-0.5 block">{{ log.date_logged }}</span>
+            </div>
+            <div class="text-right">
+              <span class="font-mono-custom font-bold text-sm {% if log.transaction_type == 'earned' %} text-emerald-600 {% else %} text-rose-600 {% endif %}">
+                {% if log.transaction_type == 'earned' %}+{% endif %}{{ log.points_changed }}
+              </span>
+              <small class="block text-[8px] font-mono-custom uppercase tracking-wider text-[#b0b0b0]">{{ log.transaction_type }}</small>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+
+    </div>
+  </main>
+
+  <div class="text-[11px] font-mono-custom uppercase tracking-wider text-[#b0b0b0] text-center w-full mt-12">
+    © 2026 Timely Eats
+  </div>
+
+  {{ render_toast_script() }}
+</body>
+</html>
