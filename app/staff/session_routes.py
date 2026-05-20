@@ -2,8 +2,8 @@ import qrcode
 import os
 from flask import jsonify, redirect, render_template, request, flash
 
-def register_session_routes(app, mysql):
 
+def register_session_routes(app, mysql):
     # 🔹 PRINT QR PAGE
     @app.route('/staff/print/<int:session_id>')
     def print_qr(session_id):
@@ -29,16 +29,18 @@ def register_session_routes(app, mysql):
             qr_code=f"qrcodes/session_{session_id}.png"
         )
 
-    # =========================
-    # GET ALL SESSIONS
-    # =========================
+    # ==========================================================
+    # GET ALL ACTIVE SESSIONS (Excludes closed/inactive rows)
+    # ==========================================================
     @app.route('/staff/sessions')
     def get_sessions():
         cursor = mysql.connection.cursor()
 
+        # Added WHERE clause so old closed sessions disappear from your live dashboards
         cursor.execute("""
             SELECT session_id, table_number, status, created_at
             FROM Table_Session
+            WHERE LOWER(status) = 'active'
             ORDER BY session_id DESC
         """)
 
@@ -55,7 +57,6 @@ def register_session_routes(app, mysql):
 
         return jsonify(data)
 
-
     # =========================
     # QR PAGE
     # =========================
@@ -63,28 +64,23 @@ def register_session_routes(app, mysql):
     def staff_qr_page():
         return render_template('EmpQR.html')
 
-
-    # =========================
-    # START SESSION (UPDATED)
-    # =========================
+    # ==========================================================
+    # START SESSION (Overwrites previous session to prevent duplicates)
+    # ==========================================================
     @app.route('/staff/start-session/<int:table_number>', methods=['POST'])
     def start_session(table_number):
         cursor = mysql.connection.cursor()
 
-        # 🔴 NEW PART: CHECK IF ACTIVE SESSION EXISTS
+        # 🔄 AUTOMATIC OVERWRITE: Deactivate any existing active sessions for this table first
+        # This keeps your history safe for analytics but clears it from active views
         cursor.execute("""
-            SELECT * FROM Table_Session
-            WHERE table_number=%s AND status='active'
+            UPDATE Table_Session 
+            SET status = 'closed' 
+            WHERE table_number = %s AND status = 'active'
         """, (table_number,))
+        mysql.connection.commit()
 
-        existing = cursor.fetchone()
-
-        if existing:
-            return jsonify({
-                "message": "Table already has an active session"
-            }), 400
-
-        # 🟢 CREATE NEW SESSION
+        # 🟢 SAFELY CREATE FRESH NEW ACTIVE SESSION
         cursor.execute("""
             INSERT INTO Table_Session (table_number, status)
             VALUES (%s, 'active')
@@ -121,11 +117,10 @@ def register_session_routes(app, mysql):
         mysql.connection.commit()
 
         return jsonify({
-            "message": "Session started",
+            "message": "Session started successfully",
             "session_id": session_id,
             "qr_code": public_path
         })
-    
 
     # =========================
     # CLOSE SESSION
@@ -134,6 +129,7 @@ def register_session_routes(app, mysql):
     def close_session(session_id):
         cursor = mysql.connection.cursor()
 
+        # Double check if any open orders remain unfinished
         cursor.execute("""
             SELECT COUNT(*)
             FROM orders
@@ -145,11 +141,12 @@ def register_session_routes(app, mysql):
         if open_order_count:
             cursor.close()
             flash("Finish all orders before closing this session.", "warning")
-            return redirect(request.referrer)
+            return redirect(request.referrer or '/staff/orders')
 
+        # Setting status to 'closed' drops it out of 'active' live feeds instantly
         cursor.execute("UPDATE Table_Session SET status='closed' WHERE session_id=%s", (session_id,))
         mysql.connection.commit()
         cursor.close()
 
         flash("Session closed successfully.", "success")
-        return redirect(request.referrer)
+        return redirect(request.referrer or '/staff/orders')
