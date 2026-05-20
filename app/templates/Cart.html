@@ -37,11 +37,9 @@
   {{ render_toast() }}
 
   <div class="max-w-[1500px] mx-auto p-4 sm:p-6 md:p-10">
-
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
 
       <div class="lg:col-span-2 space-y-8">
-
         <div>
           <span class="font-mono-custom text-[10px] tracking-[0.28em] uppercase text-[#c8933a] block mb-1">Your Selection</span>
           <h2 class="font-bebas text-3xl tracking-wide text-[#0e0e0e] mb-5">Order Summary</h2>
@@ -118,9 +116,11 @@
             {% endif %}
           </form>
         </div>
-
       </div>
-<div class="bg-white border border-[#d4cfc6] p-5 sm:p-6 shadow-xs">
+
+      <div class="space-y-6 lg:sticky lg:top-24">
+
+        <div class="bg-white border border-[#d4cfc6] p-5 sm:p-6 shadow-xs">
           <span class="font-mono-custom text-[10px] tracking-widest uppercase text-[#c8933a] block mb-3">Bill Breakdown</span>
 
           <div class="divide-y divide-[#d4cfc6] text-sm">
@@ -149,14 +149,10 @@
           </p>
         </div>
 
-      </div></div></div>
-      <div class="space-y-6 lg:sticky lg:top-24">
-
         <div class="bg-[#0e0e0e] border border-[#0e0e0e] p-5 sm:p-6 shadow-sm">
           <h3 class="font-bebas text-2xl tracking-wide text-[#f9f7f4] mb-4">Payment Method</h3>
 
           <form method="POST" action="/Customer/PlaceOrder">
-
             <div class="flex flex-col gap-1.5 mb-5">
               <label class="flex items-center gap-4 p-4 border border-white/10 bg-white/[0.03] text-[#b0b0b0] hover:border-white/30 hover:text-white transition-all cursor-pointer group">
                 <input class="hidden peer" type="radio" name="payment_method" id="pay-cash" value="cash" checked>
@@ -208,7 +204,6 @@
               {% if loyalty_discount_active %}
               <div class="flex items-center justify-between pt-3 border-t border-white/10 gap-2">
                 <p class="text-xs text-white">Redeem {{ (loyalty_points // 100) * 100 }} pts → <span class="text-[#c8933a] font-bold">${{ loyalty_discount }}</span> off</p>
-
                 <label class="flex items-center gap-2 cursor-pointer select-none">
                   <input type="checkbox" name="redeem_points" id="redeem-toggle" class="accent-[#c8933a] h-4 w-4 rounded-sm" />
                   <span class="font-mono-custom text-[9px] uppercase tracking-wider text-[#b0b0b0]">Apply</span>
@@ -227,10 +222,11 @@
           </form>
         </div>
 
-
+      </div>
+    </div>
+  </div>
 
   <script>
-    // Handle conditional card payment field visibility explicitly
     const cardRadio = document.getElementById('pay-card');
     const cashRadio = document.getElementById('pay-cash');
     const cardFields = document.getElementById('card-fields-container');
@@ -248,7 +244,6 @@
     if(cardRadio && cashRadio) {
       cardRadio.addEventListener('change', toggleCardFields);
       cashRadio.addEventListener('change', toggleCardFields);
-      // Run once on load to establish default states safely
       toggleCardFields();
     }
   </script>

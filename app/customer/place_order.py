@@ -4,7 +4,6 @@ import MySQLdb.cursors
 
 
 def register_customer_place_order_routes(app, mysql):
-
     @app.route('/Customer/PlaceOrder', methods=['POST'])
     def place_order():
         user_id = session.get('user_id')
@@ -16,7 +15,7 @@ def register_customer_place_order_routes(app, mysql):
 
         if not session_id:
             flash("No table session found. Please scan the QR code on your table.", "warning")
-            return redirect('/signin') 
+            return redirect('/signin')
 
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
 
@@ -106,6 +105,7 @@ def register_customer_place_order_routes(app, mysql):
             session_id
         ))
         order_id = cursor.lastrowid
+
         # Insert order_details
         for item in cart_items:
             cursor.execute("""
@@ -121,7 +121,7 @@ def register_customer_place_order_routes(app, mysql):
 
         # Insert payment
         cursor.execute("""
-            INSERT INTO payment (order_id, payment_method,payment_status, date)
+            INSERT INTO payment (order_id, payment_method, payment_status, date)
             VALUES (%s, %s, %s, %s)
         """, (order_id, payment_method, payment_status, datetime.now()))
 
@@ -130,9 +130,15 @@ def register_customer_place_order_routes(app, mysql):
             UPDATE cart SET status = 'closed'
             WHERE cart_id = %s
         """, (cart_id,))
-        
+
+        # 🔥 FIX 1: Explicitly drop items from cart_item table to empty out the cart content fields
+        cursor.execute("""
+            DELETE FROM cart_item 
+            WHERE cart_id = %s
+        """, (cart_id,))
+
         points_used = 0
-        # ✅ Update loyalty points
+        # Update loyalty points
         if redeem and current_points >= 100:
             points_used = (current_points // 100) * 100  # deduct full blocks only
             cursor.execute("""
@@ -147,8 +153,9 @@ def register_customer_place_order_routes(app, mysql):
                 WHERE user_id = %s
             """, (points_earned, user_id))
 
-        # ✅ Update session so cart page shows new points immediately
-        session['loyalty_points'] = current_points - (points_used if redeem and current_points >= 100 else 0) + points_earned
+        # Update session so cart page shows new points immediately
+        session['loyalty_points'] = current_points - (
+            points_used if redeem and current_points >= 100 else 0) + points_earned
 
         mysql.connection.commit()
         cursor.close()
@@ -158,4 +165,5 @@ def register_customer_place_order_routes(app, mysql):
         else:
             flash(f"Order placed! You earned {points_earned} loyalty points.", "success")
 
-        return redirect('/Customer/Cart')
+        # ✅ FIX 2: Dynamic redirect straight to the custom customer order history panel
+        return redirect('/customer/order_history')

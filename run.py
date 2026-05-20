@@ -17,6 +17,9 @@ from app.admin.add_menu import register_admin_add_menu_routes
 from app.admin.add_staff import register_admin_add_staff_routes
 from app.staff.api.staff_api import register_staff_api
 from app.staff.session_routes import register_session_routes
+from app.customer.profile import register_profile_routes
+from app.customer.order_history import register_order_history_routes
+
 template_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "app", "templates")
 static_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "app", "static")
 
@@ -42,9 +45,8 @@ register_customer_place_order_routes(app,mysql)
 register_admin_add_staff_routes(app, mysql)
 register_staff_api(app, mysql)
 register_session_routes(app, mysql)
-
-
-
+register_profile_routes(app, mysql)
+register_order_history_routes(app,mysql)
 @app.route("/")
 def home():
     if "user_id" in session:
