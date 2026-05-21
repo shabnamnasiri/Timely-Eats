@@ -124,7 +124,8 @@
                         <div class="item-cat {{ table_session.status }}">T{{ table_session.table_number }}</div>
                         <div class="item-info">
                             <strong>Session #{{ table_session.session_id }}</strong>
-                        <span>Status: {{ table_session.status|title }} • Orders: {{ table_session.order_count }}</span>                        </div>
+                            <span>Status: {{ table_session.status|title }} • Orders: {{ table_session.order_count }}</span>
+                        </div>
                         <div class="item-actions">
                             <form method="POST" action="/staff/close-session/{{ table_session.session_id }}">
                                 <button type="submit" class="btn-icon">Close Session</button>
@@ -132,6 +133,26 @@
                         </div>
                     </div>
                     {% endfor %}
+                </div>
+
+                <span class="label label-closed">Closed Table Sessions</span>
+                <div class="item-list">
+                    {% if closed_sessions %}
+                        {% for table_session in closed_sessions %}
+                            <div class="item-row closed" style="--i: {{ loop.index }}">
+                                <div class="item-cat closed">T{{ table_session.table_number }}</div>
+                                <div class="item-info">
+                                    <strong>Session #{{ table_session.session_id }}</strong>
+                                    <span>Status: {{ table_session.status|title }} • Orders: {{ table_session.order_count }}</span>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty">
+                            <b>No closed sessions yet</b>
+                            <span>Closed sessions appear here automatically after staff closes a session.</span>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
 
