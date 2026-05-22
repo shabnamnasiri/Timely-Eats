@@ -252,6 +252,9 @@ background: linear-gradient(
     .item-cat.sides    { background: #0e1e0e; color: #ffffff; }
     .item-cat.desserts { background: #2e1a1a; color: #ffffff; }
     .item-cat.drinks   { background: #0e1e2e; color: #ffffff; }
+    .item-cat.closed   { background: #c53030; color: #ffffff; }
+    .item-row.closed  { border-color: #f5c6cb; background: #fff1f1; }
+    .label.closed     { color: #c53030; }
 
     .item-info { flex: 1; min-width: 0; }
     .item-info strong { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: .04em; display: block; line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
