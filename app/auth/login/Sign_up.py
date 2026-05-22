@@ -67,8 +67,8 @@ def register_register_routes(app, mysql):
                 cursor.execute("SELECT user_id FROM User WHERE username=%s", (username,))
                 new_user = cursor.fetchone()
 
-            except IntegrityError:
-                flash("Database error", "error")
+            except IntegrityError as e:
+                flash(f"Database error: {e}", "error")
                 return render_template("Sign_up.html", form_data=form_data)
             finally:
                 cursor.close()

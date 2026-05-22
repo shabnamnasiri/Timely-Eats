@@ -5,6 +5,7 @@ pymysql.install_as_MySQLdb()
 from flask import Flask, session, redirect, render_template
 from flask_mysqldb import MySQL
 from app.auth.auth import login_required, role_required
+from app.customer.order_notifications import register_notification_routes
 from app.auth.login.Sign_in import register_login_routes
 from app.auth.login.Sign_up import register_register_routes
 from app.customer.scan import register_scan_routes
@@ -18,6 +19,7 @@ from app.admin.add_staff import register_admin_add_staff_routes
 from app.staff.api.staff_api import register_staff_api
 from app.staff.session_routes import register_session_routes
 from app.staff.orders import register_staff_order_routes
+from app.auth.login.forgot_password import register_forgotpassword_routes
 template_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "app", "templates")
 static_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "app", "static")
 
@@ -27,7 +29,7 @@ app.secret_key = os.getenv("SECRET_KEY", "secret_key_123")
 
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = '22703380'
+app.config['MYSQL_PASSWORD'] = ''
 app.config['MYSQL_DB'] = 'timlyeats'
 app.config['MYSQL_PORT'] = 3306
 mysql = MySQL(app)
@@ -45,9 +47,10 @@ register_admin_add_staff_routes(app, mysql)
 register_staff_api(app, mysql)
 register_session_routes(app, mysql)
 register_staff_order_routes(app, mysql)
-
+register_forgotpassword_routes(app, mysql)
+register_notification_routes(app, mysql)
 
 
 
 if __name__ == "__main__":
-    app.run(debug=True) 
+    app.run(debug=True, threaded=True) 

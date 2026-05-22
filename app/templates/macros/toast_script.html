@@ -1,5 +1,6 @@
 {% macro render_toast_script() %}
 <script>
+  // ── Flash-тосты ───────────────────────────────────────────────────────────
   window.addEventListener("load", function () {
     const toasts = document.querySelectorAll(".popup-toast");
     toasts.forEach((toast) => {
@@ -11,5 +12,87 @@
       }, 3000);
     });
   });
+
+  // ── Звук ──────────────────────────────────────────────────────────────────
+  let audioCtx = null;
+  document.addEventListener("click", function () {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+  });
+
+  function playSound() {
+    if (!audioCtx) return;
+    try {
+      const osc  = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.6);
+      osc.start(audioCtx.currentTime);
+      osc.stop(audioCtx.currentTime + 0.6);
+    } catch(e) {}
+  }
+
+  // ── Уведомления о заказе ─────────────────────────────────────────────────
+  window.showOrderToast = function(message, category, items) {
+    const icons  = { success: "✅", warning: "⏳", info: "👨‍🍳", error: "❌" };
+    const titles = { success: "Order Ready", warning: "Order Received", info: "Being Prepared", error: "Error" };
+
+    const itemsHtml = items
+      ? `<div class="order-toast-items">${items}</div>`
+      : "";
+
+    const toast = document.createElement("div");
+    toast.className = `order-toast ${category}`;
+    toast.innerHTML = `
+      <span class="order-toast-icon">${icons[category] || "🔔"}</span>
+      <div>
+        <div class="order-toast-title">${titles[category] || "Notification"}</div>
+        <div class="order-toast-msg">${message}</div>
+        ${itemsHtml}
+      </div>
+      <button class="order-toast-close" onclick="this.parentElement.remove()">✕</button>
+    `;
+    document.body.appendChild(toast);
+    void toast.offsetWidth;
+
+    const timeout = category === "success" ? 6000 : 4000;
+    setTimeout(() => {
+      toast.style.opacity = "0";
+      toast.style.transform = "translateY(16px)";
+      toast.style.transition = "all 0.4s ease";
+      setTimeout(() => toast.remove(), 400);
+    }, timeout);
+  };
+
+  let lastStatus = {};
+
+  function checkOrders() {
+    fetch("/notifications/order-status-json")
+      .then(res => res.json())
+      .then(orders => {
+        orders.forEach(order => {
+          if (lastStatus[order.order_id] !== order.status) {
+            lastStatus[order.order_id] = order.status;
+            const categories = { pending: "warning", preparing: "info", ready: "success" };
+            window.showOrderToast(order.message, categories[order.status] || "info", order.items);
+            if (order.status === "ready") playSound();
+          }
+        });
+      })
+      .catch(() => {});
+  }
+
+  const allowedPaths = ["/menu", "/Customer/Cart", "/Customer/place-order"];
+  const currentPath = window.location.pathname;
+  const shouldPoll = allowedPaths.some(p => currentPath.startsWith(p));
+
+  if (shouldPoll) {
+    setInterval(checkOrders, 5000);
+    checkOrders();
+  }
 </script>
 {% endmacro %}
