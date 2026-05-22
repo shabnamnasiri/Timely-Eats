@@ -86,7 +86,10 @@ def get_sessions(mysql):
     """)
     rows = cursor.fetchall()
     cursor.close()
-    return rows
+
+    active_sessions = [r for r in rows if (r["status"] or "").strip().lower() == "active"]
+    closed_sessions = [r for r in rows if (r["status"] or "").strip().lower() == "closed"]
+    return active_sessions, closed_sessions
 
 
 def register_staff_order_routes(app, mysql):
@@ -97,15 +100,17 @@ def register_staff_order_routes(app, mysql):
             return block
 
         orders = get_orders(mysql)
-        sessions = get_sessions(mysql)
+        sessions, closed_sessions = get_sessions(mysql)
 
         # Count orders per status for the dashboard stats bar
+        avg_wait_minutes = int(sum(o["wait_minutes"] for o in orders) / len(orders)) if orders else 0
         stats = {
             "active_orders":    len(orders),
             "pending_orders":   sum(1 for o in orders if o["status"] == "pending"),
             "preparing_orders": sum(1 for o in orders if o["status"] == "preparing"),
             "ready_orders":     sum(1 for o in orders if o["status"] == "ready"),
-            "avg_wait":         int(sum(o["wait_minutes"] for o in orders) / len(orders)) if orders else 0,
+            "avg_wait":         avg_wait_minutes,
+            "avg_wait_minutes": avg_wait_minutes,
         }
 
         return render_template(
@@ -113,6 +118,7 @@ def register_staff_order_routes(app, mysql):
             orders=orders,
             stats=stats,
             sessions=sessions,
+            closed_sessions=closed_sessions,
             staff_name=session.get("username", "Staff"),
             allowed_statuses=["pending", "preparing", "ready"],
         )
