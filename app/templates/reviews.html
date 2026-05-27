@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Customer Reviews</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+
+/* ===== BASE ===== */
+body {
+    margin: 0;
+    padding: 40px;
+    background: var(--paper, #fff);
+    font-family: 'DM Sans', sans-serif;
+    color: var(--ink, #111);
+}
+
+/* ===== HEADER ===== */
+.header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.header h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 40px;
+    letter-spacing: 0.1em;
+    margin: 0;
+}
+
+.header p {
+    font-size: 14px;
+    color: #777;
+}
+
+/* ===== CONTAINER ===== */
+.container {
+    max-width: 750px;
+    margin: auto;
+}
+
+/* ===== REVIEW CARD ===== */
+.review-card {
+    border: 1px solid var(--rule, #ddd);
+    background: #fff;
+    padding: 18px;
+    margin-bottom: 15px;
+    transition: 0.2s ease;
+}
+
+.review-card:hover {
+    transform: translateY(-2px);
+}
+
+/* top row */
+.review-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+/* user */
+.review-user {
+    font-weight: 600;
+    font-size: 14px;
+}
+
+/* rating */
+.review-rating {
+    color: #d4a017;
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+}
+
+/* comment */
+.review-comment {
+    font-size: 14px;
+    line-height: 1.5;
+    margin-top: 8px;
+    color: #333;
+}
+
+/* tags */
+.review-tags {
+    margin-top: 10px;
+}
+
+.tag {
+    display: inline-block;
+    font-size: 10px;
+    padding: 4px 8px;
+    border: 1px solid var(--rule, #ddd);
+    margin-right: 5px;
+    margin-top: 5px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+/* empty state */
+.empty {
+    text-align: center;
+    color: #888;
+    margin-top: 60px;
+}
+
+/* back button */
+.back {
+    display: inline-block;
+    margin-bottom: 20px;
+    font-size: 12px;
+    text-decoration: none;
+    color: var(--ink, #111);
+    border: 1px solid var(--accent, #2ecc71);
+    padding: 8px 12px;
+    transition: 0.2s;
+}
+
+.back:hover {
+    background: var(--accent, #2ecc71);
+    color: white;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <a href="javascript:history.back()" class="back">← Back</a>
+
+    <div class="header">
+        <h1>Customer Reviews</h1>
+        <p>See what others are saying</p>
+    </div>
+
+    {% if reviews %}
+
+        {% for r in reviews %}
+        <div class="review-card">
+
+            <div class="review-top">
+
+                <div class="review-user">
+                    {{ r[3] or "Guest" }}
+                </div>
+
+                <div class="review-rating">
+                    ⭐ {{ r[0] }}/5
+                </div>
+
+            </div>
+
+            <div class="review-comment">
+                {{ r[1] }}
+            </div>
+
+            {% if r[2] %}
+            <div class="review-tags">
+                {% for tag in r[2].split(',') %}
+                    <span class="tag">{{ tag }}</span>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+        </div>
+        {% endfor %}
+
+    {% else %}
+
+        <div class="empty">
+            No reviews yet for this item.
+        </div>
+
+    {% endif %}
+
+</div>
+
+</body>
+</html>

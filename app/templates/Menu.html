@@ -1,34 +1,168 @@
 {% from 'macros/toast.html' import render_toast %}
 {% from 'macros/toast_script.html' import render_toast_script %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Timely Eats — Menu · Table {{ table_number or '?' }}</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/Menu.css') }}"/>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/toast.css') }}"/>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant:ital,wght@0,400;0,600;1,300;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
-  {{ render_toast_script() }}  
+
+  <title>
+    Timely Eats — Menu · Table {{ table_number or '?' }}
+  </title>
+
+  <link rel="stylesheet"
+        href="{{ url_for('static', filename='css/Menu.css') }}"/>
+
+  <link rel="stylesheet"
+        href="{{ url_for('static', filename='css/toast.css') }}"/>
+
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant:ital,wght@0,400;0,600;1,300;1,400&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;700&display=swap"
+        rel="stylesheet"/>
+
+  {{ render_toast_script() }}
+
   <script>
     const SESSION_ID = "{{ session_id }}";
   </script>
+
+  <style>
+
+    /* rating */
+
+    .rating-box {
+      margin-top: 14px;
+
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+
+      color: #d4a017;
+      letter-spacing: .04em;
+    }
+
+    /* layout */
+
+    .card-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+
+      margin-top: 18px;
+    }
+
+    /* review buttons */
+
+    .review-btn,
+    .reviews-btn {
+      margin-top: 10px;
+      align-self: flex-start;
+
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+
+      color: var(--ink);
+      background: transparent;
+
+      border: 1px solid var(--accent);
+      padding: 10px 16px;
+
+      cursor: pointer;
+      transition: all .25s ease;
+      position: relative;
+
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    /* hover */
+
+    .review-btn:hover,
+    .reviews-btn:hover {
+      background: var(--accent);
+      color: var(--paper);
+      border-color: var(--accent);
+    }
+
+    /* click */
+
+    .review-btn:active,
+    .reviews-btn:active {
+      transform: translateY(1px);
+      opacity: 0.9;
+    }
+
+    /* animated underline */
+
+    .review-btn::after,
+    .reviews-btn::after {
+      content: '';
+
+      position: absolute;
+      left: 0;
+      bottom: 0;
+
+      width: 0%;
+      height: 1px;
+
+      background: var(--accent);
+
+      transition: width .25s ease;
+    }
+
+    .review-btn:hover::after,
+    .reviews-btn:hover::after {
+      width: 100%;
+    }
+
+  </style>
 </head>
+
 <body>
-    {{ render_toast() }}  
+
+{{ render_toast() }}
+
 <header class="topbar">
-  <div class="logo"><b>Timely<span>Eats</span></b><small>Restaurant</small></div>
-  <div class="table-badge"><span>Table</span><strong>{{ table_number or '?' }}</strong></div>
-  <a href="/Customer/Cart?session_id={{ session_id }}" class="cart">⊡ Cart</a>
-  <a href="/logout" class="cart">Logout</a>
+
+  <div class="logo">
+    <b>Timely<span>Eats</span></b>
+    <small>Restaurant</small>
+  </div>
+
+  <div class="table-badge">
+    <span>Table</span>
+    <strong>{{ table_number or '?' }}</strong>
+  </div>
+
+  <a href="/Customer/Cart?session_id={{ session_id }}"
+     class="cart">
+    ⊡ Cart
+  </a>
+
+  <a href="/logout"
+     class="cart">
+    Logout
+  </a>
+
 </header>
 
 <section class="hero">
+
   <div class="hero-inner">
-    <small>Dine-in Menu · Table {{ table_number or '?' }}</small>
-    <h1>Today's<span>Menu</span></h1>
-    <p>Locally sourced. Freshly prepared. Served with care.</p>
+    <small>
+      Dine-in Menu · Table {{ table_number or '?' }}
+    </small>
+
+    <h1>
+      Today's<span>Menu</span>
+    </h1>
+
+    <p>
+      Locally sourced. Freshly prepared. Served with care.
+    </p>
   </div>
+
 </section>
 
 <nav class="cat-nav">
@@ -44,181 +178,442 @@
 <main class="content">
 
   <!-- STARTERS -->
+
   {% set starters = items | selectattr('5', 'equalto', 'starters') | list %}
+
   <section class="menu-section" id="starters">
+
     <div class="section-header">
       <h2>Starters</h2>
-      <span id="starters-count">{{ starters | length }} dishes</span>
+      <span>{{ starters | length }} dishes</span>
     </div>
-    <div class="grid" id="starters-grid">
+
+    <div class="grid">
+
       {% for item in starters %}
+
       <div class="card" style="--i:{{ loop.index0 }}">
-        <img src="/item_photo/{{ item[0] }}" class="card-photo" alt="{{ item[1] }}" onerror="this.style.display='none'">
+
+        <img src="/item_photo/{{ item[0] }}"
+             class="card-photo"
+             alt="{{ item[1] }}"
+             onerror="this.style.display='none'">
+
         <div class="card-row">
           <h3>{{ item[1] }}</h3>
           <span class="price">${{ item[4] }}</span>
         </div>
+
         <p>{{ item[2] }}</p>
+
         <footer>
           <div class="tags">
-            <span class="tag">⏱ {{ item[3] or '—' }} min</span>
+            <span class="tag">
+              ⏱ {{ item[3] or '—' }} min
+            </span>
           </div>
         </footer>
-        <form action="{{ url_for('add_to_cart') }}" method="post">
-          <input type="hidden" name="item_id" value="{{ item[0] }}">
-          <input type="hidden" name="item_name" value="{{ item[1] }}">
-          <input type="hidden" name="item_price" value="{{ item[4] }}">
-          <input type="hidden" name="session_id" value="{{ session_id }}">
-          <button type="submit" class="order-btn">Add to Order</button>
-        </form>
+
+        <div class="rating-box">
+          {% if item[6] %}
+            ⭐ {{ item[6] }}/5
+          {% else %}
+            ⭐ No ratings yet
+          {% endif %}
+        </div>
+
+        <div class="card-actions">
+
+          <form action="{{ url_for('add_to_cart') }}"
+                method="post">
+
+            <input type="hidden"
+                   name="item_id"
+                   value="{{ item[0] }}">
+
+            <input type="hidden"
+                   name="item_name"
+                   value="{{ item[1] }}">
+
+            <input type="hidden"
+                   name="item_price"
+                   value="{{ item[4] }}">
+
+            <input type="hidden"
+                   name="session_id"
+                   value="{{ session_id }}">
+
+            <button type="submit"
+                    class="order-btn">
+              Add to Order
+            </button>
+
+          </form>
+
+          <a href="/item/{{ item[0] }}/review-page"
+             class="review-btn">
+            Write Review
+          </a>
+
+          <a href="/item/{{ item[0] }}/reviews-display"
+             class="reviews-btn">
+            View Reviews
+          </a>
+
+        </div>
+
       </div>
+
       {% else %}
-      <p class="empty-cat">No starters available today.</p>
+
+      <p class="empty-cat">
+        No starters available today.
+      </p>
+
       {% endfor %}
+
     </div>
+
   </section>
 
   <!-- MAINS -->
+
   {% set mains = items | selectattr('5', 'equalto', 'mains') | list %}
+
   <section class="menu-section" id="mains">
+
     <div class="section-header">
       <h2>Mains</h2>
-      <span id="mains-count">{{ mains | length }} dishes</span>
+      <span>{{ mains | length }} dishes</span>
     </div>
-    <div class="grid" id="mains-grid">
+
+    <div class="grid">
+
       {% for item in mains %}
+
       <div class="card" style="--i:{{ loop.index0 }}">
-        <img src="/item_photo/{{ item[0] }}" class="card-photo" alt="{{ item[1] }}" onerror="this.style.display='none'">
+
+        <img src="/item_photo/{{ item[0] }}"
+             class="card-photo"
+             alt="{{ item[1] }}"
+             onerror="this.style.display='none'">
+
         <div class="card-row">
           <h3>{{ item[1] }}</h3>
           <span class="price">${{ item[4] }}</span>
         </div>
+
         <p>{{ item[2] }}</p>
+
         <footer>
           <div class="tags">
-            <span class="tag">⏱ {{ item[3] or '—' }} min</span>
+            <span class="tag">
+              ⏱ {{ item[3] or '—' }} min
+            </span>
           </div>
         </footer>
-        <form action="{{ url_for('add_to_cart') }}" method="post">
-          <input type="hidden" name="item_id" value="{{ item[0] }}">
-          <input type="hidden" name="item_name" value="{{ item[1] }}">
-          <input type="hidden" name="item_price" value="{{ item[4] }}">
-          <input type="hidden" name="session_id" value="{{ session_id }}">
-          <button type="submit" class="order-btn">Add to Order</button>
-        </form>
-      </div>
-      {% else %}
-      <p class="empty-cat">No mains available today.</p>
-      {% endfor %}
-    </div>
-  </section>
 
-  <!-- SIDES -->
-  {% set sides = items | selectattr('5', 'equalto', 'sides') | list %}
-  <section class="menu-section" id="sides">
-    <div class="section-header">
-      <h2>Sides</h2>
-      <span id="sides-count">{{ sides | length }} items</span>
-    </div>
-    <div class="grid" id="sides-grid">
-      {% for item in sides %}
-      <div class="card" style="--i:{{ loop.index0 }}">
-        <img src="/item_photo/{{ item[0] }}" class="card-photo" alt="{{ item[1] }}" onerror="this.style.display='none'">
-        <div class="card-row">
-          <h3>{{ item[1] }}</h3>
-          <span class="price">${{ item[4] }}</span>
+        <div class="rating-box">
+          {% if item[6] %}
+            ⭐ {{ item[6] }}/5
+          {% else %}
+            ⭐ No ratings yet
+          {% endif %}
         </div>
-        <p>{{ item[2] }}</p>
-        <form action="{{ url_for('add_to_cart') }}" method="post">
-          <input type="hidden" name="item_id" value="{{ item[0] }}">
-          <input type="hidden" name="item_name" value="{{ item[1] }}">
-          <input type="hidden" name="item_price" value="{{ item[4] }}">
-          <input type="hidden" name="session_id" value="{{ session_id }}">
-          <button type="submit" class="order-btn">Add to Order</button>
-        </form>
-      </div>
-      {% else %}
-      <p class="empty-cat">No sides available today.</p>
-      {% endfor %}
-    </div>
-  </section>
 
-  <!-- DESSERTS -->
-  {% set desserts = items | selectattr('5', 'equalto', 'desserts') | list %}
-  <section class="menu-section" id="desserts">
-    <div class="section-header">
-      <h2>Desserts</h2>
-      <span id="desserts-count">{{ desserts | length }} dishes</span>
-    </div>
-    <div class="grid" id="desserts-grid">
-      {% for item in desserts %}
-      <div class="card" style="--i:{{ loop.index0 }}">
-        <img src="/item_photo/{{ item[0] }}" class="card-photo" alt="{{ item[1] }}" onerror="this.style.display='none'">
-        <div class="card-row">
-          <h3>{{ item[1] }}</h3>
-          <span class="price">${{ item[4] }}</span>
+        <div class="card-actions">
+
+          <form action="{{ url_for('add_to_cart') }}"
+                method="post">
+
+            <input type="hidden"
+                   name="item_id"
+                   value="{{ item[0] }}">
+
+            <input type="hidden"
+                   name="item_name"
+                   value="{{ item[1] }}">
+
+            <input type="hidden"
+                   name="item_price"
+                   value="{{ item[4] }}">
+
+            <input type="hidden"
+                   name="session_id"
+                   value="{{ session_id }}">
+
+            <button type="submit"
+                    class="order-btn">
+              Add to Order
+            </button>
+
+          </form>
+
+          <a href="/item/{{ item[0] }}/review-page"
+             class="review-btn">
+            Write Review
+          </a>
+
+          <a href="/item/{{ item[0] }}/reviews-display"
+             class="reviews-btn">
+            View Reviews
+          </a>
+
         </div>
-        <p>{{ item[2] }}</p>
-        <form action="{{ url_for('add_to_cart') }}" method="post">
-          <input type="hidden" name="item_id" value="{{ item[0] }}">
-          <input type="hidden" name="item_name" value="{{ item[1] }}">
-          <input type="hidden" name="item_price" value="{{ item[4] }}">
-          <input type="hidden" name="session_id" value="{{ session_id }}">
-          <button type="submit" class="order-btn">Add to Order</button>
-        </form>
-      </div>
-      {% else %}
-      <p class="empty-cat">No desserts available today.</p>
-      {% endfor %}
-    </div>
-  </section>
 
-  <!-- DRINKS -->
-  {% set drinks = items | selectattr('5', 'equalto', 'drinks') | list %}
-  <section class="menu-section" id="drinks">
-    <div class="section-header">
-      <h2>Drinks</h2>
-      <span id="drinks-count">{{ drinks | length }} items</span>
+      </div>
+
+      {% else %}
+
+      <p class="empty-cat">
+        No mains available today.
+      </p>
+
+      {% endfor %}
+
     </div>
-    <div class="grid" id="drinks-grid">
-      {% for item in drinks %}
-      <div class="card" style="--i:{{ loop.index0 }}">
-        <img src="/item_photo/{{ item[0] }}" class="card-photo" alt="{{ item[1] }}" onerror="this.style.display='none'">
-        <div class="card-row">
-          <h3>{{ item[1] }}</h3>
-          <span class="price">${{ item[4] }}</span>
+
+  </section>
+<!-- SIDES -->
+{% set sides = items | selectattr('5', 'equalto', 'sides') | list %}
+
+<section class="menu-section" id="sides">
+
+  <div class="section-header">
+    <h2>Sides</h2>
+    <span>{{ sides | length }} items</span>
+  </div>
+
+  <div class="grid">
+
+    {% for item in sides %}
+
+    <div class="card" style="--i:{{ loop.index0 }}">
+
+      <img src="/item_photo/{{ item[0] }}"
+           class="card-photo"
+           alt="{{ item[1] }}"
+           onerror="this.style.display='none'">
+
+      <div class="card-row">
+        <h3>{{ item[1] }}</h3>
+        <span class="price">${{ item[4] }}</span>
+      </div>
+
+      <p>{{ item[2] }}</p>
+
+      <footer>
+        <div class="tags">
+          <span class="tag">⏱ {{ item[3] or '—' }} min</span>
         </div>
-        <p>{{ item[2] }}</p>
+      </footer>
+
+      <div class="rating-box">
+        {% if item[6] %}
+          ⭐ {{ item[6] }}/5
+        {% else %}
+          ⭐ No ratings yet
+        {% endif %}
+      </div>
+
+      <div class="card-actions">
+
         <form action="{{ url_for('add_to_cart') }}" method="post">
           <input type="hidden" name="item_id" value="{{ item[0] }}">
           <input type="hidden" name="item_name" value="{{ item[1] }}">
           <input type="hidden" name="item_price" value="{{ item[4] }}">
           <input type="hidden" name="session_id" value="{{ session_id }}">
-          <button type="submit" class="order-btn">Add to Order</button>
-        </form>
-      </div>
-      {% else %}
-      <p class="empty-cat">No drinks available today.</p>
-      {% endfor %}
-    </div>
-  </section>
 
+          <button type="submit" class="order-btn">
+            Add to Order
+          </button>
+        </form>
+
+        <a href="/item/{{ item[0] }}/review-page" class="review-btn">
+          Write Review
+        </a>
+
+        <a href="/item/{{ item[0] }}/reviews-display" class="reviews-btn">
+          View Reviews
+        </a>
+
+      </div>
+
+    </div>
+
+    {% else %}
+    <p class="empty-cat">No sides available today.</p>
+    {% endfor %}
+
+  </div>
+</section>
+
+<!-- DESSERTS -->
+{% set desserts = items | selectattr('5', 'equalto', 'desserts') | list %}
+
+<section class="menu-section" id="desserts">
+
+  <div class="section-header">
+    <h2>Desserts</h2>
+    <span>{{ desserts | length }} items</span>
+  </div>
+
+  <div class="grid">
+
+    {% for item in desserts %}
+
+    <div class="card" style="--i:{{ loop.index0 }}">
+
+      <img src="/item_photo/{{ item[0] }}"
+           class="card-photo"
+           alt="{{ item[1] }}"
+           onerror="this.style.display='none'">
+
+      <div class="card-row">
+        <h3>{{ item[1] }}</h3>
+        <span class="price">${{ item[4] }}</span>
+      </div>
+
+      <p>{{ item[2] }}</p>
+
+      <footer>
+        <div class="tags">
+          <span class="tag">⏱ {{ item[3] or '—' }} min</span>
+        </div>
+      </footer>
+
+      <div class="rating-box">
+        {% if item[6] %}
+          ⭐ {{ item[6] }}/5
+        {% else %}
+          ⭐ No ratings yet
+        {% endif %}
+      </div>
+
+      <div class="card-actions">
+
+        <form action="{{ url_for('add_to_cart') }}" method="post">
+          <input type="hidden" name="item_id" value="{{ item[0] }}">
+          <input type="hidden" name="item_name" value="{{ item[1] }}">
+          <input type="hidden" name="item_price" value="{{ item[4] }}">
+          <input type="hidden" name="session_id" value="{{ session_id }}">
+
+          <button type="submit" class="order-btn">
+            Add to Order
+          </button>
+        </form>
+
+        <a href="/item/{{ item[0] }}/review-page" class="review-btn">
+          Write Review
+        </a>
+
+        <a href="/item/{{ item[0] }}/reviews-display" class="reviews-btn">
+          View Reviews
+        </a>
+
+      </div>
+
+    </div>
+
+    {% else %}
+    <p class="empty-cat">No desserts available today.</p>
+    {% endfor %}
+
+  </div>
+</section>
+
+<!-- DRINKS -->
+{% set drinks = items | selectattr('5', 'equalto', 'drinks') | list %}
+
+<section class="menu-section" id="drinks">
+
+  <div class="section-header">
+    <h2>Drinks</h2>
+    <span>{{ drinks | length }} items</span>
+  </div>
+
+  <div class="grid">
+
+    {% for item in drinks %}
+
+    <div class="card" style="--i:{{ loop.index0 }}">
+
+      <img src="/item_photo/{{ item[0] }}"
+           class="card-photo"
+           alt="{{ item[1] }}"
+           onerror="this.style.display='none'">
+
+      <div class="card-row">
+        <h3>{{ item[1] }}</h3>
+        <span class="price">${{ item[4] }}</span>
+      </div>
+
+      <p>{{ item[2] }}</p>
+
+      <footer>
+        <div class="tags">
+          <span class="tag">⏱ {{ item[3] or '—' }} min</span>
+        </div>
+      </footer>
+
+      <div class="rating-box">
+        {% if item[6] %}
+          ⭐ {{ item[6] }}/5
+        {% else %}
+          ⭐ No ratings yet
+        {% endif %}
+      </div>
+
+      <div class="card-actions">
+
+        <form action="{{ url_for('add_to_cart') }}" method="post">
+          <input type="hidden" name="item_id" value="{{ item[0] }}">
+          <input type="hidden" name="item_name" value="{{ item[1] }}">
+          <input type="hidden" name="item_price" value="{{ item[4] }}">
+          <input type="hidden" name="session_id" value="{{ session_id }}">
+
+          <button type="submit" class="order-btn">
+            Add to Order
+          </button>
+        </form>
+
+        <a href="/item/{{ item[0] }}/review-page" class="review-btn">
+          Write Review
+        </a>
+
+        <a href="/item/{{ item[0] }}/reviews-display" class="reviews-btn">
+          View Reviews
+        </a>
+
+      </div>
+
+    </div>
+
+    {% else %}
+    <p class="empty-cat">No drinks available today.</p>
+    {% endfor %}
+
+  </div>
+</section>
 </main>
 
-{{ render_toast_script() }}  
+{{ render_toast_script() }}
+
 <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
 
 <script>
+
 const socket = io();
 
 socket.on("order_update", function(data) {
+
     console.log(data);
 
     alert(data.message);
 
-    // OPTIONAL: update UI live
-    // document.getElementById("status").innerText = data.status;
 });
+
 </script>
+
 </body>
 </html>

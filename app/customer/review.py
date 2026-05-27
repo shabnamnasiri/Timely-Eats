@@ -1,50 +1,75 @@
-from flask import request, jsonify, session
+from flask import request, flash, session, render_template,redirect, url_for
 
 def register_review_routes(app, mysql):
 
-    @app.route('/<int:item_id>/review', methods=["POST"])
-    def submit_review(item_id):
-        # check login
+    @app.route('/item/<int:item_id>/review-page', methods=["GET"])
+    def review_page(item_id):
+        
         user_id = session.get("user_id")
+        cursor = mysql.connection.cursor()
+        cursor.execute("SELECT username FROM User WHERE user_id = %s", (user_id,))
+        user = cursor.fetchone()
+
+        user_name = user[0] if user else "Guest"
+
+
+        return render_template(
+            "CustRating.html",
+            item_id=item_id,
+            user_name=user_name
+        )
+
+
+    @app.route('/item/<int:item_id>/review', methods=["POST"])
+    def submit_review(item_id):
+
+        user_id = session.get("user_id")
+
         if not user_id:
-            return jsonify({'error': 'User must be logged in'}), 401
+            flash("You must be logged in to submit a review", "error")
+            return redirect(url_for('review_page', item_id=item_id))
 
         rating = request.form.get("rating")
         comment = request.form.get("comment", "").strip()
+        tags = request.form.getlist("tag")
 
-        # logical checks
-        try:
-            rating = int(rating)
-            if rating < 1 or rating > 5:
-                return jsonify({'error': 'rating must be between 1 and 5'}), 400
-        except (TypeError, ValueError):
-            return jsonify({'error': 'rating must be a number'}), 400
+        tag_string = ",".join(tags) if tags else None
+
 
         try:
             cursor = mysql.connection.cursor()
-            sql = """
-            INSERT INTO Review (user_id, item_id, rating, comment)
-            VALUES (%s, %s, %s, %s)
-            """
-            cursor.execute(sql, (user_id, item_id, rating, comment))
+
+            cursor.execute("""
+                INSERT INTO Review (user_id, item_id, tag, rating, comment)
+                VALUES (%s, %s, %s, %s, %s)
+            """, (user_id, item_id, tag_string, rating, comment))
+
             mysql.connection.commit()
             cursor.close()
-            return jsonify({'message': 'Review submitted successfully'}), 200
+
+            flash("Review submitted successfully!", "success")
+            return redirect(url_for('menu', item_id=item_id))
 
         except Exception as e:
-            return jsonify({'error': str(e)}), 500
+            flash(str(e), "error")
+            return redirect(url_for('menu', item_id=item_id))
+        
+    @app.route('/item/<int:item_id>/reviews-display', methods=["GET"])
+    def reviews_page(item_id):
 
+        cursor = mysql.connection.cursor()
 
-    @app.route('/item/<int:item_id>/avg-rating', methods=["GET"])
-    def get_item_avg_rating(item_id):
-        try:
-            cursor = mysql.connection.cursor()
-            sql = "SELECT AVG(rating) FROM Review WHERE item_id = %s"
-            cursor.execute(sql, (item_id,))
-            result = cursor.fetchone()
-            avg_rating = result[0] if result[0] is not None else 0
-            cursor.close()
-            return jsonify({'item_id': item_id, 'avg_rating': round(float(avg_rating), 2)}), 200
+        cursor.execute("""
+            SELECT r.rating, r.comment, r.tag, u.username
+            FROM Review r
+            LEFT JOIN User u ON r.user_id = u.user_id
+            WHERE r.item_id = %s
+            ORDER BY r.review_id DESC
+        """, (item_id,))
 
-        except Exception as e:
-            return jsonify({'error': str(e)}), 500
+        reviews = cursor.fetchall()
+        cursor.close()
+
+        return render_template("reviews.html",
+                            reviews=reviews,
+                            item_id=item_id)

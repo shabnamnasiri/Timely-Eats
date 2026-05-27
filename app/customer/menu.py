@@ -26,11 +26,24 @@ def register_menu_routes(app, mysql):
         table_number = result[0]
 
         cursor = mysql.connection.cursor()
+
         cursor.execute("""
-            SELECT item_id, name, description, preparation_time, price, category
-            FROM Item
-            ORDER BY category, name
+            SELECT 
+                i.item_id,
+                i.name,
+                i.description,
+                i.preparation_time,
+                i.price,
+                i.category,
+                COALESCE(ROUND(AVG(r.rating), 0), 0) AS avg_rating
+            FROM Item i
+            LEFT JOIN Review r ON i.item_id = r.item_id
+            GROUP BY 
+                i.item_id, i.name, i.description, 
+                i.preparation_time, i.price, i.category
+            ORDER BY i.category, i.name
         """)
+
         items = cursor.fetchall()
         cursor.close()
 

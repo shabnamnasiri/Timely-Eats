@@ -1,181 +1,153 @@
+{% from 'macros/toast.html' import render_toast %}
+{% from 'macros/toast_script.html' import render_toast_script %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Share Your Experience | OrderFlow</title>
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500;600&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../static/css/Add_menu.css">
-    <style>
-        .customer-container {
-            max-width: 600px;
-            margin: 40px auto;
-            padding: 0 20px;
-            width: 100%;
-        }
-        .rating-stars {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 32px;
-        }
-        .star-radio { display: none; }
-        .star-label {
-            flex: 1;
-            text-align: center;
-            border: 1px solid var(--rule);
-            background: white;
-            padding: 15px 5px;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 24px;
-        }
-        .star-radio:checked + .star-label {
-            background: green;
-            color: white;
-            border-color: var(--accent);
-        }
-        .order-summary-box {
-            background: var(--cream);
-            padding: 20px;
-            border: 1px solid var(--rule);
-            margin-bottom: 32px;
-        }
-        .success-msg {
-            display: none;
-            background: #e6f4ea;
-            color: #2d6a4f;
-            padding: 12px 16px;
-            border: 1px solid #95d5b2;
-            margin-bottom: 16px;
-            font-family: 'DM Sans';
-        }
-        .error-msg {
-            display: none;
-            background: #fde8e8;
-            color: #c0392b;
-            padding: 12px 16px;
-            border: 1px solid #f5c6c6;
-            margin-bottom: 16px;
-            font-family: 'DM Sans';
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Share Your Experience | OrderFlow</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500;600&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/Add_menu.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/toast.css') }}"/>
+
+<style>
+
+/* ONLY KEEP CUSTOM LAYOUT FIXES */
+
+/* container */
+.customer-container {
+    max-width: 600px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+/* rating stars (safe override only) */
+.rating-stars {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 32px;
+}
+
+.star-radio { display: none; }
+
+.star-label {
+    flex: 1;
+    text-align: center;
+    border: 1px solid var(--rule);
+    background: white;
+    padding: 15px 5px;
+    cursor: pointer;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 24px;
+}
+
+.star-radio:checked + .star-label {
+    background: var(--accent, green);
+    color: white;
+}
+
+/* back button center ONLY */
+.back-wrapper {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.back-btn {
+    display: inline-block;
+    padding: 8px 14px;
+
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+
+    color: var(--ink);
+    border: 1px solid var(--accent);
+    background: transparent;
+
+    text-decoration: none;
+    transition: .25s ease;
+}
+
+.back-btn:hover {
+    background: var(--accent);
+    color: var(--paper);
+}
+
+</style>
 </head>
-<body style="display: block; background: var(--paper);">
 
-    <div class="customer-container">
-        <div style="text-align: center; margin-bottom: 40px;">
-            <b style="font-family: 'Bebas Neue'; font-size: 32px; letter-spacing: 0.1em;">ORDER<span>FLOW</span></b>
-            <span class="label" style="margin-top: 8px;">Guest Review Portal</span>
-        </div>
+<body>
 
-        <div class="form-panel">
-            <h2>How was your visit?</h2>
-            <p>Your feedback helps our team maintain the standard of excellence you expect from us.</p>
-            <div class="form-divider"></div>
+{{ render_toast() }}
 
-            <div class="order-summary-box">
-                <span class="label" style="color: var(--smoke);">Order #1024 Details</span>
-                <div style="display: flex; justify-content: space-between; margin-top: 10px;">
-                    <strong style="font-family: 'DM Sans'; font-size: 14px;">Table 12 • Alex T.</strong>
-                    <span style="font-family: 'DM Mono'; font-size: 12px; color: var(--accent);">$42.50</span>
-                </div>
-            </div>
+<div class="customer-container">
 
-            <!-- success/error messages -->
-            <div class="success-msg" id="successMsg">✓ Review submitted successfully!</div>
-            <div class="error-msg" id="errorMsg"></div>
-
-            <form id="reviewForm">
-                <!-- hidden item_id — change value to match the item being reviewed -->
-                <input type="hidden" name="item_id" value="1">
-
-                <label class="label">Overall Rating</label>
-                <div class="rating-stars">
-                    <input type="radio" name="rating" id="r1" value="1" class="star-radio">
-                    <label for="r1" class="star-label">1</label>
-
-                    <input type="radio" name="rating" id="r2" value="2" class="star-radio">
-                    <label for="r2" class="star-label">2</label>
-
-                    <input type="radio" name="rating" id="r3" value="3" class="star-radio">
-                    <label for="r3" class="star-label">3</label>
-
-                    <input type="radio" name="rating" id="r4" value="4" class="star-radio">
-                    <label for="r4" class="star-label">4</label>
-
-                    <input type="radio" name="rating" id="r5" value="5" class="star-radio" checked>
-                    <label for="r5" class="star-label">5</label>
-                </div>
-
-                <label class="label">What stood out?</label>
-                <div class="tags-group">
-                    <input type="checkbox" id="t1" class="tag-toggle">
-                    <label for="t1">Service</label>
-
-                    <input type="checkbox" id="t2" class="tag-toggle">
-                    <label for="t2">Speed</label>
-
-                    <input type="checkbox" id="t3" class="tag-toggle">
-                    <label for="t3">Food Quality</label>
-
-                    <input type="checkbox" id="t4" class="tag-toggle">
-                    <label for="t4">Ambiance</label>
-                </div>
-
-                <div class="field">
-                    <label>Additional Comments</label>
-                    <!-- added name="comment" -->
-                    <textarea name="comment" placeholder="Tell us more about your experience..." style="min-height: 120px;"></textarea>
-                </div>
-
-                <button type="submit" class="btn-submit" style="margin-top: 20px;">Submit My Review</button>
-            </form>
-        </div>
-
-        <div style="text-align: center; margin-top: 30px; padding-bottom: 40px;">
-            <small style="font-family: 'DM Mono'; color: var(--ash); font-size: 10px; text-transform: uppercase; letter-spacing: 0.2em;">
-                Thank you for choosing OrderFlow
-            </small>
-        </div>
+    <div style="text-align:center; margin-bottom:40px;">
+        <b style="font-family:'Bebas Neue'; font-size:32px;">
+            Timely<span>Eat</span>
+        </b>
+        <div class="label">Guest Review Portal</div>
     </div>
 
-    <script>
-        document.getElementById('reviewForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
+    <div style="margin-bottom:10px;">
+        <strong style="font-family:'DM Sans'; font-size:14px;">
+            • {{ user_name }}
+        </strong>
+    </div>
 
-            const form = e.target;
-            const formData = new FormData(form);
+    <form action="{{ url_for('submit_review', item_id=item_id) }}" method="POST">
 
-            // get item_id from hidden field for the URL
-            const itemId = formData.get('item_id');
+        <label class="label">Overall Rating</label>
 
-            const successMsg = document.getElementById('successMsg');
-            const errorMsg = document.getElementById('errorMsg');
-            successMsg.style.display = 'none';
-            errorMsg.style.display = 'none';
+        <div class="rating-stars">
+            {% for i in range(1,6) %}
+            <input type="radio" name="rating" id="r{{i}}" value="{{i}}" class="star-radio" {% if i==5 %}checked{% endif %}>
+            <label for="r{{i}}" class="star-label">{{i}}</label>
+            {% endfor %}
+        </div>
 
-            try {
-                const response = await fetch(`/${itemId}/review`, {
-                    method: 'POST',
-                    body: formData
-                });
+        <label class="label">What stood out?</label>
 
-                const data = await response.json();
+        <div class="tags-group">
+            <input type="checkbox" id="t1" name="tag" value="Service" class="tag-toggle">
+            <label for="t1">Service</label>
 
-                if (response.ok) {
-                    successMsg.style.display = 'block';
-                    form.reset();
-                } else {
-                    errorMsg.textContent = '✗ ' + data.error;
-                    errorMsg.style.display = 'block';
-                }
-            } catch (err) {
-                errorMsg.textContent = '✗ Something went wrong. Please try again.';
-                errorMsg.style.display = 'block';
-            }
-        });
-    </script>
+            <input type="checkbox" id="t2" name="tag" value="Speed" class="tag-toggle">
+            <label for="t2">Speed</label>
+
+            <input type="checkbox" id="t3" name="tag" value="Food Quality" class="tag-toggle">
+            <label for="t3">Food Quality</label>
+
+            <input type="checkbox" id="t4" name="tag" value="Ambiance" class="tag-toggle">
+            <label for="t4">Ambiance</label>
+        </div>
+
+        <div class="field">
+            <label>Additional Comments</label>
+            <textarea name="comment" placeholder="Tell us more..." style="min-height:120px;"></textarea>
+        </div>
+
+        <button type="submit" class="btn-submit">
+            Submit My Review
+        </button>
+
+    </form>
+
+    <!-- CENTERED BACK BUTTON -->
+    <div class="back-wrapper">
+        <a href="{{ url_for('menu') }}" class="back-btn">
+            ← Back to Menu
+        </a>
+    </div>
+
+</div>
+
+{{ render_toast_script() }}
 
 </body>
 </html>
