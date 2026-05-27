@@ -456,3 +456,47 @@ body {
     transform: translateY(0);
   }
 }
+/* FIX CARD HEIGHTS */
+
+.grid {
+  align-items: stretch;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* FIX IMAGE SIZE */
+
+.card-photo {
+  width: 100%;
+  height: 220px;      /* fixed image size */
+  object-fit: cover;  /* prevents stretching */
+  display: block;
+  border-bottom: 1px solid var(--rule);
+  background: #eaeaea;
+}
+
+/* KEEP BUTTONS ALIGNED */
+
+.card form {
+  margin-top: auto;
+}
+
+/* FIX LONG TEXT BREAKING LAYOUT */
+
+.card p {
+  flex-grow: 1;
+}
+
+/* MOBILE */
+
+@media (max-width: 700px) {
+
+  .card-photo {
+    height: 180px;
+  }
+
+}
