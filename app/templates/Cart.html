@@ -112,10 +112,44 @@
 <!-- ═══════════════ COL 2 — RIGHT ═══════════════ -->
 <div class="summary-col">
 
-  <!-- 1. PAYMENT — top of right col -->
+  <!-- 1. BILL SUMMARY — NOW TOP -->
+  <div class="panel">
+    <span class="sec-label">Bill</span>
+
+    {% for item in cart_items %}
+    <div class="bill-row">
+      <span>
+        {% if item.quantity > 1 %}{{ item.quantity }}× {% endif %}
+        {{ item.name }}
+      </span>
+      <b>${{ "%.2f"|format(item.price * item.quantity) }}</b>
+    </div>
+    {% endfor %}
+
+    {% if loyalty_discount_active %}
+    <div class="discount-row" id="discount-row">
+      <span>⭐ Loyalty Discount</span>
+      <b>- ${{ loyalty_discount }}</b>
+    </div>
+    {% endif %}
+
+    <div class="bill-total">
+      <span>Total</span>
+      <b>${{ "%.2f"|format(cart_total) }}</b>
+    </div>
+
+    <p class="earn-note">
+      This order earns <b>{{ points_earned }}</b> loyalty points.
+    </p>
+  </div>
+
+
+  <!-- 2. PAYMENT + PLACE ORDER — NOW BELOW -->
   <div class="pay-panel">
     <h3>Payment</h3>
+
     <form method="POST" action="/Customer/PlaceOrder">
+
       <div class="pay-opts">
         <input class="pay-r" type="radio" name="payment_method" id="pay-cash" value="cash" checked>
         <label class="pay-lbl" for="pay-cash">
@@ -145,7 +179,7 @@
         </div>
       </div>
 
-      <!-- ✅ Loyalty panel INSIDE the form so redeem checkbox is submitted -->
+      <!-- Loyalty -->
       <div class="panel">
         <div class="loyalty-header">
           <h3>Loyalty Points</h3>
@@ -154,58 +188,50 @@
             <b>{{ loyalty_points }} <span>pts</span></b>
           </div>
         </div>
+
         <div class="loyalty-bar-wrap">
           <div class="loyalty-bar-fill" data-progress="{{ loyalty_progress }}"></div>
         </div>
-        <p class="loyalty-hint"><b>{{ points_to_next_reward }}</b> pts until your next reward.</p>
+
+        <p class="loyalty-hint">
+          <b>{{ points_to_next_reward }}</b> pts until your next reward.
+        </p>
 
         {% if loyalty_discount_active %}
         <div class="redeem-row">
-          <p>Redeem {{ (loyalty_points // 100) * 100 }} pts → <b class="accent-text">${{ loyalty_discount }}</b> off</p>
-          <!-- ✅ name="redeem_points" so place_order.py can read it -->
+          <p>
+            Redeem {{ (loyalty_points // 100) * 100 }} pts →
+            <b class="accent-text">${{ loyalty_discount }}</b> off
+          </p>
+
           <input class="redeem-toggle" type="checkbox" name="redeem_points" id="redeem-toggle">
           <label class="redeem-lbl" for="redeem-toggle">Redeem</label>
         </div>
         {% else %}
         <div class="redeem-row">
-          <p class="loyalty-hint">You need <b>{{ points_to_next_reward }}</b> more pts to redeem.</p>
+          <p class="loyalty-hint">
+            You need <b>{{ points_to_next_reward }}</b> more pts to redeem.
+          </p>
         </div>
         {% endif %}
       </div>
 
-      <button type="submit" class="btn-place">Place Order</button>
+      <button type="submit" class="btn-place">
+        Place Order
+      </button>
+
     </form>
+
+    <!-- NEW: REQUEST CLOSE SESSION BUTTON -->
+    <form method="POST" action="/Customer/request-close-session">
+    <button type="submit" class="close-session-btn">
+        Request Session Close
+    </button>
+    </form>
+
   </div>
 
-  <!-- 2. BILL SUMMARY — outside form, just display -->
-  <div class="panel">
-    <span class="sec-label">Bill</span>
-
-    {% for item in cart_items %}
-    <div class="bill-row">
-      <span>{% if item.quantity > 1 %}{{ item.quantity }}× {% endif %}{{ item.name }}</span>
-      <b>${{ "%.2f"|format(item.price * item.quantity) }}</b>
-    </div>
-    {% endfor %}
-
-    {% if loyalty_discount_active %}
-    <div class="discount-row" id="discount-row">
-      <span>⭐ Loyalty Discount</span>
-      <b>- ${{ loyalty_discount }}</b>
-    </div>
-    {% endif %}
-
-    <div class="bill-total">
-      <span>Total</span>
-      <b>${{ "%.2f"|format(cart_total) }}</b>
-    </div>
-    <p class="earn-note">This order earns <b>{{ points_earned }}</b> loyalty points.</p>
-  </div>
-
-</div><!-- end summary-col -->
-  </div><!-- end page-grid -->
-</div><!-- end page -->
-
+</div>
 <script>
   document.querySelectorAll('.order-item[data-index]').forEach(el => {
     el.style.setProperty('--i', el.dataset.index);

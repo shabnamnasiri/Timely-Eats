@@ -518,8 +518,27 @@ document.querySelectorAll(".filter-tab").forEach((button) => {
         });
     });
 });
+
 </script>
 {{ render_toast_script() }}
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+
+<script>
+const socket = io();
+
+socket.on("connect", () => {
+    console.log("STAFF CONNECTED");
+});
+
+socket.on("close_session_request", function(data) {
+
+    console.log("EVENT RECEIVED");
+    console.log(data);
+
+    alert(data.message);
+
+});
+</script>
 
 </body>
 </html>

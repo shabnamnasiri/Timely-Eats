@@ -349,7 +349,63 @@ flash-container {
   font-size: 11px;
   color: var(--paper);
 }
+.request-btn {
+  width: 100%;
+  margin-top: 14px;
+  padding: 12px 16px;
 
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+
+  color: var(--paper);
+  background: var(--accent);
+
+  border: 1px solid var(--accent);
+  cursor: pointer;
+
+  transition: all .25s ease;
+  position: relative;
+
+  box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+}
+
+/* hover = stronger emphasis */
+.request-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.18);
+  filter: brightness(1.05);
+}
+
+/* click */
+.request-btn:active {
+  transform: translateY(1px);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.15);
+}
+
+/* subtle pulse glow (attention grabber) */
+.request-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 0;
+  box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.6);
+  animation: pulseGlow 2.5s infinite;
+  pointer-events: none;
+}
+
+@keyframes pulseGlow {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.35);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(255, 193, 7, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 193, 7, 0);
+  }
+}
 /* animation */
 @keyframes slideIn {
   to {

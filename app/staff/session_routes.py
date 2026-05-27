@@ -1,6 +1,7 @@
 import qrcode
 import os
 from flask import jsonify, redirect, render_template, request, flash, session
+from app.extensions import socketio
 
 def register_session_routes(app, mysql):
 
@@ -138,24 +139,44 @@ def register_session_routes(app, mysql):
     # =========================
     @app.route('/staff/close-session/<int:session_id>', methods=['POST'])
     def close_session(session_id):
+
         cursor = mysql.connection.cursor()
 
+        # check unfinished orders
         cursor.execute("""
             SELECT COUNT(*)
             FROM orders
             WHERE session_id = %s
             AND LOWER(COALESCE(status, '')) NOT IN ('ready')
         """, (session_id,))
+
         open_order_count = cursor.fetchone()[0]
 
         if open_order_count:
             cursor.close()
-            flash("Finish all orders before closing this session.", "warning")
+
+            flash(
+                "Finish all orders before closing this session.",
+                "warning"
+            )
+
             return redirect(request.referrer)
 
-        cursor.execute("UPDATE Table_Session SET status='closed' WHERE session_id=%s", (session_id,))
+        # close session
+        cursor.execute("""
+            UPDATE Table_Session
+            SET status='closed'
+            WHERE session_id=%s
+        """, (session_id,))
+
         mysql.connection.commit()
         cursor.close()
 
+        # REAL-TIME notification to customer
+        socketio.emit("session_closed", {
+            "session_id": session_id
+        })
+
         flash("Session closed successfully.", "success")
+
         return redirect(request.referrer)
