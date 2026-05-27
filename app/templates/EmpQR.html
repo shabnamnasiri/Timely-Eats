@@ -48,7 +48,10 @@
 
         <div class="list-panel">
             <span class="label">Active QR Registry</span>
-            <div class="item-list" id="sessionList"></div>
+            <div class="item-list" id="activeSessionList"></div>
+
+            <span class="label label-closed">Closed QR Registry</span>
+            <div class="item-list" id="closedSessionList"></div>
         </div>
 
         <aside class="form-panel">
@@ -98,23 +101,22 @@ function loadSessions() {
     fetch('/staff/sessions')
     .then(res => res.json())
     .then(data => {
-        data.sort((a, b) => {
-            if (a.status === "active") return -1;
-            if (b.status === "active") return 1;
-            return 0;
-        });
+        // split active and closed sessions for clearer UI
+        const active = data.filter(s => s.status === "active");
+        const closed = data.filter(s => s.status !== "active");
 
-        const container = document.getElementById("sessionList");
-        container.innerHTML = "";
+        const activeContainer = document.getElementById("activeSessionList");
+        const closedContainer = document.getElementById("closedSessionList");
+        activeContainer.innerHTML = "";
+        closedContainer.innerHTML = "";
 
-        document.getElementById("activeCount").innerText = "Active Links: " + data.length;
+        document.getElementById("activeCount").innerText = "Active Links: " + active.length;
 
-        data.forEach((s, i) => {
+        active.forEach((s, i) => {
             const row = document.createElement("div");
             row.className = "item-row";
             row.style.setProperty("--i", i + 1);
 
-            // Close button is a real form POST so Flask flash works
             row.innerHTML = `
                 <div class="item-cat mains">TABLE ${s.table_number}</div>
                 <div class="item-info">
@@ -130,10 +132,36 @@ function loadSessions() {
                 </div>
             `;
 
-            container.appendChild(row);
+            activeContainer.appendChild(row);
         });
 
-        updateDropdown(data);
+        if (closed.length === 0) {
+            const e = document.createElement('div');
+            e.className = 'empty';
+            e.innerHTML = '<b>No closed sessions yet</b><span>Closed sessions will appear here.</span>';
+            closedContainer.appendChild(e);
+        } else {
+            closed.forEach((s, i) => {
+                const row = document.createElement("div");
+                row.className = "item-row";
+                row.style.setProperty("--i", i + 1);
+
+                row.innerHTML = `
+                    <div class="item-cat closed">T${s.table_number}</div>
+                    <div class="item-info">
+                        <b>Session #${s.session_id}</b>
+                        <span>Status: ${s.status} • Orders: ${s.order_count}</span>
+                    </div>
+                    <div class="item-actions">
+                        <button class="btn-icon" onclick="printQR(${s.session_id})">Print</button>
+                    </div>
+                `;
+
+                closedContainer.appendChild(row);
+            });
+        }
+
+        updateDropdown(active);
     })
     .catch(err => console.error("LOAD ERROR:", err));
 }

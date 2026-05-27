@@ -38,7 +38,7 @@ app.secret_key = os.getenv("SECRET_KEY", "secret_key_123")
 
 app.config["MYSQL_HOST"] = "localhost"
 app.config["MYSQL_USER"] = "root"
-app.config["MYSQL_PASSWORD"] = "22703380"
+app.config["MYSQL_PASSWORD"] = ""
 app.config["MYSQL_DB"] = "timlyeats"
 app.config["MYSQL_PORT"] = 3306
 app.config["MYSQL_AUTOCOMMIT"] = True
@@ -134,11 +134,7 @@ def push_staff_dashboard():
                 orders = get_orders(mysql)
                 sessions, closed_sessions = get_sessions(mysql)
 
-                avg_wait = (
-                    int(sum(o["wait_minutes"] for o in orders) / len(orders))
-                    if orders else 0
-                )
-
+                # Do not compute average wait time (removed from UI)
                 stats = {
                     "active_orders": len(orders),
                     "pending_orders": sum(
@@ -150,7 +146,6 @@ def push_staff_dashboard():
                     "ready_orders": sum(
                         1 for o in orders if o["status"] == "ready"
                     ),
-                    "avg_wait": avg_wait,
                 }
 
                 socketio.emit(
