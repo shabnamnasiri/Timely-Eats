@@ -206,5 +206,19 @@
 </main>
 
 {{ render_toast_script() }}  
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+
+<script>
+const socket = io();
+
+socket.on("order_update", function(data) {
+    console.log(data);
+
+    alert(data.message);
+
+    // OPTIONAL: update UI live
+    // document.getElementById("status").innerText = data.status;
+});
+</script>
 </body>
 </html>

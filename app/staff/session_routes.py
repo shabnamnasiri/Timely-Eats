@@ -1,6 +1,6 @@
 import qrcode
 import os
-from flask import jsonify, redirect, render_template, request, flash
+from flask import jsonify, redirect, render_template, request, flash, session
 
 def register_session_routes(app, mysql):
 
@@ -61,7 +61,13 @@ def register_session_routes(app, mysql):
     # =========================
     @app.route('/staff/qr')
     def staff_qr_page():
-        return render_template('EmpQR.html')
+        user_id = session.get('user_id')
+        cursor = mysql.connection.cursor()
+        cursor.execute("SELECT username FROM user WHERE user_id = %s", (user_id,))
+        user = cursor.fetchone()
+        cursor.close()
+
+        return render_template("EmpQR.html", staff_name=user)
 
 
     # =========================

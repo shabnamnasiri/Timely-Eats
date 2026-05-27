@@ -11,16 +11,17 @@ def register_notification_routes(app, mysql):
 
         cursor = mysql.connection.cursor()
         cursor.execute("""
-    SELECT o.order_id, o.status,
-           GROUP_CONCAT(i.name ORDER BY i.name SEPARATOR ', ') as items
-    FROM orders o
-    JOIN order_details od ON od.order_id = o.order_id
-    JOIN item i ON i.item_id = od.item_id
-    WHERE o.status IN ('pending', 'preparing', 'ready')
-    GROUP BY o.order_id, o.status
-    ORDER BY o.timestamp DESC
-    LIMIT 5
-""")
+        SELECT o.order_id, o.status,
+            GROUP_CONCAT(i.name ORDER BY i.name SEPARATOR ', ') AS items
+        FROM orders o
+        JOIN order_details od ON od.order_id = o.order_id
+        JOIN item i ON i.item_id = od.item_id
+        WHERE o.user_id = %s
+        AND o.status IN ('pending', 'preparing', 'ready')
+        GROUP BY o.order_id, o.status
+        ORDER BY o.timestamp DESC
+        LIMIT 5
+    """, (user_id,))
         orders = cursor.fetchall()
         cursor.close()
 

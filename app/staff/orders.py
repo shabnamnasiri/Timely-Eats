@@ -1,8 +1,7 @@
 from datetime import datetime
 from flask import flash, redirect, render_template, request, session
 import MySQLdb.cursors
-
-
+from app.extensions import socketio, mysql
 def require_staff():
     """Block access if user is not logged in or not a staff member."""
     if "user_id" not in session:
@@ -161,6 +160,24 @@ def register_staff_order_routes(app, mysql):
             cursor.execute("UPDATE orders SET status = %s WHERE order_id = %s", (new_status, order_id))
 
         mysql.connection.commit()
+        # Get user_id for this order
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute("SELECT user_id FROM orders WHERE order_id = %s", (order_id,))
+        order_user = cursor.fetchone()
         cursor.close()
+        if order_user:
+            user_id = order_user["user_id"]
+
+            socketio.emit("order_update", {
+                "order_id": order_id,
+                "status": new_status,
+                "message": f"Your order #{order_id} is now {new_status}"
+            }, to=f"user_{user_id}")
+
+        # Optional: also notify staff dashboard
+        socketio.emit("staff_update", {
+                "order_id": order_id,
+                "status":   new_status,
+            }, to="staff")
         flash(f"Order #{order_id} updated to {new_status}.", "success")
         return redirect("/staff/orders")
