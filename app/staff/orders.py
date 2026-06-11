@@ -101,15 +101,12 @@ def register_staff_order_routes(app, mysql):
         orders = get_orders(mysql)
         sessions, closed_sessions = get_sessions(mysql)
 
-        # Count orders per status for the dashboard stats bar
-        avg_wait_minutes = int(sum(o["wait_minutes"] for o in orders) / len(orders)) if orders else 0
+        # Do not calculate or include average wait time — removed per UI request
         stats = {
             "active_orders":    len(orders),
             "pending_orders":   sum(1 for o in orders if o["status"] == "pending"),
             "preparing_orders": sum(1 for o in orders if o["status"] == "preparing"),
             "ready_orders":     sum(1 for o in orders if o["status"] == "ready"),
-            "avg_wait":         avg_wait_minutes,
-            "avg_wait_minutes": avg_wait_minutes,
         }
 
         return render_template(
@@ -142,12 +139,18 @@ def register_staff_order_routes(app, mysql):
 
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
 
-        cursor.execute("SELECT order_id, preparation_time FROM orders WHERE order_id = %s", (order_id,))
+        cursor.execute("SELECT order_id, status, preparation_time FROM orders WHERE order_id = %s", (order_id,))
         order = cursor.fetchone()
 
         if not order:
             cursor.close()
             flash("Order not found.", "warning")
+            return redirect("/staff/orders")
+
+        current_status = (order["status"] or "").strip().lower()
+        if current_status == "ready" and new_status != "ready":
+            cursor.close()
+            flash("Ready orders cannot be changed back to pending or preparing.", "warning")
             return redirect("/staff/orders")
 
         original_prep = order["preparation_time"] or 10

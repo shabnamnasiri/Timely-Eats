@@ -137,6 +137,7 @@
                     <div class="stat"><dt>Pending</dt>   <dd id="stat-pending">{{ stats.pending_orders }}</dd></div>
                     <div class="stat"><dt>Preparing</dt> <dd id="stat-preparing">{{ stats.preparing_orders }}</dd></div>
                     <div class="stat"><dt>Ready</dt>     <dd id="stat-ready">{{ stats.ready_orders }}</dd></div>
+                    <div class="stat"><dt>Avg Time</dt>  <dd id="stat-avgwait">{{ stats.avg_wait_minutes }}<span>min</span></dd></div>
                 </div>
 
                 <div class="list-controls">
@@ -310,7 +311,6 @@ function updateStats(stats) {
     bumpStat("stat-pending",   stats.pending_orders);
     bumpStat("stat-preparing", stats.preparing_orders);
     bumpStat("stat-ready",     stats.ready_orders);
-    bumpStat("stat-avgwait",   stats.avg_wait);
     const topbar = document.getElementById("stat-active-topbar");
     if (topbar) topbar.textContent = stats.active_orders;
 }
