@@ -119,7 +119,7 @@ def register_staff_order_routes(app, mysql):
             sessions=sessions,
             closed_sessions=closed_sessions,
             staff_name=session.get("username", "Staff"),
-            allowed_statuses=["pending", "preparing", "ready"],
+            allowed_statuses=["pending", "preparing", "ready","closed"],
         )
 
     @app.route("/staff/orders/update", methods=["POST"])
@@ -136,7 +136,7 @@ def register_staff_order_routes(app, mysql):
 
         # Validate the status — only these three are allowed
         new_status = (request.form.get("status") or "").strip().lower()
-        if new_status not in ("pending", "preparing", "ready"):
+        if new_status not in ("pending", "preparing", "ready","closed"):
             flash("Choose a valid order status.", "warning")
             return redirect("/staff/orders")
 
@@ -156,6 +156,8 @@ def register_staff_order_routes(app, mysql):
             cursor.execute("UPDATE orders SET status = 'ready', preparation_time = 0 WHERE order_id = %s", (order_id,))
         elif new_status == "pending":
             cursor.execute("UPDATE orders SET status = 'pending', preparation_time = %s WHERE order_id = %s", (original_prep, order_id))
+        elif new_status == "closed":
+            cursor.execute("UPDATE orders SET status = 'closed' WHERE order_id = %s", (order_id))
         else:
             cursor.execute("UPDATE orders SET status = %s WHERE order_id = %s", (new_status, order_id))
 

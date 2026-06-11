@@ -14,9 +14,9 @@ def register_menu_routes(app, mysql):
         cursor = mysql.connection.cursor()
 
         cursor.execute("""
-            SELECT table_number FROM Table_Session 
-            WHERE session_id=%s AND status='active'
-        """, (session_id,))
+        SELECT table_number FROM Table_Session 
+        WHERE session_id=%s AND status IN ('active', 'ordered')
+    """, (session_id,))
         result = cursor.fetchone()
         cursor.close()
 

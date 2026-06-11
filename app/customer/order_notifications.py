@@ -18,7 +18,7 @@ def register_notification_routes(app, mysql):
         JOIN order_details od ON od.order_id = o.order_id
         JOIN item i ON i.item_id = od.item_id
         WHERE o.user_id = %s
-        AND o.status IN ('pending', 'preparing', 'ready')
+        AND o.status IN ('pending', 'preparing', 'ready', 'closed')
         GROUP BY o.order_id, o.status
         ORDER BY o.timestamp DESC
         LIMIT 5
@@ -41,39 +41,3 @@ def register_notification_routes(app, mysql):
             "ready":     "Your order is ready! Enjoy your meal.",
         }.get(status, "Order status updated.")
 
-    @app.route("/Customer/request-close-session", methods=["POST"])
-    def request_close_session():
-
-        session_id = session.get("table_session_id")
-
-        if not session_id:
-            flash("No active session.", "error")
-            return redirect(request.referrer)
-
-        cursor = mysql.connection.cursor()
-
-        cursor.execute("""
-            SELECT table_number
-            FROM Table_Session
-            WHERE session_id = %s
-        """, (session_id,))
-
-        result = cursor.fetchone()
-        cursor.close()
-
-        if not result:
-            flash("Session not found.", "error")
-            return redirect(request.referrer)
-
-        table_number = result[0]
-
-        # REAL-TIME EVENT → STAFF
-        socketio.emit("close_session_request", {
-            "session_id": session_id,
-            "table_number": table_number,
-            "message": f"Table {table_number} requested session close"
-        })
-
-        flash("Staff notified successfully.", "success")
-
-        return redirect(request.referrer)

@@ -28,7 +28,7 @@
   </div>
 </header>
 
-{{ render_toast() }}  
+{{ render_toast() }}
 
 <!-- PAGE WRAPPER → GRID inside -->
 <div class="page">
@@ -109,138 +109,193 @@
 
     </div><!-- end left-col -->
 
-<!-- ═══════════════ COL 2 — RIGHT ═══════════════ -->
-<div class="summary-col">
+    <!-- ═══════════════ COL 2 — RIGHT ═══════════════ -->
+    <div class="summary-col">
 
-  <!-- 1. BILL SUMMARY — NOW TOP -->
-  <div class="panel">
-    <span class="sec-label">Bill</span>
-
-    {% for item in cart_items %}
-    <div class="bill-row">
-      <span>
-        {% if item.quantity > 1 %}{{ item.quantity }}× {% endif %}
-        {{ item.name }}
-      </span>
-      <b>${{ "%.2f"|format(item.price * item.quantity) }}</b>
-    </div>
-    {% endfor %}
-
-    {% if loyalty_discount_active %}
-    <div class="discount-row" id="discount-row">
-      <span>⭐ Loyalty Discount</span>
-      <b>- ${{ loyalty_discount }}</b>
-    </div>
-    {% endif %}
-
-    <div class="bill-total">
-      <span>Total</span>
-      <b>${{ "%.2f"|format(cart_total) }}</b>
-    </div>
-
-    <p class="earn-note">
-      This order earns <b>{{ points_earned }}</b> loyalty points.
-    </p>
-  </div>
-
-
-  <!-- 2. PAYMENT + PLACE ORDER — NOW BELOW -->
-  <div class="pay-panel">
-    <h3>Payment</h3>
-
-    <form method="POST" action="/Customer/PlaceOrder">
-
-      <div class="pay-opts">
-        <input class="pay-r" type="radio" name="payment_method" id="pay-cash" value="cash" checked>
-        <label class="pay-lbl" for="pay-cash">
-          <span class="pay-icon">💵</span>
-          <span>
-            <span class="pay-name">Cash</span>
-            <span class="pay-desc">Pay at the counter</span>
-          </span>
-        </label>
-
-        <input class="pay-r" type="radio" name="payment_method" id="pay-card" value="card">
-        <label class="pay-lbl" for="pay-card">
-          <span class="pay-icon">💳</span>
-          <span>
-            <span class="pay-name">Card</span>
-            <span class="pay-desc">Visa, Mastercard, Amex</span>
-          </span>
-        </label>
-      </div>
-
-      <!-- Card fields -->
-      <div class="card-fields">
-        <input class="card-input field-base" type="text" placeholder="Card Number" maxlength="19">
-        <div class="card-row">
-          <input class="card-input field-base" type="text" placeholder="MM / YY" maxlength="7">
-          <input class="card-input field-base" type="text" placeholder="CVV" maxlength="4">
-        </div>
-      </div>
-
-      <!-- Loyalty -->
+      <!-- BILL SUMMARY -->
       <div class="panel">
-        <div class="loyalty-header">
-          <h3>Loyalty Points</h3>
-          <div class="pts-big">
-            <small>Balance</small>
-            <b>{{ loyalty_points }} <span>pts</span></b>
-          </div>
+        <span class="sec-label">Bill</span>
+
+        {% for item in cart_items %}
+        <div class="bill-row">
+          <span>
+            {% if item.quantity > 1 %}{{ item.quantity }}× {% endif %}
+            {{ item.name }}
+          </span>
+          <b>${{ "%.2f"|format(item.price * item.quantity) }}</b>
+        </div>
+        {% endfor %}
+
+        <!-- Discount row: hidden by default, shown via JS when redeemed -->
+        <div class="discount-row" id="discount-row" style="{{ 'display:flex' if redeem_active else 'display:none' }}">
+          <span>⭐ Loyalty Discount</span>
+          <b id="discount-amount">- ${{ "%.2f"|format(loyalty_discount) }}</b>
         </div>
 
-        <div class="loyalty-bar-wrap">
-          <div class="loyalty-bar-fill" data-progress="{{ loyalty_progress }}"></div>
+        <div class="bill-total">
+          <span>Total</span>
+          <b id="order-total">${{ "%.2f"|format(cart_total) }}</b>
         </div>
 
-        <p class="loyalty-hint">
-          <b>{{ points_to_next_reward }}</b> pts until your next reward.
+        <p class="earn-note">
+          This order earns <b id="points-earned">{{ points_earned }}</b> loyalty points.
         </p>
-
-        {% if loyalty_discount_active %}
-        <div class="redeem-row">
-          <p>
-            Redeem {{ (loyalty_points // 100) * 100 }} pts →
-            <b class="accent-text">${{ loyalty_discount }}</b> off
-          </p>
-
-          <input class="redeem-toggle" type="checkbox" name="redeem_points" id="redeem-toggle">
-          <label class="redeem-lbl" for="redeem-toggle">Redeem</label>
-        </div>
-        {% else %}
-        <div class="redeem-row">
-          <p class="loyalty-hint">
-            You need <b>{{ points_to_next_reward }}</b> more pts to redeem.
-          </p>
-        </div>
-        {% endif %}
       </div>
 
-      <button type="submit" class="btn-place">
-        Place Order
-      </button>
+      <!-- PAYMENT + PLACE ORDER -->
+      <div class="pay-panel">
+        <h3>Payment</h3>
 
-    </form>
+        <form method="POST" action="/Customer/PlaceOrder">
 
-    <!-- NEW: REQUEST CLOSE SESSION BUTTON -->
-    <form method="POST" action="/Customer/request-close-session">
-    <button type="submit" class="close-session-btn">
-        Request Session Close
-    </button>
-    </form>
+          <div class="pay-opts">
+            <input class="pay-r" type="radio" name="payment_method" id="pay-cash" value="cash" checked>
+            <label class="pay-lbl" for="pay-cash">
+              <span class="pay-icon">💵</span>
+              <span>
+                <span class="pay-name">Cash</span>
+                <span class="pay-desc">Pay at the counter</span>
+              </span>
+            </label>
 
-  </div>
+            <input class="pay-r" type="radio" name="payment_method" id="pay-card" value="card">
+            <label class="pay-lbl" for="pay-card">
+              <span class="pay-icon">💳</span>
+              <span>
+                <span class="pay-name">Card</span>
+                <span class="pay-desc">Visa, Mastercard, Amex</span>
+              </span>
+            </label>
+          </div>
 
-</div>
+          <!-- Card fields -->
+          <div class="card-fields">
+            <input class="card-input field-base" type="text" placeholder="Card Number" maxlength="19">
+            <div class="card-row">
+              <input class="card-input field-base" type="text" placeholder="MM / YY" maxlength="7">
+              <input class="card-input field-base" type="text" placeholder="CVV" maxlength="4">
+            </div>
+          </div>
+
+          <!-- Loyalty -->
+          <div class="panel">
+            <div class="loyalty-header">
+              <h3>Loyalty Points</h3>
+              <div class="pts-big">
+                <small>Balance</small>
+                <b>{{ loyalty_points }} <span>pts</span></b>
+              </div>
+            </div>
+
+            <div class="loyalty-bar-wrap">
+              <div class="loyalty-bar-fill" data-progress="{{ loyalty_progress }}"></div>
+            </div>
+
+            <p class="loyalty-hint">
+              <b>{{ points_to_next_reward }}</b> pts until your next reward.
+            </p>
+
+            {% if loyalty_discount_active %}
+            <div class="redeem-row">
+              <p>
+                Redeem {{ (loyalty_points // 100) * 100 }} pts →
+                <b class="accent-text" id="loyalty-discount-label">${{ "%.2f"|format(loyalty_discount) }}</b> off
+              </p>
+              <input class="redeem-toggle" type="checkbox" name="redeem_points"
+                     id="redeem-toggle" value="1"
+                     {{ 'checked' if redeem_active else '' }}>
+              <label class="redeem-lbl" for="redeem-toggle">Redeem</label>
+            </div>
+            {% else %}
+            <div class="redeem-row">
+              <p class="loyalty-hint">
+                You need <b>{{ points_to_next_reward }}</b> more pts to redeem.
+              </p>
+            </div>
+            {% endif %}
+          </div>
+
+          <button type="submit" class="btn-place">Place Order</button>
+
+        </form>
+      </div>
+
+    </div><!-- end summary-col -->
+  </div><!-- end page-grid -->
+</div><!-- end page -->
+
 <script>
   document.querySelectorAll('.order-item[data-index]').forEach(el => {
     el.style.setProperty('--i', el.dataset.index);
   });
+
   const bar = document.querySelector('.loyalty-bar-fill[data-progress]');
   if (bar) bar.style.width = bar.dataset.progress + '%';
 
-</script>
-{{ render_toast_script() }}  
+  const redeemToggle = document.getElementById('redeem-toggle');
 
+  if (redeemToggle) {
+    redeemToggle.addEventListener('change', async function () {
+      const redeem = this.checked;
+      this.disabled = true;
+
+      try {
+        const res = await fetch('/apply_loyalty', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ redeem })
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+          // Update total
+          const totalEl = document.getElementById('order-total');
+          if (totalEl) totalEl.textContent = `$${data.new_total.toFixed(2)}`;
+
+          // Update discount label in loyalty panel
+          const discountLabel = document.getElementById('loyalty-discount-label');
+          if (discountLabel) {
+            discountLabel.textContent = `$${data.discount.toFixed(2)}`;
+          }
+
+          // Show/hide discount row in bill
+          const discountRow = document.getElementById('discount-row');
+          const discountAmt = document.getElementById('discount-amount');
+          if (discountRow && discountAmt) {
+            if (redeem && data.discount > 0) {
+              discountAmt.textContent = `- $${data.discount.toFixed(2)}`;
+              discountRow.style.display = 'flex';
+            } else {
+              discountRow.style.display = 'none';
+            }
+          }
+
+          // Update points earned preview (1 pt per $1)
+          const pointsEarned = document.getElementById('points-earned');
+          if (pointsEarned) {
+            pointsEarned.textContent = Math.floor(data.new_total);
+          }
+        }
+      } catch (err) {
+        console.error('Loyalty redeem failed:', err);
+        this.checked = !redeem;
+      } finally {
+        this.disabled = false;
+      }
+    });
+  }
+</script>
+
+{{ render_toast_script() }}
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+<script>
+  const socket = io();
+
+  socket.on('session_closed', function (data) {
+    alert(data.message || 'Your table session has ended.');
+    window.location.href = '/Customer/scan-required';
+  });
+</script>
 </body>
 </html>

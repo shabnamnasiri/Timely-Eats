@@ -59,7 +59,7 @@ socketio.init_app(
 # =========================
 # IMPORT ROUTES AFTER INIT
 # =========================
-
+from app.customer.session_expiry import register_session_expiry_task, register_session_room_events
 from app.customer.order_notifications import register_notification_routes
 from app.auth.login.Sign_in import register_login_routes
 from app.auth.login.Sign_up import register_register_routes
@@ -108,18 +108,23 @@ register_notification_routes(app, mysql)
 def connect():
     user_id = session.get("user_id")
     role_id = session.get("role_id")
+    table_session_id = session.get("table_session_id")
 
     print(f"[SOCKET CONNECT] user={user_id} role={role_id}")
 
     if user_id:
         join_room(f"user_{user_id}")
 
+    if table_session_id:
+        join_room(f"table_session_{table_session_id}")
+        print(f"[SOCKET] Auto-joined table_session_{table_session_id}")
+
     if role_id == 2:
         join_room("staff")
 
     if role_id == 1:
         join_room("admin")
-
+        
 # =========================
 # REAL-TIME STAFF DASHBOARD
 # =========================
@@ -172,6 +177,9 @@ def push_staff_dashboard():
 # =========================
 
 socketio.start_background_task(push_staff_dashboard)
+
+register_session_expiry_task(app, mysql, socketio)
+register_session_room_events(socketio)
 
 # =========================
 # RUN SERVER

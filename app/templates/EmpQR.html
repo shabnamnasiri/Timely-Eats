@@ -142,14 +142,15 @@ function updateDropdown(sessions) {
     const select = document.getElementById("tableNumber");
     select.innerHTML = `<option value="">Select Table...</option>`;
 
-    ALL_TABLES.forEach(table => {
-        const active = sessions.some(s => s.table_number == table && s.status == "active");
-        if (active) {
-            select.innerHTML += `<option disabled>Table ${table} (In Use)</option>`;
-        } else {
-            select.innerHTML += `<option value="${table}">Table ${table}</option>`;
-        }
-    });
+   ALL_TABLES.forEach(table => {
+    const active = sessions.some(s => s.table_number == table && s.status == "active");
+    const ordered = sessions.some(s => s.table_number == table && s.status == "ordered");
+    if (active || ordered) {
+        select.innerHTML += `<option disabled>Table ${table} (In Use)</option>`;
+    } else {
+        select.innerHTML += `<option value="${table}">Table ${table}</option>`;
+    }
+});
 }
 
 function printQR(id) {

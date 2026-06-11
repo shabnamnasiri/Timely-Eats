@@ -614,6 +614,14 @@ socket.on("order_update", function(data) {
 });
 
 </script>
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+<script>
+  const socket = io();
 
-</body>
+  socket.on('session_closed', function (data) {
+    alert(data.message || 'Your table session has ended.');
+    window.location.href = '/Customer/scan-required';
+  });
+</script></body>
 </html>
