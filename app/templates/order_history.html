@@ -1,0 +1,184 @@
+{% from 'macros/toast.html' import render_toast %}
+{% from 'macros/toast_script.html' import render_toast_script %}
+
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Timely Eats — Order History</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+
+  <style>
+    body { font-family: 'DM Sans', sans-serif; }
+    .font-bebas { font-family: 'Bebas Neue', sans-serif; }
+    .font-mono-custom { font-family: 'DM Mono', monospace; }
+  </style>
+</head>
+<body class="bg-[#f9f7f4] text-[#0e0e0e] antialiased min-h-full pb-12">
+
+  <header class="bg-[#0e0e0e] text-white py-6 px-6 md:px-12 border-b-2 border-[#c8933a] sticky top-0 z-50 shadow-md">
+    <div class="max-w-6xl mx-auto flex justify-between items-center">
+      <div>
+        <div class="font-bebas text-2xl tracking-wider">Timely<span class="text-[#c8933a]">Eats</span></div>
+      </div>
+      <a href="/menu" class="font-mono-custom text-xs uppercase tracking-wider bg-[#c8933a] text-[#0e0e0e] px-4 py-2 hover:bg-white hover:text-[#0e0e0e] transition-colors rounded-xs">
+        ← Back To Menu
+      </a>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-10">
+
+    <div class="bg-white border border-[#d4cfc6] rounded-xs p-6 mb-10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shadow-sm relative overflow-hidden">
+      <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-[#c8933a]"></div>
+      <div>
+        <h1 class="text-3xl font-bold tracking-tight text-[#0e0e0e]">Your Orders</h1>
+        <p class="text-xs font-mono-custom text-[#7a7a7a] uppercase tracking-wider mt-1">Track live preparation & receipt logs</p>
+      </div>
+      <div class="bg-[#f3f0ea] border border-[#d4cfc6] px-6 py-4 rounded-xs text-center sm:text-right w-full sm:w-auto">
+        <span class="block font-mono-custom text-[10px] text-[#7a7a7a] uppercase tracking-widest">Total Money Spent</span>
+        <span class="text-3xl font-bebas tracking-wide text-[#c8933a]">${{ "%.2f"|format(total_spent) }}</span>
+      </div>
+    </div>
+
+    {% if active_orders %}
+    <section class="mb-12">
+      <div class="flex items-center gap-3 mb-6">
+        <span class="flex h-3 w-3 relative">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+        </span>
+        <h2 class="text-xl font-bold tracking-tight text-[#0e0e0e]">Active Preparation</h2>
+      </div>
+
+      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {% for order in active_orders %}
+        <div class="bg-white border-2 border-emerald-500/30 rounded-xs p-5 shadow-xs relative">
+          <div class="absolute top-4 right-4 bg-emerald-50 text-emerald-700 font-mono-custom text-[10px] uppercase font-bold tracking-wider px-2.5 py-1 rounded-full border border-emerald-200">
+            {{ order.status }}
+          </div>
+          <span class="font-mono-custom text-xs text-[#7a7a7a]">Order #{{ order.id }}</span>
+          <p class="text-sm font-medium text-[#3d3d3d] mt-2 mb-4 line-clamp-2 min-h-[40px]">{{ order.summary }}</p>
+          <div class="border-t border-[#f3f0ea] pt-3 flex justify-between items-center">
+            <span class="text-xs text-[#b0b0b0]">{{ order.date }}</span>
+            <span class="font-bebas text-xl text-[#0e0e0e]">${{ "%.2f"|format(order.total) }}</span>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+    {% endif %}
+
+    <div class="bg-[#f3f0ea] border border-[#d4cfc6] rounded-xs p-4 mb-6 flex flex-col md:flex-row gap-4 items-center justify-between shadow-xs">
+      <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
+        <span class="font-mono-custom text-xs uppercase text-[#3d3d3d] tracking-wider font-medium">Filter History:</span>
+        <button onclick="filterOrders('all')" id="btn-all" class="px-4 py-1.5 text-xs font-mono-custom uppercase bg-[#0e0e0e] text-[#f9f7f4] border border-[#0e0e0e] tracking-wider rounded-xs transition-colors cursor-pointer">All Past</button>
+        <button onclick="filterOrders('completed')" id="btn-completed" class="px-4 py-1.5 text-xs font-mono-custom uppercase bg-white text-[#3d3d3d] border border-[#d4cfc6] tracking-wider rounded-xs hover:border-[#c8933a] transition-colors cursor-pointer">Completed</button>
+        <button onclick="filterOrders('cancelled')" id="btn-cancelled" class="px-4 py-1.5 text-xs font-mono-custom uppercase bg-white text-[#3d3d3d] border border-[#d4cfc6] tracking-wider rounded-xs hover:border-[#c8933a] transition-colors cursor-pointer">Cancelled</button>
+      </div>
+
+      <div class="flex items-center gap-2 w-full md:w-auto justify-end">
+        <label for="sortOrder" class="font-mono-custom text-xs uppercase text-[#3d3d3d] tracking-wider whitespace-nowrap">Sort Price:</label>
+        <select id="sortOrder" onchange="sortOrders()" class="bg-white border border-[#d4cfc6] rounded-xs px-3 py-1.5 text-xs font-mono-custom text-[#3d3d3d] outline-hidden focus:border-[#c8933a]">
+          <option value="default">Newest First</option>
+          <option value="low-high">Price: Low to High</option>
+          <option value="high-low">Price: High to Low</option>
+        </select>
+      </div>
+    </div>
+
+    <section>
+      <h2 class="text-xl font-bold tracking-tight text-[#0e0e0e] mb-6">Historical Logs</h2>
+
+      {% if not past_orders %}
+      <div class="bg-white border border-[#d4cfc6] rounded-xs p-12 text-center shadow-xs">
+        <p class="text-sm text-[#7a7a7a]">No past transactions logged within this customer profile account.</p>
+      </div>
+      {% else %}
+      <div id="past-orders-grid" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {% for order in past_orders %}
+        <div class="order-card bg-white border border-[#d4cfc6] rounded-xs p-5 shadow-xs hover:border-[#c8933a] transition-all"
+             data-status="{{ order.status }}"
+             data-price="{{ order.total }}"
+             data-index="{{ loop.index }}">
+          <div class="flex justify-between items-start">
+            <span class="font-mono-custom text-xs text-[#7a7a7a]">Order #{{ order.id }}</span>
+            <span class="font-mono-custom text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-sm border
+              {% if order.status == 'completed' %} bg-emerald-50 text-emerald-700 border-emerald-200
+              {% else %} bg-rose-50 text-rose-700 border-rose-200 {% endif %}">
+              {{ order.status }}
+            </span>
+          </div>
+          <p class="text-sm font-light text-[#3d3d3d] mt-3 mb-5 line-clamp-2 min-h-[40px]">{{ order.summary }}</p>
+          <div class="border-t border-[#f3f0ea] pt-3 flex justify-between items-center">
+            <span class="text-[11px] font-mono-custom text-[#b0b0b0]">{{ order.date }}</span>
+            <span class="font-bebas text-xl text-[#0e0e0e]">${{ "%.2f"|format(order.total) }}</span>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </section>
+  </main>
+
+  <div class="text-[11px] font-mono-custom uppercase tracking-wider text-[#b0b0b0] text-center w-full mt-12">
+    © 2026 Timely Eats
+  </div>
+
+  {{ render_toast_script() }}
+
+  <script>
+    let currentFilter = 'all';
+
+    function filterOrders(status) {
+      currentFilter = status;
+      const cards = document.querySelectorAll('.order-card');
+
+      // Update toggle button UI appearance
+      ['all', 'completed', 'cancelled'].forEach(type => {
+        const btn = document.getElementById(`btn-${type}`);
+        if(type === status) {
+          btn.classList.remove('bg-white', 'text-[#3d3d3d]');
+          btn.classList.add('bg-[#0e0e0e]', 'text-[#f9f7f4]');
+        } else {
+          btn.classList.remove('bg-[#0e0e0e]', 'text-[#f9f7f4]');
+          btn.classList.add('bg-white', 'text-[#3d3d3d]');
+        }
+      });
+
+      cards.forEach(card => {
+        if (status === 'all' || card.getAttribute('data-status') === status) {
+          card.style.display = 'block';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+      sortOrders(); // Retain sorting alignment during active filter transformations
+    }
+
+    function sortOrders() {
+      const grid = document.getElementById('past-orders-grid');
+      if (!grid) return;
+
+      const cards = Array.from(grid.querySelectorAll('.order-card'));
+      const sortValue = document.getElementById('sortOrder').value;
+
+      cards.sort((a, b) => {
+        const priceA = parseFloat(a.getAttribute('data-price'));
+        const priceB = parseFloat(b.getAttribute('data-price'));
+        const indexA = parseInt(a.getAttribute('data-index'));
+        const indexB = parseInt(b.getAttribute('data-index'));
+
+        if (sortValue === 'low-high') return priceA - priceB;
+        if (sortValue === 'high-low') return priceB - priceA;
+        return indexA - indexB; // Resets view configuration cleanly to descending date structure
+      });
+
+      // Clear existing context grid layout and cleanly append ordered collection stack
+      cards.forEach(card => grid.appendChild(card));
+    }
+  </script>
+</body>
+</html>

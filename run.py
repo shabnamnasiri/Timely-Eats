@@ -38,7 +38,7 @@ app.secret_key = os.getenv("SECRET_KEY", "secret_key_123")
 
 app.config["MYSQL_HOST"] = "localhost"
 app.config["MYSQL_USER"] = "root"
-app.config["MYSQL_PASSWORD"] = ""
+app.config["MYSQL_PASSWORD"] = "22703380"
 app.config["MYSQL_DB"] = "timlyeats"
 app.config["MYSQL_PORT"] = 3306
 app.config["MYSQL_AUTOCOMMIT"] = True
@@ -60,6 +60,8 @@ socketio.init_app(
 # IMPORT ROUTES AFTER INIT
 # =========================
 from app.customer.session_expiry import register_session_expiry_task, register_session_room_events
+from app.customer.order_history import register_customer_order_history_routes
+from app.customer.profile import register_customer_profile_routes
 from app.customer.order_notifications import register_notification_routes
 from app.auth.login.Sign_in import register_login_routes
 from app.auth.login.Sign_up import register_register_routes
@@ -78,8 +80,6 @@ from app.staff.orders import (
     get_orders,
     get_sessions
 )
-from app.auth.login.forgot_password import register_forgotpassword_routes
-
 # =========================
 # REGISTER ROUTES
 # =========================
@@ -97,9 +97,9 @@ register_admin_add_staff_routes(app, mysql)
 register_staff_api(app, mysql)
 register_session_routes(app, mysql)
 register_staff_order_routes(app, mysql)
-register_forgotpassword_routes(app, mysql)
 register_notification_routes(app, mysql)
-
+register_customer_profile_routes(app, mysql)
+register_customer_order_history_routes(app, mysql)
 # =========================
 # SOCKET CONNECTIONS
 # =========================

@@ -1,108 +1,63 @@
-/* ── Обычные flash-тосты ─────────────────────────────────────────── */
+/* ── Flash Toasts ─────────────────────────────────────────── */
+
 .popup-toast {
   position: fixed;
   top: 90px;
   right: 30px;
   z-index: 9999;
+
   display: flex;
   align-items: center;
-  gap: 12px;
-  background: var(--ink);
-  color: var(--paper);
-  border-left: 3px solid var(--accent);
-  padding: 14px 18px;
-  font-family: 'DM Mono', monospace;
-  font-size: 11px;
-  letter-spacing: .12em;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+  gap: 14px;
+
+  min-width: 320px;
+  max-width: 420px;
+
+  background: #c8933a;
+  color: #0e0e0e;
+
+  padding: 16px 18px;
+
+  border-radius: 8px;
+  border: 1px solid rgba(14,14,14,0.12);
+
+  box-shadow: 0 12px 32px rgba(0,0,0,0.18);
+
   opacity: 0;
   transform: translateY(-10px);
   animation: slideIn .4s ease forwards;
 }
 
-.toast-title {
-  font-size: 10px;
-  color: var(--accent);
-}
-
-.toast-msg {
-  font-size: 11px;
-  color: var(--paper);
-}
-
-/* ── Уведомления о заказе (крупнее) ─────────────────────────────── */
-.order-toast {
-  position: fixed;
-  bottom: 30px;
-  right: 30px;
-  z-index: 9999;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  background: var(--ink);
-  color: var(--paper);
-  padding: 20px 24px;
-  min-width: 320px;
-  max-width: 420px;
-  box-shadow: 0 16px 48px rgba(0,0,0,0.35);
-  opacity: 0;
-  transform: translateY(16px);
-  animation: slideUp .4s ease forwards;
-}
-
-.order-toast.warning { border-left: 4px solid #f59e0b; }
-.order-toast.info    { border-left: 4px solid #0284c7; }
-.order-toast.success { border-left: 4px solid #16a34a; }
-
-.order-toast .order-toast-icon {
-  font-size: 28px;
+.toast-icon {
+  font-size: 22px;
   flex-shrink: 0;
 }
 
-.order-toast .order-toast-title {
+.toast-title {
   font-family: 'DM Mono', monospace;
   font-size: 10px;
+  font-weight: 700;
   letter-spacing: .15em;
   text-transform: uppercase;
-  color: var(--accent);
+  color: rgba(14,14,14,.7);
   margin-bottom: 4px;
 }
 
-.order-toast .order-toast-msg {
+.toast-msg {
   font-family: 'DM Sans', sans-serif;
   font-size: 14px;
-  color: var(--paper);
+  font-weight: 500;
+  color: #0e0e0e;
   line-height: 1.4;
 }
 
-.order-toast .order-toast-close {
-  margin-left: auto;
-  background: none;
-  border: none;
-  color: var(--paper);
-  opacity: 0.4;
-  cursor: pointer;
-  font-size: 18px;
-  padding: 0;
-  align-self: flex-start;
-  flex-shrink: 0;
-}
-
-.order-toast .order-toast-items {
-  margin-top: 6px;
-  font-family: 'DM Mono', monospace;
-  font-size: 10px;
-  color: var(--accent);
-  letter-spacing: .08em;
-  opacity: 0.8;
-}
-
-.order-toast .order-toast-close:hover { opacity: 1; }
-
 @keyframes slideIn {
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes slideUp {
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
