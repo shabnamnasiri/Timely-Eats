@@ -1,5 +1,6 @@
 {% from 'macros/toast.html' import render_toast %}
 {% from 'macros/toast_script.html' import render_toast_script %}
+{% from 'macros/admin_sidebar.html' import render_admin_sidebar %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,32 +13,7 @@
 </head>
 <body>
 
-<aside class="sidebar">
-  <div class="sidebar-logo">
-    <b>Timely<span>Eats</span></b>
-    <small>Admin Panel</small>
-  </div>
-  <div class="sidebar-section">Menu</div>
-  <ul class="sidebar-nav">
-    <li><a href="#" class="active"><i class="ico">▤</i> Menu Items</a></li>
-    <!-- <li><a href="#"><i class="ico">⊞</i> Categories</a></li>
-    <li><a href="#"><i class="ico">◈</i> Modifiers</a></li> -->
-  </ul>
-  <div class="sidebar-section">Operations</div>
-  <ul class="sidebar-nav">
-    <li><a href="/admin/add_staff"><i class="ico">⊙</i>Add Staff</a></li>
-    <li><a href="/logout" class="cart"><i class="ico">↩</i> Logout</a></li>
-  </ul>
-  <div class="sidebar-section">Reports</div>
-  <ul class="sidebar-nav">
-    <li><a href="#"><i class="ico">◈</i> Analytics</a></li>
-    <li><a href="#"><i class="ico">▦</i> Revenue</a></li>
-  </ul>
-  <div class="sidebar-user">
-    <small>Signed in as</small>
-    <span> Admin  · {{ user[0] }}</span>
-  </div>
-</aside>
+{{ render_admin_sidebar('menu', user) }}
 
 <div class="main">
   <div class="topbar">

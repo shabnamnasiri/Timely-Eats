@@ -2,20 +2,13 @@ import os
 from flask import request, jsonify, render_template, Response, redirect, url_for, session, flash
 from werkzeug.utils import secure_filename
 
+from app.admin.helpers import admin_required, get_admin_user
+
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'webp'}
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def register_admin_add_menu_routes(app, mysql):
-
-    def admin_required():
-        if "user_id" not in session:
-            flash("Please sign in to access this page.", "warning")
-            return redirect("/signin")
-        if session.get("role_id") != 3:
-            flash("Access denied. Admins only.", "danger")
-            return redirect("/signin")
-        return None
 
     @app.route("/admin/add_menu", methods=["GET", "POST"])
     def admin_menu():
@@ -23,12 +16,10 @@ def register_admin_add_menu_routes(app, mysql):
         if guard:
             return guard
 
-        user_id = session.get('user_id')
         cursor = mysql.connection.cursor()
         cursor.execute("SELECT item_id, name, description, preparation_time, price, category FROM item")
         items = cursor.fetchall()
-        cursor.execute("SELECT username FROM user WHERE user_id = %s", (user_id,))
-        user = cursor.fetchone()
+        user = get_admin_user(mysql)
         cursor.close()
 
         return render_template("Add_menu.html", items=items, user=user)

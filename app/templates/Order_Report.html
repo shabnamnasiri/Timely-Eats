@@ -1,3 +1,4 @@
+{% from 'macros/admin_sidebar.html' import render_admin_sidebar %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,11 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Order Analytics | TimelyEats</title>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../static/css/Revenue.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Revenue.css') }}">
     <script src="https://cdn.tailwindcss.com"></script>
-
     <style>
-        /* Modern Search Input styling */
         .search-input {
             background: var(--canvas);
             border: 1px solid var(--rule);
@@ -18,40 +17,7 @@
             font-size: 11px;
             width: 280px;
             outline: none;
-            transition: all 0.2s ease;
         }
-        .search-input:focus {
-            border-color: var(--accent-strong);
-            background: #fff;
-            width: 320px;
-        }
-
-        /* Pagination Styling */
-        .pagination {
-            display: flex;
-            gap: 5px;
-            margin-top: 24px;
-            justify-content: center;
-        }
-        .page-link {
-            padding: 8px 16px;
-            border: 1px solid var(--rule);
-            background: var(--paper);
-            font-family: 'DM Mono', monospace;
-            font-size: 10px;
-            text-transform: uppercase;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .page-link.active {
-            background: var(--ink);
-            color: var(--paper);
-        }
-        .page-link:hover:not(.active) {
-            border-color: var(--accent-strong);
-        }
-
-        /* Horizontal Filter Toolbar */
         .table-toolbar {
             display: flex;
             align-items: center;
@@ -61,13 +27,6 @@
             border-bottom: 1px solid var(--rule);
             gap: 20px;
         }
-        
-        .toolbar-filters {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-        }
-
         .toolbar-select {
             background: transparent;
             font-family: 'DM Mono', monospace;
@@ -80,141 +39,74 @@
         }
     </style>
 </head>
-
 <body class="bg-[var(--canvas)]">
 
-<aside class="sidebar hidden lg:flex lg:flex-col">
-    <div class="sidebar-logo">
-        <b>Timely<span style="color: #c8933a;">Eats</span></b>
-        <small>Admin Panel</small>
-    </div>
-
-  <div class="sidebar-section">Menu</div>
-  <ul class="sidebar-nav">
-    <li><a href="Add_menu.html"><i class="ico">▤</i> Menu Items</a></li>
-    <li><a href="#"><i class="ico">⊞</i> Categories</a></li>
-  </ul>
-
-  <div class="sidebar-section">Live_feed</div>
-  <ul class="sidebar-nav">
-    <li><a href="Admin_order.html"><i class="ico">⊙</i> Orders</a></li>
-    <li><a href="Admin_table.html"><i class="ico">◫</i> Tables</a></li>
-  </ul>
-
-  <div class="sidebar-section">Users</div>
-  <ul class="sidebar-nav">
-    <li><a href="Admin_staff.html"><i class="ico">⊙</i>Staff</a></li>
-    <li><a href="Admin_customer.html"><i class="ico">◫</i>Customers</a></li>
-  </ul>
-
-  <div class="sidebar-section">Analytics</div>
-  <ul class="sidebar-nav">
-    <li><a href="Revenue.html"><i class="ico">▦</i> Revenue</a></li>
-    <li><a href="ORder_Report.html" class = "active"><i class="ico">▦</i> Order_Report</a></li>
-    <li><a href="Customer_report.html"><i class="ico">▦</i> Customer_Report</a></li>
-    <li><a href="Table_report.html"><i class="ico">▦</i> Table_Report</a></li>
-  </ul>
-</aside>
-
+{{ render_admin_sidebar('order_report', user) }}
 
 <main class="main flex-1 min-w-0">
     <header class="topbar">
         <h1>Order Analytics</h1>
-        <div class="flex gap-4">
-            <button class="px-4 py-2 bg-[var(--ink)] text-[var(--paper)] font-['Bebas_Neue'] text-lg tracking-wide hover:bg-[var(--accent-strong)] transition-all">
-                Export CSV
-            </button>
-            <button class="px-4 py-2 border border-[var(--rule)] font-['Bebas_Neue'] text-lg tracking-wide hover:bg-white transition-all">
-                Print PDF
-            </button>
-        </div>
+        <p class="font-mono text-[10px] text-[var(--mist)] uppercase mt-1">Completed orders only (status: closed)</p>
     </header>
 
-    <div class="content block"> <section class="max-w-6xl mx-auto">
+    <div class="content block">
+        <section class="max-w-6xl mx-auto">
             <span class="label">Performance Metrics</span>
-            
+
             <div class="stats grid grid-cols-2 md:grid-cols-4 gap-[2px] mb-8">
-                <div class="stat"><dt>Total Orders</dt><dd>1,248</dd></div>
-                <div class="stat"><dt>Avg Prep</dt><dd>13<span>m</span></dd></div>
-                <div class="stat"><dt>Success Rate</dt><dd>94%</dd></div>
-                <div class="stat"><dt>Net Revenue</dt><dd>18,420</dd></div>
+                <div class="stat"><dt>Completed Orders</dt><dd>{{ stats.total_orders }}</dd></div>
+                <div class="stat"><dt>Avg Prep</dt><dd>{{ stats.avg_prep|round|int }}<span>m</span></dd></div>
+                <div class="stat"><dt>Completion Rate</dt><dd>{{ stats.success_rate }}%</dd></div>
+                <div class="stat"><dt>Net Revenue</dt><dd>${{ "%.2f"|format(stats.net_revenue) }}</dd></div>
             </div>
 
             <div class="panel !p-0 overflow-hidden shadow-sm">
-                
                 <div class="table-toolbar">
-                    <div class="flex items-center gap-4">
-                        <input type="text" placeholder="SEARCH ITEMS..." class="search-input">
-                    </div>
-
-                    <div class="toolbar-filters">
-                        <div class="flex items-center gap-2">
-                            <span class="font-mono text-[9px] text-[var(--mist)] uppercase">Min Sales:</span>
-                            <select class="toolbar-select">
-                                <option>0+</option>
-                                <option>50+</option>
-                                <option>100+</option>
-                                <option>500+</option>
-                            </select>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <span class="font-mono text-[9px] text-[var(--mist)] uppercase">Sort:</span>
-                            <select class="toolbar-select">
-                                <option>Most Sold</option>
-                                <option>Highest Revenue</option>
-                                <option>Alphabetical</option>
-                            </select>
-                        </div>
-                    </div>
+                    <input type="text" id="itemSearch" placeholder="SEARCH ITEMS..." class="search-input">
+                    <div class="toolbar-select">Sorted by: Most Sold</div>
                 </div>
 
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
+                    <table class="w-full text-left border-collapse" id="salesTable">
                         <thead>
                             <tr class="border-b border-[var(--rule)]">
                                 <th class="py-4 px-8 font-mono text-[9px] uppercase tracking-widest text-[var(--mist)]">Rank</th>
                                 <th class="py-4 px-8 font-mono text-[9px] uppercase tracking-widest text-[var(--mist)]">Item Description</th>
                                 <th class="py-4 px-8 font-mono text-[9px] uppercase tracking-widest text-[var(--mist)] text-center">Volume</th>
                                 <th class="py-4 px-8 font-mono text-[9px] uppercase tracking-widest text-[var(--mist)] text-right">Gross Rev</th>
-                                <th class="py-4 px-8 font-mono text-[9px] uppercase tracking-widest text-[var(--mist)]">Status</th>
+                                <th class="py-4 px-8 font-mono text-[9px] uppercase tracking-widest text-[var(--mist)]">Category</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-[var(--rule)]">
-                            <tr class="hover:bg-[#fcfaf7] transition-colors group">
-                                <td class="py-5 px-8 font-['Bebas_Neue'] text-xl">01</td>
-                                <td class="py-5 px-8 font-medium text-sm text-[var(--ink)]">Classic Wagyu Burger</td>
-                                <td class="py-5 px-8 text-center font-mono text-sm font-bold">482</td>
-                                <td class="py-5 px-8 text-right font-mono text-sm">$6,266.00</td>
-                                <td class="py-5 px-8"><span class="text-[9px] font-mono text-green-600 bg-green-50 px-2 py-1 border border-green-100">Trending ↑</span></td>
+                            {% for item in items %}
+                            <tr class="hover:bg-[#fcfaf7] transition-colors sales-row">
+                                <td class="py-5 px-8 font-['Bebas_Neue'] text-xl">{{ "%02d"|format(loop.index) }}</td>
+                                <td class="py-5 px-8 font-medium text-sm text-[var(--ink)] item-name">{{ item.name }}</td>
+                                <td class="py-5 px-8 text-center font-mono text-sm font-bold">{{ item.volume }}</td>
+                                <td class="py-5 px-8 text-right font-mono text-sm">${{ "%.2f"|format(item.gross_revenue) }}</td>
+                                <td class="py-5 px-8 font-mono text-[10px] uppercase text-[var(--mist)]">{{ item.category or '—' }}</td>
                             </tr>
-                            <tr class="hover:bg-[#fcfaf7] transition-colors group">
-                                <td class="py-5 px-8 font-['Bebas_Neue'] text-xl">02</td>
-                                <td class="py-5 px-8 font-medium text-sm text-[var(--ink)]">Truffle Parmesan Fries</td>
-                                <td class="py-5 px-8 text-center font-mono text-sm font-bold">312</td>
-                                <td class="py-5 px-8 text-right font-mono text-sm">$2,496.00</td>
-                                <td class="py-5 px-8"><span class="text-[9px] font-mono text-[var(--mist)] bg-[var(--canvas)] px-2 py-1 border border-[var(--rule)]">Stable</span></td>
+                            {% else %}
+                            <tr>
+                                <td colspan="5" class="py-8 px-8 text-center font-mono text-sm text-[var(--mist)]">No completed orders yet.</td>
                             </tr>
-                            <tr class="hover:bg-[#fcfaf7] transition-colors group">
-                                <td class="py-5 px-8 font-['Bebas_Neue'] text-xl">03</td>
-                                <td class="py-5 px-8 font-medium text-sm text-[var(--ink)]">Spicy Buffalo Wings (6pc)</td>
-                                <td class="py-5 px-8 text-center font-mono text-sm font-bold">289</td>
-                                <td class="py-5 px-8 text-right font-mono text-sm">$3,468.00</td>
-                                <td class="py-5 px-8"><span class="text-[9px] font-mono text-green-600 bg-green-50 px-2 py-1 border border-green-100">Trending ↑</span></td>
-                            </tr>
+                            {% endfor %}
                         </tbody>
                     </table>
                 </div>
             </div>
-
-            <div class="pagination">
-                <button class="page-link">← Prev</button>
-                <button class="page-link active">1</button>
-                <button class="page-link">2</button>
-                <button class="page-link">3</button>
-                <button class="page-link">Next →</button>
-            </div>
         </section>
     </div>
 </main>
+
+<script>
+document.getElementById("itemSearch")?.addEventListener("input", (e) => {
+    const q = e.target.value.toLowerCase();
+    document.querySelectorAll(".sales-row").forEach(row => {
+        const name = row.querySelector(".item-name")?.textContent.toLowerCase() || "";
+        row.style.display = name.includes(q) ? "" : "none";
+    });
+});
+</script>
 </body>
 </html>

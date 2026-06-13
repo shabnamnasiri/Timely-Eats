@@ -1,0 +1,136 @@
+{% from 'macros/admin_sidebar.html' import render_admin_sidebar %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Table Management — TimelyEats</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/Revenue.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .table-card {
+      background: var(--paper);
+      border: 1px solid var(--rule);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .table-card.occupied { border-top: 3px solid var(--ink); }
+    .table-card.available { border-top: 3px solid #ded8cd; opacity: 0.85; }
+    .table-card.attention { border-top: 3px solid var(--accent-strong); background: #fffcf5; }
+    .card-header { display: flex; justify-content: space-between; align-items: flex-start; }
+    .table-id {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--mist);
+      background: var(--canvas);
+      padding: 2px 6px;
+    }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .occupied .status-dot { background: var(--ink); }
+    .available .status-dot { border: 1px solid var(--rule); }
+    .attention .status-dot { background: var(--accent-strong); }
+    .card-body h3 { font-family: 'Bebas Neue', sans-serif; font-size: 24px; line-height: 1.1; }
+    .card-body p { font-size: 11px; color: var(--smoke); margin-top: 2px; }
+    .card-footer {
+      margin-top: auto;
+      padding-top: 12px;
+      border-top: 1px dashed var(--rule);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .running-total { font-family: 'DM Mono', monospace; font-size: 12px; font-weight: bold; }
+    .session-list { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
+    .session-item {
+      padding: 12px;
+      border: 1px solid var(--rule);
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+    }
+  </style>
+</head>
+<body class="bg-[var(--canvas)]">
+
+{{ render_admin_sidebar('tables', user) }}
+
+<main class="main flex-1 min-w-0">
+  <header class="topbar">
+    <h1>Floor Management</h1>
+    <p class="font-mono text-[10px] text-[var(--mist)] uppercase mt-1">View only — live table status</p>
+  </header>
+
+  <section class="content block">
+    <div class="max-w-6xl mx-auto">
+      {% set occupied = tables|selectattr('session_id')|list|length %}
+      {% set total = tables|length %}
+      <div class="stats grid grid-cols-2 md:grid-cols-4 gap-[2px] mb-8">
+        <div class="stat"><dt>Total Tables</dt><dd>{{ total }}</dd></div>
+        <div class="stat"><dt>Occupied</dt><dd>{{ occupied }}</dd></div>
+        <div class="stat"><dt>Available</dt><dd>{{ total - occupied }}</dd></div>
+        <div class="stat"><dt>Active Sessions</dt><dd>{{ sessions|length }}</dd></div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 2xl:grid-cols-4 gap-4">
+        {% for table in tables %}
+        {% set card_class = 'occupied' if table.session_id else 'available' %}
+        {% if table.session_status == 'ordered' %}{% set card_class = 'attention' %}{% endif %}
+        <div class="table-card {{ card_class }}">
+          <div class="card-header">
+            <span class="table-id">T-{{ "%02d"|format(table.table_number) }}</span>
+            <div class="status-dot"></div>
+          </div>
+          <div class="card-body">
+            {% if table.session_id %}
+            <h3>Session #{{ table.session_id }}</h3>
+            <p>Status: {{ table.session_status|title }} • {{ table.order_count }} order(s)</p>
+            {% else %}
+            <h3>Available</h3>
+            <p>QR: {{ table.qr_status|title }}</p>
+            {% endif %}
+          </div>
+          <div class="card-footer">
+            <span class="font-mono text-[9px] text-[var(--mist)] uppercase">
+              {% if table.session_id %}In service{% else %}Idle{% endif %}
+            </span>
+            {% if table.session_id %}
+            <span class="running-total">${{ "%.2f"|format(table.running_total) }}</span>
+            {% endif %}
+          </div>
+        </div>
+        {% else %}
+        <p class="font-mono text-sm text-[var(--mist)]">No tables configured.</p>
+        {% endfor %}
+      </div>
+
+      <div class="mt-10 grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="panel">
+          <span class="label">Active Sessions</span>
+          <div class="session-list">
+            {% for s in sessions %}
+            <div class="session-item">Table {{ s.table_number }} — Session #{{ s.session_id }} ({{ s.status }}) — {{ s.order_count }} orders</div>
+            {% else %}
+            <div class="session-item">No active sessions.</div>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="panel">
+          <span class="label">Recently Closed</span>
+          <div class="session-list">
+            {% for s in closed_sessions[:8] %}
+            <div class="session-item">Table {{ s.table_number }} — Session #{{ s.session_id }} — {{ s.order_count }} orders</div>
+            {% else %}
+            <div class="session-item">No closed sessions yet.</div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+</body>
+</html>
