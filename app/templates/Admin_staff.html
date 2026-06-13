@@ -56,9 +56,10 @@
 
 <main class="main">
 
-  <header class="topbar">
-    <h1>Staff Directory</h1>
-  </header>
+<header class="topbar">
+      <button class="sidebar-toggle" id="sidebarToggle" aria-label="Open menu">&#9776;</button>
+  <h1>Staff Directory</h1>
+</header>
 
   {{ render_toast() }}
 
@@ -80,7 +81,7 @@
             <span>Actions Management</span>
           </div>
         </div>
-
+<div class="sidebar-backdrop"></div>
         <div id="tableBody">
           </div>
 
@@ -280,6 +281,40 @@
   // Self-starter initialization calls
   renderTable();
   renderPaginationControls();
+
+(function () {
+  const sidebar  = document.querySelector('.sidebar');
+  const backdrop = document.querySelector('.sidebar-backdrop');
+  const toggle   = document.querySelector('.sidebar-toggle');
+
+  if (!sidebar || !backdrop || !toggle) return;
+
+  function openSidebar() {
+    sidebar.classList.add('open');
+    backdrop.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeSidebar() {
+    sidebar.classList.remove('open');
+    backdrop.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  toggle.addEventListener('click', openSidebar);
+  backdrop.addEventListener('click', closeSidebar);
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closeSidebar();
+  });
+
+  sidebar.querySelectorAll('a').forEach(function (link) {
+    link.addEventListener('click', function () {
+      if (window.innerWidth < 1024) closeSidebar();
+    });
+  });
+})();
+
 </script>
 
 {{ render_toast_script() }}

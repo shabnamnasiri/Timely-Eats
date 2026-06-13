@@ -6,63 +6,88 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Timely Eats — Menu Manager</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/Add_menu.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/toast.css') }}"/>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 </head>
-<body>
 
-<aside class="sidebar">
+<body class="overflow-x-hidden">
+
+<!-- Backdrop OUTSIDE sidebar, BEFORE it -->
+<div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+<aside id="sidebar" class="sidebar">
   <div class="sidebar-logo">
-    <b>Timely<span>Eats</span></b>
+    <b>Timely<span style="color: #f0b347;">Eats</span></b>
     <small>Admin Panel</small>
   </div>
+
   <div class="sidebar-section">Menu</div>
-  <ul class="sidebar-nav">
-    <li><a href="#" class="active"><i class="ico">▤</i> Menu Items</a></li>
-    <!-- <li><a href="#"><i class="ico">⊞</i> Categories</a></li>
-    <li><a href="#"><i class="ico">◈</i> Modifiers</a></li> -->
+  <ul class="sidebar-nav flex-1">
+    <li><a href="/admin/add_menu" class="active"><i class="ico">▤</i> Menu Items</a></li>
+    <li><a href="Categories.html"><i class="ico">⊞</i> Categories</a></li>
   </ul>
-  <div class="sidebar-section">Operations</div>
+
+  <div class="sidebar-section">Live Feed</div>
   <ul class="sidebar-nav">
-    <li><a href="/admin/add_staff"><i class="ico">⊙</i>Add Staff</a></li>
-    <li><a href="/logout" class="cart"><i class="ico">↩</i> Logout</a></li>
+    <li><a href="Admin_order.html"><i class="ico">⊙</i> Orders</a></li>
+    <li><a href="Admin_table.html"><i class="ico">◫</i> Tables</a></li>
   </ul>
-  <div class="sidebar-section">Reports</div>
+
+  <div class="sidebar-section">Users</div>
   <ul class="sidebar-nav">
-    <li><a href="#"><i class="ico">◈</i> Analytics</a></li>
-    <li><a href="#"><i class="ico">▦</i> Revenue</a></li>
+    <li><a href="/admin/add_staff"><i class="ico">⊙</i> Staff</a></li>
+    <li><a href="Admin_customer.html"><i class="ico">◫</i> Customers</a></li>
   </ul>
+
+  <div class="sidebar-section">Analytics</div>
+  <ul class="sidebar-nav">
+    <li><a href="Revenue.html"><i class="ico">▦</i> Revenue</a></li>
+    <li><a href="Order_Report.html"><i class="ico">▦</i> Order Report</a></li>
+    <li><a href="Customer_report.html"><i class="ico">▦</i> Customer Report</a></li>
+    <li><a href="Table_report.html"><i class="ico">▦</i> Table Report</a></li>
+  </ul>
+
   <div class="sidebar-user">
     <small>Signed in as</small>
-    <span> Admin  · {{ user[0] }}</span>
+    <span>Admin · {{ user[0] }}</span>
+    <a href="/logout" class="sidebar-logout">⏻ Logout</a>
   </div>
 </aside>
 
 <div class="main">
+
   <div class="topbar">
-    <h1>Menu Manager</h1>
+    <div class="flex items-center gap-4">
+      <!-- Hamburger button -->
+      <button class="sidebar-toggle" id="sidebarToggle" aria-label="Open menu">&#9776;</button>
+      <h1>Menu Manager</h1>
+    </div>
     <div class="topbar-right">
-      <span class="badge badge-items">{{ items|length }} items</span>
+      <button class="font-mono text-xs uppercase tracking-wider hover:opacity-70" onclick="window.location.href='/logout'">LOGOUT</button>
     </div>
   </div>
 
-  <div class="content">
+  {{ render_toast() }}
+
+  <div class="content grid grid-cols-1 xl:grid-cols-[1fr_400px] gap-8 items-start">
 
     <!-- LEFT: ITEM LIST -->
-    <div class="list-panel">
-      <span class="label">Current Menu</span>
+    <div class="list-panel min-w-0">
+      <span class="label">Current Menu ({{ items|length }})</span>
 
-      <dl class="stats">
-        <div class="stat"><dt>Starters</dt><dd>{{ items|selectattr('5','equalto','starters')|list|length }}</dd></div>
-        <div class="stat"><dt>Mains</dt><dd>{{ items|selectattr('5','equalto','mains')|list|length }}</dd></div>
-        <div class="stat"><dt>Sides</dt><dd>{{ items|selectattr('5','equalto','sides')|list|length }}</dd></div>
-        <div class="stat"><dt>Desserts</dt><dd>{{ items|selectattr('5','equalto','desserts')|list|length }}</dd></div>
-        <div class="stat"><dt>Drinks</dt><dd>{{ items|selectattr('5','equalto','drinks')|list|length }}</dd></div>
+      <dl class="stats grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-2">
+        <div class="stat"><dt>Starters</dt><dd id="ct-starters">0</dd></div>
+        <div class="stat"><dt>Mains</dt><dd id="ct-mains">0</dd></div>
+        <div class="stat"><dt>Sides</dt><dd id="ct-sides">0</dd></div>
+        <div class="stat"><dt>Desserts</dt><dd id="ct-desserts">0</dd></div>
+        <div class="stat"><dt>Drinks</dt><dd id="ct-drinks">0</dd></div>
       </dl>
 
-      <div class="list-controls">
-        <div class="filter-tabs">
+      <div class="list-controls flex flex-col sm:flex-row sm:items-center gap-3">
+        <div class="filter-tabs flex overflow-x-auto pb-1">
           <button class="filter-tab on" data-filter="all">All</button>
           <button class="filter-tab" data-filter="starters">Starters</button>
           <button class="filter-tab" data-filter="mains">Mains</button>
@@ -72,77 +97,81 @@
         </div>
       </div>
 
-      <div class="item-list" id="item-list">
-        {% if items %}
-          {% for item in items %}
-          <div class="item-row" style="--i:{{ loop.index0 }}" data-category="{{ item[5] }}">
+      <div class="item-list grid grid-cols-1 md:grid-cols-2 gap-4">
+        {% for item in items %}
+        <div class="item-row flex items-center gap-4 p-4 bg-white border border-gray-200 relative group" data-category="{{ item[5]|lower }}">
 
-            <img src="/item_photo/{{ item[0] }}" class="item-photo" alt="{{ item[1] }}">
+          <img src="/item_photo/{{ item[0] }}" class="rounded border" style="width:65px;height:65px;object-fit:cover;" alt="{{ item[1] }}">
 
-            <span class="item-cat {{ item[5] }}">{{ item[5] }}</span>
-
-            <div class="item-info">
-              <strong>{{ item[1] }}</strong>
-              <span>{{ item[2] }}</span>
+          <div class="flex-1 min-w-0 item-info">
+            <h6 class="mb-1 font-bold text-sm uppercase truncate">{{ item[1] }}</h6>
+            <p class="mb-1 text-xs text-gray-500 truncate">{{ item[2] }}</p>
+            <div class="flex gap-2 flex-wrap items-center mt-1">
+              <span class="item-cat text-[10px] py-0.5 px-2 font-mono {{ item[5]|lower }}">{{ item[5] }}</span>
+              <span class="badge badge-items font-mono text-[9px]">{{ item[3] }} min</span>
             </div>
+          </div>
 
-            <span class="item-price">${{ item[4] }}</span>
-
-            <div class="item-actions">
-              <button class="btn-icon"
-                onclick="openModal({{ item[0] }}, '{{ item[1]|replace("'", "\\'") }}', '{{ item[2]|replace("'", "\\'") }}', {{ item[4] }}, {{ item[3] or 0 }}, '{{ item[5] }}')">
+          <div class="text-end flex-shrink-0 flex flex-col items-end gap-2">
+            <div class="font-mono text-sm font-bold text-black">${{ item[4] }}</div>
+            <div class="flex gap-1">
+              <button type="button"
+                      class="btn-edit btn-icon"
+                      data-id="{{ item[0] }}"
+                      data-name="{{ item[1] }}"
+                      data-desc="{{ item[2] }}"
+                      data-prep="{{ item[3] }}"
+                      data-price="{{ item[4] }}"
+                      data-cat="{{ item[5]|lower }}">
                 Edit
               </button>
               <form action="/delete_item/{{ item[0] }}" method="POST" style="display:inline">
                 <button type="submit" class="btn-icon del">Delete</button>
               </form>
             </div>
+          </div>
 
-          </div>
-          {% endfor %}
-        {% else %}
-          <div class="empty">
-            <b>No Items Yet</b>
-            <span>Use the form to add your first menu item.</span>
-          </div>
+        </div>
+        {% endfor %}
+
+        {% if not items %}
+        <div class="empty text-center p-5 col-span-full">
+          <b>No Items Yet</b>
+          <div class="text-muted">Add your first menu item.</div>
+        </div>
         {% endif %}
       </div>
     </div>
 
     <!-- RIGHT: ADD FORM -->
-    {{ render_toast() }}  
-    <div class="form-panel">
+    <div class="form-panel xl:sticky xl:top-24">
       <div class="form-divider"></div>
       <h2>Add Menu Item</h2>
       <p>Fill in the details below to add a new item to the customer menu.</p>
 
-      <form method="POST" action="/admin/add_menu_item" enctype="multipart/form-data" autocomplete="off">
-
+      <form id="item-form" autocomplete="off" class="space-y-5" action="/admin/add_menu_item" method="POST" enctype="multipart/form-data">
         <div class="field">
-          <label>Item Name *</label>
-          <input type="text" name="name" placeholder="e.g. Seared Scallops" required/>
-        </div>
-
-        <div class="field">
-          <label>Description *</label>
-          <textarea name="description" placeholder="Describe the dish…" required></textarea>
-        </div>
-
-      <div class="field-row">
-        <div class="field">
-          <label>Price ($) *</label>
-          <input type="number" name="price" step="0.01" min="0" required/>
+          <label for="f-name">Item Name *</label>
+          <input type="text" id="f-name" name="name" placeholder="e.g. Seared Scallops" required />
         </div>
         <div class="field">
-          <label>Prep Time (mins)</label>
-          <input type="number" name="prep_time" min="1" max="180"/>
+          <label for="f-desc">Description *</label>
+          <textarea id="f-desc" name="description" placeholder="Describe the dish…" required></textarea>
         </div>
-      </div>
-
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="field">
+            <label for="f-price">Price ($) *</label>
+            <input name="price" type="number" id="f-price" placeholder="0.00" step="0.01" min="0" required />
+          </div>
+          <div class="field">
+            <label for="f-prep">Prep Time (mins)</label>
+            <input name="prep_time" type="number" id="f-prep" placeholder="e.g. 15" min="1" max="180" />
+          </div>
+        </div>
         <div class="field">
-          <label>Category *</label>
+          <label for="f-cat">Category *</label>
           <div class="select-wrap">
-            <select name="category" required>
+            <select id="f-cat" name="category" required>
               <option value="">Select category…</option>
               <option value="starters">Starters</option>
               <option value="mains">Mains</option>
@@ -152,13 +181,11 @@
             </select>
           </div>
         </div>
-
         <div class="field">
-          <label>Photo (optional)</label>
-          <input type="file" name="photo" accept="image/*" class="file-input"/>
-          <div class="file-preview" id="add-preview"></div>
+          <label for="f-photo">Item Image *</label>
+          <input type="file" id="f-photo" name="photo" accept="image/*" required class="block w-full text-xs">
+          <div class="file-preview mt-2" id="add-preview"></div>
         </div>
-
         <button type="submit" class="btn-submit">+ Add to Menu</button>
       </form>
     </div>
@@ -166,90 +193,121 @@
   </div>
 </div>
 
-<!-- ── EDIT MODAL ── -->
-<div class="modal-overlay" id="modalOverlay" onclick="closeModal()"></div>
-<div class="modal" id="editModal">
-  <div class="modal-header">
-    <h2>Edit Item</h2>
-    <button class="modal-close" onclick="closeModal()">✕</button>
+<!-- EDIT MODAL -->
+<div id="edit-modal" class="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 p-4">
+  <div class="form-panel w-full max-w-[500px] max-h-[90vh] overflow-y-auto relative bg-white shadow-2xl scale-95 transition-transform duration-200" id="modal-container">
+    <button type="button" id="close-modal" class="absolute top-4 right-4 text-xl font-mono text-gray-400 hover:text-black transition-colors" aria-label="Close dialog">✕</button>
+    <div class="form-divider"></div>
+    <h2>Edit Menu Item</h2>
+    <p>Update item configuration parameters below.</p>
+    <form id="edit-item-form" method="POST" enctype="multipart/form-data" class="space-y-5">
+      <input type="hidden" id="edit-f-id" name="item_id">
+      <div class="field">
+        <label for="edit-f-name">Item Name *</label>
+        <input type="text" id="edit-f-name" name="name" required />
+      </div>
+      <div class="field">
+        <label for="edit-f-desc">Description *</label>
+        <textarea id="edit-f-desc" name="description" required></textarea>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="field">
+          <label for="edit-f-price">Price ($) *</label>
+          <input type="number" id="edit-f-price" name="price" step="0.01" min="0" required />
+        </div>
+        <div class="field">
+          <label for="edit-f-prep">Prep Time (mins)</label>
+          <input type="number" id="edit-f-prep" name="prep_time" min="1" max="180" />
+        </div>
+      </div>
+      <div class="field">
+        <label for="edit-f-cat">Category *</label>
+        <div class="select-wrap">
+          <select id="edit-f-cat" name="category" required>
+            <option value="starters">Starters</option>
+            <option value="mains">Mains</option>
+            <option value="sides">Sides</option>
+            <option value="desserts">Desserts</option>
+            <option value="drinks">Drinks</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label for="edit-f-photo">Replace Photo (optional)</label>
+        <input type="file" id="edit-f-photo" name="photo" accept="image/*" class="block w-full text-xs">
+        <div class="file-preview mt-2" id="edit-preview"></div>
+        <div class="current-photo-wrap mt-3">
+          <span class="label" style="margin-bottom:6px;">Current Photo</span>
+          <img id="edit-current-photo" src="" class="current-photo" alt="current item photo"/>
+        </div>
+      </div>
+      <button type="submit" class="btn-submit !bg-black !text-white hover:!bg-gray-800">Save Changes</button>
+    </form>
   </div>
-
-  <form id="editForm" method="POST" enctype="multipart/form-data" autocomplete="off">
-
-    <div class="field">
-      <label>Item Name *</label>
-      <input type="text" name="name" id="edit-name" required/>
-    </div>
-
-    <div class="field">
-      <label>Description</label>
-      <textarea name="description" id="edit-desc"></textarea>
-    </div>
-
-    <div class="field-row">
-      <div class="field">
-        <label>Price ($) *</label>
-        <input type="number" name="price" id="edit-price" step="0.01" min="0" required/>
-      </div>
-      <div class="field">
-        <label>Prep Time (mins)</label>
-        <input type="number" name="prep_time" id="edit-prep" min="1" max="180"/>
-      </div>
-    </div>
-
-    <div class="field">
-      <label>Category *</label>
-      <div class="select-wrap">
-        <select name="category" id="edit-cat" required>
-          <option value="starters">Starters</option>
-          <option value="mains">Mains</option>
-          <option value="sides">Sides</option>
-          <option value="desserts">Desserts</option>
-          <option value="drinks">Drinks</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="field">
-      <label>Replace Photo (optional)</label>
-      <input type="file" name="photo" accept="image/*" class="file-input"/>
-      <div class="file-preview" id="edit-preview"></div>
-      <div class="current-photo-wrap">
-        <span class="label" style="margin-bottom:6px;">Current Photo</span>
-        <img id="edit-current-photo" src="" class="current-photo" alt="current"/>
-      </div>
-    </div>
-
-    <button type="submit" class="btn-submit">Save Changes</button>
-  </form>
 </div>
 
 <script>
-function openModal(id, name, desc, price, prep, cat) {
-  document.getElementById('editForm').action = '/update_item/' + id;
-  document.getElementById('edit-name').value  = name;
-  document.getElementById('edit-desc').value  = desc;
-  document.getElementById('edit-price').value = price;
-  document.getElementById('edit-prep').value  = prep;
-  document.getElementById('edit-cat').value   = cat;
-  document.getElementById('edit-current-photo').src = '/item_photo/' + id;
-  document.getElementById('edit-preview').innerHTML = '';
-  document.getElementById('modalOverlay').classList.add('active');
-  document.getElementById('editModal').classList.add('active');
-}
+document.addEventListener("DOMContentLoaded", function () {
 
-  function closeModal() {
-    document.getElementById('modalOverlay').classList.remove('active');
-    document.getElementById('editModal').classList.remove('active');
+  // ── 1. SIDEBAR ──────────────────────────────────────────────────────────────
+  const sidebar  = document.getElementById('sidebar');
+  const backdrop = document.getElementById('sidebarBackdrop');
+  const toggle   = document.getElementById('sidebarToggle');
+
+  function openSidebar() {
+    sidebar.classList.add('open');
+    backdrop.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeSidebar() {
+    sidebar.classList.remove('open');
+    backdrop.classList.remove('open');
+    document.body.style.overflow = '';
   }
 
-  // ── PHOTO PREVIEW (add form) ──
-  document.querySelector('input[name="photo"]').addEventListener('change', function() {
+  toggle?.addEventListener('click', openSidebar);
+  backdrop?.addEventListener('click', closeSidebar);
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closeSidebar();
+  });
+
+  sidebar.querySelectorAll('a').forEach(function (link) {
+    link.addEventListener('click', function () {
+      if (window.innerWidth < 1024) closeSidebar();
+    });
+  });
+
+  // ── 2. COUNTERS & FILTER TABS ───────────────────────────────────────────────
+  const tabs       = document.querySelectorAll(".filter-tab");
+  const rows       = document.querySelectorAll(".item-row");
+  const categories = ['starters', 'mains', 'sides', 'desserts', 'drinks'];
+
+  categories.forEach(cat => {
+    const count   = document.querySelectorAll(`.item-row[data-category="${cat}"]`).length;
+    const counter = document.getElementById(`ct-${cat}`);
+    if (counter) counter.textContent = count;
+  });
+
+  tabs.forEach(tab => {
+    tab.addEventListener("click", function () {
+      tabs.forEach(t => t.classList.remove("on"));
+      this.classList.add("on");
+      const filter = this.getAttribute("data-filter").toLowerCase();
+      rows.forEach(row => {
+        row.style.display =
+          (filter === "all" || row.getAttribute("data-category") === filter)
+            ? "flex" : "none";
+      });
+    });
+  });
+
+  // ── 3. PHOTO PREVIEWS ───────────────────────────────────────────────────────
+  document.getElementById('f-photo').addEventListener('change', function () {
     previewPhoto(this, 'add-preview');
   });
 
-  // ── PHOTO PREVIEW (edit form) ──
-  document.querySelector('#editForm input[name="photo"]').addEventListener('change', function() {
+  document.getElementById('edit-f-photo').addEventListener('change', function () {
     previewPhoto(this, 'edit-preview');
   });
 
@@ -264,19 +322,46 @@ function openModal(id, name, desc, price, prep, cat) {
     }
   }
 
-  // ── FILTER TABS ──
-  document.querySelectorAll('.filter-tab').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('on'));
-      btn.classList.add('on');
-      const filter = btn.dataset.filter;
-      document.querySelectorAll('.item-row').forEach(row => {
-        row.style.display = (filter === 'all' || row.dataset.category === filter) ? 'flex' : 'none';
-      });
+  // ── 4. EDIT MODAL ───────────────────────────────────────────────────────────
+  const editModal      = document.getElementById("edit-modal");
+  const modalContainer = document.getElementById("modal-container");
+  const closeModalBtn  = document.getElementById("close-modal");
+  const editForm       = document.getElementById("edit-item-form");
+
+  document.querySelectorAll(".btn-edit").forEach(btn => {
+    btn.addEventListener("click", function (e) {
+      e.stopPropagation();
+      document.getElementById("edit-f-id").value    = this.dataset.id;
+      document.getElementById("edit-f-name").value  = this.dataset.name;
+      document.getElementById("edit-f-desc").value  = this.dataset.desc;
+      document.getElementById("edit-f-price").value = this.dataset.price;
+      document.getElementById("edit-f-prep").value  = this.dataset.prep;
+      document.getElementById("edit-f-cat").value   = this.dataset.cat;
+      document.getElementById("edit-current-photo").src = '/item_photo/' + this.dataset.id;
+      document.getElementById('edit-preview').innerHTML = '';
+      editForm.action = `/update_item/${this.dataset.id}`;
+      editModal.classList.remove("opacity-0", "pointer-events-none");
+      modalContainer.classList.remove("scale-95");
     });
   });
+
+  function hideModal() {
+    editModal.classList.add("opacity-0", "pointer-events-none");
+    modalContainer.classList.add("scale-95");
+  }
+
+  closeModalBtn.addEventListener("click", hideModal);
+  editModal.addEventListener("click", function (e) {
+    if (e.target === editModal) hideModal();
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") hideModal();
+  });
+
+});
 </script>
-{{ render_toast_script() }}  
+
+{{ render_toast_script() }}
 
 </body>
 </html>

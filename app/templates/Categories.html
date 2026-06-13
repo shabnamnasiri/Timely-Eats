@@ -5,21 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Timely Eats — Categories</title>
 
-  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- Your existing CSS (KEEPING DESIGN SYSTEM CONSISTENT) -->
   <link rel="stylesheet" href="../static/css/Add_menu.css">
 
-  <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 
 </head>
 
 <body class="overflow-x-hidden">
-
-<!-- ───────────────── SIDEBAR (UNCHANGED STRUCTURE) ───────────────── -->
-<aside class="sidebar hidden lg:flex lg:flex-col">
+<div class="sidebar-backdrop hidden opacity-0 pointer-events-none" id="sidebarBackdrop"></div>
+<aside id="sidebar" class="sidebar fixed lg:static inset-y-0 left-0 z-50 w-64 -translate-x-full lg:translate-x-0 transition-transform duration-300 flex flex-col">
 
   <div class="sidebar-logo">
     <b>Timely<span style="color:#c8933a;">Eats</span></b>
@@ -63,77 +59,55 @@
 
 </aside>
 
-<!-- ───────────────── MAIN ───────────────── -->
 <div class="main flex-1 min-w-0 flex flex-col">
 
-  <!-- TOPBAR -->
   <div class="topbar sticky top-0 flex items-center justify-between">
+    <button class="sidebar-toggle" id="sidebarToggle" aria-label="Open menu">&#9776;</button>
 
     <div class="flex items-center gap-4">
-      <button class="lg:hidden border border-black px-3 py-1 text-xs font-mono uppercase tracking-[0.2em]">
-        Menu
-      </button>
-
       <h1>Categories</h1>
     </div>
-
   </div>
 
-  <!-- CONTENT -->
   <div class="content grid grid-cols-1 xl:grid-cols-[1fr_420px] gap-8 items-start">
 
-    <!-- ───────── LEFT: CATEGORY LIST ───────── -->
     <div class="list-panel">
-
       <span class="label">Current Categories</span>
 
       <div class="item-list flex flex-col gap-2">
 
-        <!-- CATEGORY CARD -->
         <div class="flex items-center justify-between bg-white border border-[#d4cfc6] p-4 hover:border-[#c8933a] transition">
-
           <div>
             <div class="font-bold text-lg">Starters</div>
             <div class="text-xs text-[#7a7a7a] mono">slug: starters</div>
           </div>
 
           <div class="flex gap-2">
-
             <button class="border border-[#d4cfc6] px-3 py-1 text-xs mono hover:border-[#c8933a]">
               EDIT
             </button>
-
             <button class="border border-red-400 text-red-500 px-3 py-1 text-xs mono hover:bg-red-500 hover:text-white">
               DELETE
             </button>
-
           </div>
-
         </div>
 
-        <!-- CATEGORY CARD -->
         <div class="flex items-center justify-between bg-white border border-[#d4cfc6] p-4 hover:border-[#c8933a] transition">
-
           <div>
             <div class="font-bold text-lg">Mains</div>
             <div class="text-xs text-[#7a7a7a] mono">slug: mains</div>
           </div>
 
           <div class="flex gap-2">
-
             <button class="border border-[#d4cfc6] px-3 py-1 text-xs mono hover:border-[#c8933a]">
               EDIT
             </button>
-
             <button class="border border-red-400 text-red-500 px-3 py-1 text-xs mono hover:bg-red-500 hover:text-white">
               DELETE
             </button>
-
           </div>
-
         </div>
 
-        <!-- EMPTY STATE (optional) -->
         <div class="text-center text-[#7a7a7a] mono text-xs py-10">
           No more categories
         </div>
@@ -141,11 +115,96 @@
       </div>
     </div>
 
-    <!-- ───────── RIGHT: ADD FORM ───────── -->
-   
+    <div class="bg-white border border-[#d4cfc6] p-6">
+      <span class="label block mb-4">Create New Category</span>
+
+      <form action="#" method="POST" class="flex flex-col gap-4">
+        
+        <div>
+          <label class="block text-xs uppercase tracking-wider font-bold mb-1 text-[#7a7a7a] mono">
+            Category Name
+          </label>
+          <input 
+            type="text" 
+            placeholder="e.g., Desserts" 
+            class="w-full bg-transparent border border-[#d4cfc6] p-3 text-sm focus:outline-none focus:border-[#c8933a] transition"
+            required
+          />
+        </div>
+
+        <div>
+          <label class="block text-xs uppercase tracking-wider font-bold mb-1 text-[#7a7a7a] mono">
+            Slug
+          </label>
+          <input 
+            type="text" 
+            placeholder="e.g., desserts" 
+            class="w-full bg-transparent border border-[#d4cfc6] p-3 text-sm focus:outline-none focus:border-[#c8933a] transition font-mono"
+            required
+          />
+          <small class="text-[10px] text-[#7a7a7a] block mt-1 mono">
+            The URL-friendly version of the name (lowercase, hyphens only).
+          </small>
+        </div>
+
+        <button 
+          type="submit" 
+          class="mt-2 w-full bg-black text-white text-xs uppercase tracking-widest font-bold py-3 hover:bg-[#c8933a] transition transition-colors"
+        >
+          Add Category
+        </button>
+
+      </form>
+    </div>
 
   </div>
 </div>
 
+<script>
+(function () {
+  const sidebar  = document.getElementById('sidebar');
+  const backdrop = document.getElementById('sidebarBackdrop');
+  const toggle   = document.getElementById('sidebarToggle');
+
+  if (!sidebar || !backdrop || !toggle) return;
+
+  function openSidebar() {
+    // 1. Fire your stylesheet animations 
+    sidebar.classList.add('open');
+    backdrop.classList.add('open');
+    
+    // 2. Clear Tailwind utilities blocks
+    sidebar.classList.remove('-translate-x-full');
+    backdrop.classList.remove('hidden');
+    
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeSidebar() {
+    // 1. Retract stylesheet animations
+    sidebar.classList.remove('open');
+    backdrop.classList.remove('open');
+    
+    // 2. Return layout structural blocks to hidden states
+    sidebar.classList.add('-translate-x-full');
+    backdrop.classList.add('hidden');
+    
+    document.body.style.overflow = '';
+  }
+
+  toggle.addEventListener('click', openSidebar);
+  backdrop.addEventListener('click', closeSidebar);
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closeSidebar();
+  });
+
+  sidebar.querySelectorAll('a').forEach(function (link) {
+    link.addEventListener('click', function () {
+      if (window.innerWidth < 1024) closeSidebar();
+    });
+  });
+})();
+</script>
 </body>
 </html>
