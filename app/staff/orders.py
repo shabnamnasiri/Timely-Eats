@@ -124,16 +124,14 @@ def register_staff_order_routes(app, mysql):
         if (block := require_staff()):
             return block
 
-        # Validate the order ID coming from the form
         try:
             order_id = int(request.form.get("order_id", "").strip())
         except ValueError:
             flash("Choose a valid order before updating.", "warning")
             return redirect("/staff/orders")
 
-        # Validate the status — only these three are allowed
         new_status = (request.form.get("status") or "").strip().lower()
-        if new_status not in ("pending", "preparing", "ready","closed"):
+        if new_status not in ("pending", "preparing", "ready", "closed"):
             flash("Choose a valid order status.", "warning")
             return redirect("/staff/orders")
 
@@ -160,29 +158,60 @@ def register_staff_order_routes(app, mysql):
         elif new_status == "pending":
             cursor.execute("UPDATE orders SET status = 'pending', preparation_time = %s WHERE order_id = %s", (original_prep, order_id))
         elif new_status == "closed":
-            cursor.execute("UPDATE orders SET status = 'closed' WHERE order_id = %s", (order_id))
+            cursor.execute("UPDATE orders SET status = 'closed' WHERE order_id = %s", (order_id,))
         else:
             cursor.execute("UPDATE orders SET status = %s WHERE order_id = %s", (new_status, order_id))
 
         mysql.connection.commit()
-        # Get user_id for this order
-        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+
+        # ── Auto-close table session if all orders are ready ──────────────────────
+        # Step 1: Find the table_session this order belongs to
+        cursor.execute("""
+            SELECT o.session_id, ts.status AS session_status
+            FROM orders o
+            JOIN Table_Session ts ON ts.session_id = o.session_id
+            WHERE o.order_id = %s
+        """, (order_id,))
+        session_row = cursor.fetchone()
+
+        if session_row and session_row["session_status"] == "ordered":
+            session_id = session_row["session_id"]
+
+            # Step 2: Check if every order in this session is 'ready'
+            cursor.execute("""
+                SELECT COUNT(*) AS total,
+                    SUM(status = 'ready') AS ready_count
+                FROM orders
+                WHERE session_id = %s
+            """, (session_id,))
+            counts = cursor.fetchone()
+
+            if counts and counts["total"] > 0 and counts["total"] == counts["ready_count"]:
+                # Step 3: All orders are ready — close the session
+                cursor.execute("""
+                    UPDATE Table_Session SET status = 'closed' WHERE session_id = %s
+                """, (session_id,))
+                mysql.connection.commit()
+        # ──────────────────────────────────────────────────────────────────────────
+
+        # Notify the customer
         cursor.execute("SELECT user_id FROM orders WHERE order_id = %s", (order_id,))
         order_user = cursor.fetchone()
         cursor.close()
+
         if order_user:
             user_id = order_user["user_id"]
-
             socketio.emit("order_update", {
                 "order_id": order_id,
                 "status": new_status,
                 "message": f"Your order #{order_id} is now {new_status}"
             }, to=f"user_{user_id}")
 
-        # Optional: also notify staff dashboard
+        # Notify staff dashboard
         socketio.emit("staff_update", {
-                "order_id": order_id,
-                "status":   new_status,
-            }, to="staff")
+            "order_id": order_id,
+            "status": new_status,
+        }, to="staff")
+
         flash(f"Order #{order_id} updated to {new_status}.", "success")
         return redirect("/staff/orders")

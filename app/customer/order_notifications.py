@@ -1,4 +1,4 @@
-from flask import jsonify, session, flash, redirect, request
+from flask import jsonify, session
 from app.extensions import socketio
 
 
@@ -11,19 +11,33 @@ def register_notification_routes(app, mysql):
             return jsonify([])
 
         cursor = mysql.connection.cursor()
+
+        # Only fetch orders the user hasn't been notified about yet
         cursor.execute("""
-        SELECT o.order_id, o.status,
-            GROUP_CONCAT(i.name ORDER BY i.name SEPARATOR ', ') AS items
-        FROM orders o
-        JOIN order_details od ON od.order_id = o.order_id
-        JOIN item i ON i.item_id = od.item_id
-        WHERE o.user_id = %s
-        AND o.status IN ('pending', 'preparing', 'ready', 'closed')
-        GROUP BY o.order_id, o.status
-        ORDER BY o.timestamp DESC
-        LIMIT 5
-    """, (user_id,))
+            SELECT o.order_id, o.status,
+                GROUP_CONCAT(i.name ORDER BY i.name SEPARATOR ', ') AS items
+            FROM orders o
+            JOIN order_details od ON od.order_id = o.order_id
+            JOIN item i ON i.item_id = od.item_id
+            WHERE o.user_id = %s
+            AND o.status IN ('pending', 'preparing', 'ready', 'closed')
+            AND o.notified = 0
+            GROUP BY o.order_id, o.status
+            ORDER BY o.timestamp DESC
+            LIMIT 5
+        """, (user_id,))
         orders = cursor.fetchall()
+
+        if orders:
+            # Mark all fetched orders as notified so they don't show again
+            order_ids = [o[0] for o in orders]
+            placeholders = ", ".join(["%s"] * len(order_ids))
+            cursor.execute(
+                f"UPDATE orders SET notified = 1 WHERE order_id IN ({placeholders})",
+                order_ids
+            )
+            mysql.connection.commit()
+
         cursor.close()
 
         return jsonify([{
@@ -40,4 +54,3 @@ def register_notification_routes(app, mysql):
             "preparing": "Your order is being prepared!",
             "ready":     "Your order is ready! Enjoy your meal.",
         }.get(status, "Order status updated.")
-
