@@ -28,7 +28,7 @@
 
     <div class="sidebar-user">
         <small>Active Staff</small>
-        <span>{{staff_name[0] }}</span>
+        <span>{{ staff_name[0] }}</span>
     </div>
 </aside>
 
@@ -101,9 +101,8 @@ function loadSessions() {
     fetch('/staff/sessions')
     .then(res => res.json())
     .then(data => {
-        // split active and closed sessions for clearer UI
-        const active = data.filter(s => s.status === "active");
-        const closed = data.filter(s => s.status !== "active");
+        const active = data.filter(s => s.status === "active" || s.status === "ordered");
+        const closed = data.filter(s => s.status === "closed");
 
         const activeContainer = document.getElementById("activeSessionList");
         const closedContainer = document.getElementById("closedSessionList");
@@ -112,28 +111,37 @@ function loadSessions() {
 
         document.getElementById("activeCount").innerText = "Active Links: " + active.length;
 
-        active.forEach((s, i) => {
-            const row = document.createElement("div");
-            row.className = "item-row";
-            row.style.setProperty("--i", i + 1);
+        if (active.length === 0) {
+            const e = document.createElement('div');
+            e.className = 'empty';
+            e.innerHTML = '<b>No active sessions</b><span>Generate a QR code to start a session.</span>';
+            activeContainer.appendChild(e);
+        } else {
+            active.forEach((s, i) => {
+                const row = document.createElement("div");
+                row.className = "item-row";
+                row.style.setProperty("--i", i + 1);
 
-            row.innerHTML = `
-                <div class="item-cat mains">TABLE ${s.table_number}</div>
-                <div class="item-info">
-                    <b>Session #${s.session_id}</b>
-                    <span>${formatTime(s.created_at)}</span>
-                </div>
-                <div class="item-price">${s.status}</div>
-                <div class="item-actions">
-                    <button class="btn-icon" onclick="printQR(${s.session_id})">Print</button>
-                    <form method="POST" action="/staff/close-session/${s.session_id}" style="display:inline;">
-                        <button type="submit" class="btn-icon del">Close</button>
-                    </form>
-                </div>
-            `;
+                const statusLabel = s.status === "ordered" ? "Ordered" : "Active";
+                const statusClass = s.status === "ordered" ? "starters" : "mains";
 
-            activeContainer.appendChild(row);
-        });
+                row.innerHTML = `
+                    <div class="item-cat ${statusClass}">TABLE ${s.table_number}</div>
+                    <div class="item-info">
+                        <b>Session #${s.session_id}</b>
+                        <span>${formatTime(s.created_at)} • Orders: ${s.order_count} • ${statusLabel}</span>
+                    </div>
+                    <div class="item-actions">
+                        <button class="btn-icon" onclick="printQR(${s.session_id})">Print</button>
+                        <form method="POST" action="/staff/close-session/${s.session_id}" style="display:inline;">
+                            <button type="submit" class="btn-icon del">Close</button>
+                        </form>
+                    </div>
+                `;
+
+                activeContainer.appendChild(row);
+            });
+        }
 
         if (closed.length === 0) {
             const e = document.createElement('div');
@@ -150,7 +158,7 @@ function loadSessions() {
                     <div class="item-cat closed">T${s.table_number}</div>
                     <div class="item-info">
                         <b>Session #${s.session_id}</b>
-                        <span>Status: ${s.status} • Orders: ${s.order_count}</span>
+                        <span>Status: ${s.status} • Orders: ${s.order_count} • ${formatTime(s.created_at)}</span>
                     </div>
                     <div class="item-actions">
                         <button class="btn-icon" onclick="printQR(${s.session_id})">Print</button>
@@ -166,19 +174,18 @@ function loadSessions() {
     .catch(err => console.error("LOAD ERROR:", err));
 }
 
-function updateDropdown(sessions) {
+function updateDropdown(activeSessions) {
     const select = document.getElementById("tableNumber");
     select.innerHTML = `<option value="">Select Table...</option>`;
 
-   ALL_TABLES.forEach(table => {
-    const active = sessions.some(s => s.table_number == table && s.status == "active");
-    const ordered = sessions.some(s => s.table_number == table && s.status == "ordered");
-    if (active || ordered) {
-        select.innerHTML += `<option disabled>Table ${table} (In Use)</option>`;
-    } else {
-        select.innerHTML += `<option value="${table}">Table ${table}</option>`;
-    }
-});
+    ALL_TABLES.forEach(table => {
+        const inUse = activeSessions.some(s => s.table_number == table);
+        if (inUse) {
+            select.innerHTML += `<option disabled>Table ${table} (In Use)</option>`;
+        } else {
+            select.innerHTML += `<option value="${table}">Table ${table}</option>`;
+        }
+    });
 }
 
 function printQR(id) {

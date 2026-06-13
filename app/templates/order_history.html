@@ -8,6 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Timely Eats — Order History</title>
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/toast.css') }}"/>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 
   <style>
@@ -17,7 +18,7 @@
   </style>
 </head>
 <body class="bg-[#f9f7f4] text-[#0e0e0e] antialiased min-h-full pb-12">
-
+  {{ render_toast() }}
   <header class="bg-[#0e0e0e] text-white py-6 px-6 md:px-12 border-b-2 border-[#c8933a] sticky top-0 z-50 shadow-md">
     <div class="max-w-6xl mx-auto flex justify-between items-center">
       <div>
