@@ -56,7 +56,11 @@
     <li><a href="#"><i class="ico">▦</i> Customer Report</a></li>
     <li><a href="#"><i class="ico">▦</i> Table Report</a></li>
   </ul>
-
+<div class="sidebar-user">
+    <small>Signed in as</small>
+    <span>Admin · {{ user[0] }}</span>
+    <a href="/logout" class="sidebar-logout">⏻ Logout</a>
+  </div>
 </aside>
 
 <div class="main flex-1 min-w-0 flex flex-col">
