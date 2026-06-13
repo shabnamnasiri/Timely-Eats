@@ -13,14 +13,12 @@ def register_customer_cart_routes(app, mysql):
 
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
 
-        # Get loyalty points from DB ✅
         cursor.execute("""
-            SELECT loyalty_point FROM User WHERE user_id = %s
+            SELECT loyalty_point FROM user WHERE user_id = %s
         """, (user_id,))
         user_data = cursor.fetchone()
         loyalty_points = user_data['loyalty_point'] if user_data else 0
 
-        # Get active cart
         cursor.execute("""
             SELECT * FROM cart
             WHERE user_id = %s AND status='open'
@@ -28,24 +26,32 @@ def register_customer_cart_routes(app, mysql):
         """, (user_id,))
         cart = cursor.fetchone()
 
-        # Calculate loyalty values ✅
+        # 100 pts = $1 discount (consistent with place_order)
         loyalty_progress      = loyalty_points % 100
         points_to_next_reward = 100 - loyalty_progress if loyalty_progress != 0 else 0
-        loyalty_discount      = (loyalty_points // 100) * 5  # 100pts = $5
-        loyalty_discount_active = loyalty_points >= 100       # True if enough to redeem
+        loyalty_discount      = loyalty_points // 100        # $1 per 100 pts
+        loyalty_discount_active = loyalty_points >= 100
+
+        # Whether the user has already toggled redeem this session
+        redeem_active = bool(session.get('redeem_points'))
+
+        empty_ctx = dict(
+            cart_items=[],
+            cart_total=0,
+            table_number=session.get('table_number', '—'),
+            table_session_id=session.get('table_session_id'),
+            loyalty_points=loyalty_points,
+            loyalty_progress=loyalty_progress,
+            points_to_next_reward=points_to_next_reward,
+            loyalty_discount=loyalty_discount,
+            loyalty_discount_active=loyalty_discount_active,
+            redeem_active=redeem_active,
+            points_earned=0,
+        )
 
         if not cart:
             cursor.close()
-            return render_template('Cart.html',
-                                   cart_items=[],
-                                   cart_total=0,
-                                   table_number=session.get('table_number', '—'),
-                                   loyalty_points=loyalty_points,
-                                   loyalty_progress=loyalty_progress,
-                                   points_to_next_reward=points_to_next_reward,
-                                   loyalty_discount=loyalty_discount,
-                                   loyalty_discount_active=loyalty_discount_active,
-                                   points_earned=0)
+            return render_template('Cart.html', **empty_ctx)
 
         cursor.execute("""
             SELECT ci.cart_item_id,
@@ -58,43 +64,48 @@ def register_customer_cart_routes(app, mysql):
             JOIN item i ON ci.item_id = i.item_id
             WHERE ci.cart_id = %s
         """, (cart['cart_id'],))
-
         rows = cursor.fetchall()
         cursor.close()
 
-        cart_items = []
-        for r in rows:
-            cart_items.append({
-                "cart_item_id":       r["cart_item_id"],
-                "name":               r["name"],
-                "category":           r["category"],
-                "price":              float(r["price"]),
-                "quantity":           r["quantity"],
-                "customization_note": r["customization_note"],
-                "customisations":     [r["customization_note"]] if r["customization_note"] else []
-            })
+        cart_items = [{
+            "cart_item_id":       r["cart_item_id"],
+            "name":               r["name"],
+            "category":           r["category"],
+            "price":              float(r["price"]),
+            "quantity":           r["quantity"],
+            "customization_note": r["customization_note"],
+            "customisations":     [r["customization_note"]] if r["customization_note"] else []
+        } for r in rows]
 
-        cart_total    = sum(i["price"] * i["quantity"] for i in cart_items)
-        points_earned = int(cart_total * 0.10)  # ✅ 10% of total, not 100%
+        cart_total = sum(i["price"] * i["quantity"] for i in cart_items)
+
+        # Apply discount to displayed total if redeem is active
+        displayed_total = cart_total
+        if redeem_active and loyalty_discount_active:
+            displayed_total = max(0, cart_total - loyalty_discount)
+
+        # Award 1 pt per $1 spent (consistent with place_order)
+        points_earned = int(displayed_total)
 
         return render_template("Cart.html",
                                cart_items=cart_items,
-                               cart_total=cart_total,
+                               cart_total=displayed_total,
                                table_number=session.get('table_number', '—'),
-                               loyalty_points=loyalty_points,          # ✅ from DB
-                               loyalty_progress=loyalty_progress,      # ✅ calculated
-                               points_to_next_reward=points_to_next_reward,  # ✅
-                               loyalty_discount=loyalty_discount,      # ✅ in $
-                               loyalty_discount_active=loyalty_discount_active,  # ✅ True/False
-                               points_earned=points_earned)            # ✅ 10% preview
+                               table_session_id=session.get('table_session_id'),
+                               loyalty_points=loyalty_points,
+                               loyalty_progress=loyalty_progress,
+                               points_to_next_reward=points_to_next_reward,
+                               loyalty_discount=loyalty_discount,
+                               loyalty_discount_active=loyalty_discount_active,
+                               redeem_active=redeem_active,
+                               points_earned=points_earned)
 
     # ---------------- INCREASE ----------------
     @app.route("/cart/increase/<int:item_id>", methods=["POST"])
     def increase_item(item_id):
         cursor = mysql.connection.cursor()
         cursor.execute("""
-            UPDATE cart_item
-            SET quantity = quantity + 1
+            UPDATE cart_item SET quantity = quantity + 1
             WHERE cart_item_id = %s
         """, (item_id,))
         mysql.connection.commit()
@@ -106,13 +117,11 @@ def register_customer_cart_routes(app, mysql):
     def decrease_item(item_id):
         cursor = mysql.connection.cursor()
         cursor.execute("""
-            UPDATE cart_item
-            SET quantity = quantity - 1
+            UPDATE cart_item SET quantity = quantity - 1
             WHERE cart_item_id = %s
         """, (item_id,))
         cursor.execute("""
-            DELETE FROM cart_item
-            WHERE cart_item_id = %s AND quantity <= 0
+            DELETE FROM cart_item WHERE cart_item_id = %s AND quantity <= 0
         """, (item_id,))
         mysql.connection.commit()
         cursor.close()
@@ -123,8 +132,7 @@ def register_customer_cart_routes(app, mysql):
     def remove_item(item_id):
         cursor = mysql.connection.cursor()
         cursor.execute("""
-            DELETE FROM cart_item
-            WHERE cart_item_id = %s
+            DELETE FROM cart_item WHERE cart_item_id = %s
         """, (item_id,))
         mysql.connection.commit()
         cursor.close()
@@ -139,8 +147,7 @@ def register_customer_cart_routes(app, mysql):
                 cart_item_id = key.split('_', 1)[1]
                 note = value.strip()
                 cursor.execute("""
-                    UPDATE cart_item
-                    SET customization_note = %s
+                    UPDATE cart_item SET customization_note = %s
                     WHERE cart_item_id = %s
                 """, (note if note else None, cart_item_id))
         mysql.connection.commit()

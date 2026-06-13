@@ -1,343 +1,543 @@
 {% from 'macros/toast.html' import render_toast %}
 {% from 'macros/toast_script.html' import render_toast_script %}
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Employee Order Portal | System</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Order Portal | System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Add_menu.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/toast.css') }}"/>
+    <style>
+        /* ── Real-time indicator in topbar ── */
+        .rt-dot {
+            display: inline-block;
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: #22c55e;
+            margin-right: 6px;
+            box-shadow: 0 0 0 0 rgba(34,197,94,.6);
+            animation: pulse-dot 2s infinite;
+        }
+        .rt-dot.offline {
+            background: #ef4444;
+            box-shadow: none;
+            animation: none;
+        }
+        @keyframes pulse-dot {
+            0%   { box-shadow: 0 0 0 0 rgba(34,197,94,.6); }
+            70%  { box-shadow: 0 0 0 7px rgba(34,197,94,0); }
+            100% { box-shadow: 0 0 0 0 rgba(34,197,94,0); }
+        }
 
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght=0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Mono:wght@300;400;500&family=Bebas+Neue&display=swap" rel="stylesheet">
+        /* ── Flash animation on a card update ── */
+        @keyframes flash-update {
+            0%   { outline: 2px solid #facc15; background: rgba(250,204,21,.08); }
+            80%  { outline: 2px solid #facc15; background: rgba(250,204,21,.04); }
+            100% { outline: 2px solid transparent; background: transparent; }
+        }
+        .item-row.flash {
+            animation: flash-update 1.4s ease forwards;
+        }
 
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/Revenue.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/toast.css') }}">
+        /* ── "NEW" badge that appears on injected orders ── */
+        .new-badge {
+            display: inline-block;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: .06em;
+            padding: 2px 7px;
+            border-radius: 99px;
+            background: #22c55e;
+            color: #fff;
+            margin-left: 8px;
+            vertical-align: middle;
+            animation: badge-pop .3s cubic-bezier(.34,1.56,.64,1) forwards;
+        }
+        @keyframes badge-pop {
+            from { transform: scale(0); opacity: 0; }
+            to   { transform: scale(1); opacity: 1; }
+        }
+
+        /* ── Stat counters animate on change ── */
+        .stat dd.bump {
+            animation: stat-bump .35s cubic-bezier(.34,1.56,.64,1);
+        }
+        @keyframes stat-bump {
+            0%   { transform: scale(1.4); color: #facc15; }
+            100% { transform: scale(1);   color: inherit; }
+        }
+
+        /* ── Status badge inside item-row ── */
+        .status-badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 99px;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: .05em;
+            text-transform: uppercase;
+        }
+        .status-badge.status-pending   { background: rgba(250,204,21,.15); color: #ca8a04; }
+        .status-badge.status-preparing { background: rgba(59,130,246,.15);  color: #2563eb; }
+        .status-badge.status-ready     { background: rgba(34,197,94,.15);   color: #16a34a; }
+
+        /* ── Last-updated ticker ── */
+        #last-updated {
+            font-size: 11px;
+            opacity: .55;
+            margin-left: 6px;
+        }
+    </style>
 </head>
-
 <body>
 
-<aside class="sidebar">
-  <div class="sidebar-logo">
-    <b>Timely<span>Eats</span></b>
-    <small>Internal Terminal v2.0</small>
-  </div>
-  <div class="sidebar-section">Live Feed</div>
-  <ul class="sidebar-nav">
-    <li><a href="/staff/orders" class="active"><i class="ico">⬢</i> Live Orders</a></li>
-    <li><a href="/staff/qr"><i class="ico">▣</i> QR Generator</a></li>
-        <li><a href="/staff/order_hist"><i class="ico">⬢</i> Order history</a></li>
-
-  </ul>
-
-  {% if staff_name %}
-  <div class="sidebar-user">
-    <small>Active Staff</small>
-    <span style="color: var(--paper); font-weight: 500;">{{ staff_name }}</span>
-    <a href="/logout" style="display: block; margin-top: 8px; color: #e74c3c; font-family: 'DM Mono'; font-size: 11px; text-decoration: none;">⏻ Logout</a>
-  </div>
-  {% endif %}
-</aside>
-
-<main class="main">
-
-  <header class="topbar">
-    <h1>Current Expeditions</h1>
-  </header>
-
-  {{ render_toast() }}
-
-  <div class="content">
-
-    <section style="flex:2;">
-      <div class="panel">
-        <span class="label">Live Metrics Queue</span>
-
-        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px;">
-          <div style="border: 1px solid var(--rule); padding: 12px; font-family: 'DM Mono';">
-            <small style="color: var(--smoke); font-size: 10px; display: block; text-transform: uppercase;">Pending</small>
-            <strong style="font-size: 20px; color: var(--ink);">{{ stats.pending_orders }}</strong>
-          </div>
-          <div style="border: 1px solid var(--rule); padding: 12px; font-family: 'DM Mono';">
-            <small style="color: var(--smoke); font-size: 10px; display: block; text-transform: uppercase;">Preparing</small>
-            <strong style="font-size: 20px; color: var(--ink);">{{ stats.preparing_orders }}</strong>
-          </div>
-          <div style="border: 1px solid var(--rule); padding: 12px; font-family: 'DM Mono';">
-            <small style="color: var(--smoke); font-size: 10px; display: block; text-transform: uppercase;">Ready</small>
-            <strong style="font-size: 20px; color: var(--ink);">{{ stats.ready_orders }}</strong>
-          </div>
-          <div style="border: 1px solid var(--rule); padding: 12px; font-family: 'DM Mono';">
-            <small style="color: var(--smoke); font-size: 10px; display: block; text-transform: uppercase;">Avg Wait</small>
-            <strong style="font-size: 20px; color: var(--ink);">{{ stats.avg_wait }}<span style="font-size: 11px; color: var(--mist);">min</span></strong>
-          </div>
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <b>ORDER<span>FLOW</span></b>
+            <small>Internal Terminal v2.0</small>
         </div>
 
-        <h2 class="panel-title">Active Table Sessions</h2>
+        <div class="sidebar-section">Management</div>
+        <nav class="sidebar-nav">
+            <a href="/staff/orders" class="active"><i class="ico">⬢</i> Live Orders</a>
+            <a href="/staff/qr"><i class="ico">▤</i> QR Generator</a>
+            <a href="/logout" class="cart"><i class="ico">↩</i> Logout</a>
+        </nav>
 
-        <div style="display: flex; gap: 10px; margin-bottom: 20px; align-items: center; flex-wrap: wrap;">
-          <input id="searchInput" type="text" placeholder="Search by Table Number..." style="flex: 2; min-width: 180px; padding:10px; border:1px solid var(--rule); background:transparent; font-family:'DM Mono'; color: var(--ink);">
-
-          <select id="dateSort" style="flex: 1; min-width: 160px; padding:10px; border:1px solid var(--rule); background:transparent; font-family:'DM Mono'; color: var(--ink);">
-            <option value="desc">Session Date: Newest First</option>
-            <option value="asc">Session Date: Oldest First</option>
-          </select>
+        <div class="sidebar-user">
+            <small>Active Staff</small>
+            <span>{{ staff_name }}</span>
         </div>
+    </aside>
 
-        <div id="sessionContainer">
-          </div>
+    <main class="main">
+        {{ render_toast() }}
 
-      </div>
-    </section>
+        <header class="topbar">
+            <h1>Current Expeditions</h1>
+            <div class="topbar-right">
+                <span class="badge badge-items" id="network-badge">
+                    <span class="rt-dot" id="rt-dot"></span>
+                    <span id="network-label">Connecting…</span>
+                </span>
+                <span class="badge badge-items" style="color: var(--success)">
+                    <span id="stat-active-topbar">{{ stats.active_orders }}</span> Active Orders
+                </span>
+                <span id="last-updated"></span>
+            </div>
+        </header>
 
-  </div>
-</main>
+        <div class="content">
+            <div class="list-panel">
+                <span class="label">Live Queue</span>
 
-<div id="modalOverlay" style="display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.4); z-index: 998;" onclick="closeModal()"></div>
+                <div class="stats">
+                    <div class="stat"><dt>Pending</dt>   <dd id="stat-pending">{{ stats.pending_orders }}</dd></div>
+                    <div class="stat"><dt>Preparing</dt> <dd id="stat-preparing">{{ stats.preparing_orders }}</dd></div>
+                    <div class="stat"><dt>Ready</dt>     <dd id="stat-ready">{{ stats.ready_orders }}</dd></div>
+                    <div class="stat"><dt>Avg Time</dt>  <dd id="stat-avgwait">{{ stats.avg_wait_minutes }}<span>min</span></dd></div>
+                </div>
 
-<div id="portalModal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 480px; max-width: 95%; background: var(--paper); border: 1px solid var(--rule); padding: 25px; z-index: 999; box-shadow: 0 12px 30px rgba(0,0,0,0.15);">
-  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--rule); padding-bottom: 10px;">
-    <h2 id="modalTitle" style="font-family: 'Bebas Neue'; font-size: 26px; letter-spacing: 1px; margin: 0; color: var(--ink);">Details Window</h2>
-    <button onclick="closeModal()" style="background: transparent; border: none; color: var(--mist); font-size: 18px; cursor: pointer;">✕</button>
-  </div>
+                <div class="list-controls">
+                    <div class="filter-tabs">
+                        <button type="button" class="filter-tab on" data-filter="all">All Orders</button>
+                        <button type="button" class="filter-tab" data-filter="pending">Pending</button>
+                        <button type="button" class="filter-tab" data-filter="preparing">Preparing</button>
+                        <button type="button" class="filter-tab" data-filter="ready">Ready</button>
+                    </div>
+                </div>
 
-  <div id="modalContent">
-    </div>
-</div>
+                <div class="item-list" id="orderList">
+                    {% if orders %}
+                        {% for order in orders %}
+                        <div class="item-row"
+                             style="--i: {{ loop.index }}"
+                             data-status="{{ order.status }}"
+                             data-order-id="{{ order.order_id }}">
 
+                            <div class="item-cat {{ order.status_class }}">#{{ order.order_id }}</div>
+                            <div class="item-info">
+                                <strong>
+                                    Table {{ order.table_number or "?" }}
+                                    <span class="status-badge status-{{ order.status }}">{{ order.status }}</span>
+                                </strong>
+                                <span>
+                                    {% if order.status == 'ready' %}
+                                        Ready!
+                                    {% elif order.remaining_minutes > 0 %}
+                                        Ready in: {{ order.remaining_minutes }}m
+                                    {% else %}
+                                        Ready!
+                                    {% endif %}
+                                    • {{ order.payment_label }}
+                                </span>
+                                <div class="item-lines">
+                                    {% for line in order.lines %}
+                                    <span>{{ line.item }}{% if line.note %} — <em>{{ line.note }}</em>{% endif %}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="item-price">${{ "%.2f"|format(order.total_amount) }}</div>
+                            <div class="item-actions">
+                                <button
+                                    type="button"
+                                    class="btn-icon"
+                                    onclick="prefillOrder('{{ order.order_id }}', '{{ order.status }}', '{{ order.session_id }}')"
+                                >
+                                    Manage
+                                </button>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                    <div class="empty" id="empty-msg">
+                        <b>No Orders Yet</b>
+                        <span>New customer checkouts will appear here automatically.</span>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <span class="label" style="margin-top: 24px;">Table Sessions</span>
+                <div class="item-list">
+                    {% for table_session in sessions %}
+                    <div class="item-row" style="--i: {{ loop.index }}">
+                        <div class="item-cat {{ table_session.status }}">T{{ table_session.table_number }}</div>
+                        <div class="item-info">
+                            <strong>Session #{{ table_session.session_id }}</strong>
+                            <span>Status: {{ table_session.status|title }} • Orders: {{ table_session.order_count }}</span>
+                        </div>
+                        <div class="item-actions">
+                            <form method="POST" action="/staff/close-session/{{ table_session.session_id }}">
+                                <button type="submit" class="btn-icon">Close Session</button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <span class="label label-closed">Closed Table Sessions</span>
+                <div class="item-list">
+                    {% if closed_sessions %}
+                        {% for table_session in closed_sessions %}
+                            <div class="item-row closed" style="--i: {{ loop.index }}">
+                                <div class="item-cat closed">T{{ table_session.table_number }}</div>
+                                <div class="item-info">
+                                    <strong>Session #{{ table_session.session_id }}</strong>
+                                    <span>Status: {{ table_session.status|title }} • Orders: {{ table_session.order_count }}</span>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty">
+                            <b>No closed sessions yet</b>
+                            <span>Closed sessions appear here automatically after staff closes a session.</span>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <aside class="form-panel">
+                <h2>Order Assistance</h2>
+                <div class="form-divider"></div>
+
+                <form method="POST" action="/staff/orders/update">
+                    <div class="field">
+                        <label>Target Order ID</label>
+                        <input type="number" name="order_id" id="orderIdField" placeholder="e.g. 1024" required>
+                    </div>
+
+                    <div class="field-row">
+                        <div class="field">
+                            <label>Update Status</label>
+                            <div class="select-wrap">
+                                <select name="status" id="statusField" required>
+                                    {% for status in allowed_statuses %}
+                                    <option value="{{ status }}">{{ status|title }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label>Session Lock</label>
+                            <input type="text" id="sessionField" placeholder="Session ID auto-fills from Manage" readonly>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-submit">Update Order Status</button>
+                </form>
+            </aside>
+        </div>
+    </main>
+
+<!-- ─────────────────────────────────────────────────────────────────
+     Socket.IO — loaded from CDN, same version as flask-socketio 5.x
+──────────────────────────────────────────────────────────────────── -->
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
 <script>
-  // Filter incoming backend arrays by 'active' state to keep hidden workspaces dropped out of client lists
-  const rawSessionsData = [
-    {% for ts in sessions if ts.status == 'active' %}
-    {
-      session_id: {{ ts.session_id }},
-      table_number: {{ ts.table_number }},
-      status: "{{ ts.status }}",
-      created_at: "{{ ts.created_at or '' }}",
-      orders: []
-    }{% if not loop.last %},{% endif %}
-    {% endfor %}
-  ];
+// ── helpers ────────────────────────────────────────────────────────
 
-  const rawOrdersData = [
-    {% for o in orders %}
-    {
-      order_id: {{ o.order_id }},
-      session_id: {{ o.session_id or 0 }},
-      table_number: "{{ o.table_number or '?' }}",
-      status: "{{ o.status }}",
-      total_amount: {{ o.total_amount }},
-      payment_label: "{{ o.payment_label }}",
-      remaining_minutes: {{ o.remaining_minutes }},
-      summary: "{{ o.summary|replace('"', '\\"') }}",
-      lines: [
-        {% for line in o.lines %}
-        {
-          item: "{{ line.item|replace('"', '\\"') }}",
-          note: "{{ (line.note or '')|replace('"', '\\"') }}"
-        }{% if not loop.last %},{% endif %}
-        {% endfor %}
-      ]
-    }{% if not loop.last %},{% endif %}
-    {% endfor %}
-  ];
+/** Return the currently active filter tab value. */
+function activeFilter() {
+    const tab = document.querySelector(".filter-tab.on");
+    return tab ? tab.dataset.filter : "all";
+}
 
-  // Map orders inside parent session blocks dynamically
-  rawSessionsData.forEach(session => {
-    session.orders = rawOrdersData.filter(o => o.session_id === session.session_id);
-  });
+/** Apply the current filter to a single row (show/hide). */
+function applyFilterToRow(row) {
+    const f = activeFilter();
+    row.style.display = (f === "all" || row.dataset.status === f) ? "" : "none";
+}
 
-  let workingSessionsList = [...rawSessionsData];
-  const container = document.getElementById("sessionContainer");
+/** Animate a stat <dd> when its value changes. */
+function bumpStat(id, value) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const current = el.dataset.rawVal ?? el.textContent.trim();
+    if (String(current) === String(value)) return;   // no change → no bump
+    el.dataset.rawVal = value;
+    // preserve inner <span> (e.g. "min" label)
+    const span = el.querySelector("span");
+    el.textContent = value;
+    if (span) el.appendChild(span);
+    el.classList.remove("bump");
+    void el.offsetWidth;                              // force reflow
+    el.classList.add("bump");
+}
 
-  // Dynamic Layout Workspace Generator Engine
-  function renderLayoutTree() {
-    container.innerHTML = "";
+/** Update every stats counter + topbar badge. */
+function updateStats(stats) {
+    bumpStat("stat-pending",   stats.pending_orders);
+    bumpStat("stat-preparing", stats.preparing_orders);
+    bumpStat("stat-ready",     stats.ready_orders);
+    const topbar = document.getElementById("stat-active-topbar");
+    if (topbar) topbar.textContent = stats.active_orders;
+}
 
-    if (workingSessionsList.length === 0) {
-      container.innerHTML = `
-        <div class="item-row" style="justify-content: center; padding: 40px 0; background: #fff; border:1px solid var(--rule);">
-          <div style="text-align: center;">
-            <b style="font-family: 'Bebas Neue'; font-size: 20px; color: var(--mist);">No Active Workspace Found</b>
-            <p style="margin: 5px 0 0 0; font-size: 11px; color: var(--mist); font-family: 'DM Mono';">No active sessions match your tracking criteria.</p>
-          </div>
-        </div>`;
-      return;
+/** Stamp the "Last updated HH:MM:SS" ticker. */
+function stampUpdated() {
+    const el = document.getElementById("last-updated");
+    if (!el) return;
+    const now = new Date();
+    el.textContent = "Updated " + now.toLocaleTimeString();
+}
+
+/** Build an order row element from a plain JS object (comes from dashboard_refresh). */
+function buildOrderRow(order, index) {
+    const div = document.createElement("div");
+    div.className = "item-row";
+    div.style.cssText = `--i: ${index}`;
+    div.dataset.status   = order.status;
+    div.dataset.orderId  = order.order_id;
+
+    const statusClass = order.status;   // pending / preparing / ready
+
+    // item lines HTML
+    const linesHtml = (order.lines || []).map(l =>
+        `<span>${l.item}${l.note ? ` — <em>${l.note}</em>` : ""}</span>`
+    ).join("");
+
+    let readyText = "Ready!";
+    if (order.status !== "ready" && order.remaining_minutes > 0) {
+        readyText = `Ready in: ${order.remaining_minutes}m`;
     }
 
-    workingSessionsList.forEach(session => {
-      const activeOrdersCount = session.orders.length;
-      const allOrdersReady = activeOrdersCount > 0 && session.orders.every(o => o.status === "ready");
-
-      let formattedDate = "Unknown Date";
-      if (session.created_at) {
-        const d = new Date(session.created_at);
-        formattedDate = !isNaN(d) ? d.toLocaleString() : session.created_at;
-      }
-
-      let sessionHTML = `
-        <div style="margin-bottom: 30px; border: 1px solid var(--rule); background: #fff; padding: 20px;">
-          <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid var(--ink); padding-bottom: 10px; margin-bottom: 15px;">
-            <div>
-              <span style="font-family:'Bebas Neue'; font-size: 26px; color: var(--ink); letter-spacing: 0.5px;">TABLE ${session.table_number}</span>
-              <span style="font-family: 'DM Mono'; font-size: 11px; color: var(--smoke); display: block;">Started: ${formattedDate} • Session ID: #${session.session_id}</span>
-            </div>
-            <div>
-              ${ activeOrdersCount === 0 ? `
-                <form method="POST" action="/staff/close-session/${session.session_id}">
-                  <button type="submit" class="date-select-btn" style="background:#e74c3c; border-color:#e74c3c; color:#fff; cursor:pointer;">Terminate Session</button>
-                </form>
-              ` : allOrdersReady ? `
-                <form method="POST" action="/staff/close-session/${session.session_id}">
-                  <button type="submit" class="date-select-btn" style="background:#27ae60; border-color:#27ae60; color:#fff; font-weight:bold; cursor:pointer;">Finish Session & Clear</button>
-                </form>
-              ` : `
-                <span style="font-family:'DM Mono'; font-size:11px; color:var(--smoke); background:var(--rule); padding:6px 10px; display:inline-block;">Awaiting Items completion</span>
-              `}
-            </div>
-          </div>
-          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px;">
-      `;
-
-      if (activeOrdersCount === 0) {
-        sessionHTML += `
-          <div style="grid-column: 1 / -1; padding: 20px; text-align: center; border: 1px dashed var(--rule); font-family: 'DM Mono'; font-size: 12px; color: var(--mist);">
-            No orders associated with this workspace container instance.
-          </div>`;
-      } else {
-        session.orders.forEach(order => {
-          const isReady = order.status === "ready";
-
-          // Build summary list with visible customization notes directly inside the nested session card
-          let orderLinesBlock = "";
-          order.lines.forEach(l => {
-            orderLinesBlock += `
-              <div style="margin-top:4px; font-size:11px; color:var(--smoke); line-height:1.3;">
-                • ${l.item}
-                ${l.note ? `<span style="display:block; color:#c8933a; font-style:italic; padding-left:8px; font-size:10px;">“${l.note}”</span>` : ''}
-              </div>`;
-          });
-
-          sessionHTML += `
-            <div class="item-row staff-data-row" style="flex-direction:column; align-items:flex-start; gap:8px; cursor:pointer; padding:15px; border:1px solid var(--rule); background:${isReady ? 'rgba(39, 174, 96, 0.03)' : 'transparent'};" onclick="openOrderModal(${order.order_id})">
-              <div style="display:flex; justify-content:space-between; width:100%; align-items:center; margin-bottom:4px;">
-                <strong style="font-size:15px; color:var(--ink);">Ticket #${order.order_id}</strong>
-                <span style="font-family:'DM Mono'; font-size:10px; text-transform:uppercase; padding:2px 6px; border:1px solid; background:${isReady?'#27ae60':'transparent'}; color:${isReady?'#fff':'#c8933a'}">
-                  ${order.status}
-                </span>
-              </div>
-
-              <div style="width:100%; border-top:1px dashed var(--rule); padding-top:4px; margin-bottom:4px;">
-                ${orderLinesBlock}
-              </div>
-
-              <div style="display:flex; justify-content:space-between; width:100%; font-family:'DM Mono'; font-size:11px; color:var(--mist); margin-top:auto; border-top:1px dashed var(--rule); padding-top:6px;">
-                <span>${order.payment_label}</span>
-                <strong style="color:var(--ink); font-size:12px;">$${order.total_amount.toFixed(2)}</strong>
-              </div>
-            </div>
-          `;
-        });
-      }
-
-      sessionHTML += `</div></div>`;
-      container.innerHTML += sessionHTML;
-    });
-  }
-
-  // Filter Engine applying parameters against session startup data matrix
-  function applyFiltersAndSorting() {
-    const searchQuery = document.getElementById("searchInput").value.trim().toLowerCase();
-    const dateSort = document.getElementById("dateSort").value;
-
-    // 1. Filter by Table Search
-    workingSessionsList = rawSessionsData.filter(s => {
-      if (!searchQuery) return true;
-      return `table ${s.table_number}`.includes(searchQuery) || String(s.table_number).includes(searchQuery);
-    });
-
-    // 2. Sort by Session Date
-    workingSessionsList.sort((a, b) => {
-      const timeA = a.created_at ? new Date(a.created_at).getTime() : 0;
-      const timeB = b.created_at ? new Date(b.created_at).getTime() : 0;
-      return dateSort === "desc" ? timeB - timeA : timeA - timeB;
-    });
-
-    renderLayoutTree();
-  }
-
-  // Interactive Single-Card Order Modal Manager
-  function openOrderModal(orderId) {
-    const order = rawOrdersData.find(o => o.order_id === orderId);
-    if (!order) return;
-
-    document.getElementById("modalTitle").innerText = `Ticket Workspace: Order #${order.order_id}`;
-    const targetContent = document.getElementById("modalContent");
-
-    let itemsLinesHTML = "";
-    order.lines.forEach(l => {
-      itemsLinesHTML += `
-        <div style="padding: 8px 0; border-bottom: 1px dashed var(--rule);">
-          <strong style="color:var(--ink); font-size:13px;">${l.item}</strong>
-          ${l.note ? `<span style="display:block; font-size:11px; color:#e74c3c; margin-top:4px; font-family:'DM Sans'; font-style:italic; background:#fdfaf6; padding:4px 8px; border-left:2px solid #c8933a;">“${l.note}”</span>` : ''}
+    div.innerHTML = `
+        <div class="item-cat ${statusClass}">#${order.order_id}</div>
+        <div class="item-info">
+            <strong>
+                Table ${order.table_number || "?"}
+                <span class="status-badge status-${order.status}">${order.status}</span>
+            </strong>
+            <span>${readyText} • ${order.payment_label}</span>
+            <div class="item-lines">${linesHtml}</div>
+        </div>
+        <div class="item-price">$${parseFloat(order.total_amount).toFixed(2)}</div>
+        <div class="item-actions">
+            <button type="button" class="btn-icon"
+                onclick="prefillOrder('${order.order_id}','${order.status}','${order.session_id || ""}')">
+                Manage
+            </button>
         </div>`;
+    return div;
+}
+
+// ── Socket setup ───────────────────────────────────────────────────
+
+const socket = io();   // connects to same host:port automatically
+
+const dot   = document.getElementById("rt-dot");
+const label = document.getElementById("network-label");
+
+socket.on("connect", () => {
+    dot.classList.remove("offline");
+    label.textContent = "Live";
+    console.log("✅ Socket connected:", socket.id);
+});
+
+socket.on("disconnect", () => {
+    dot.classList.add("offline");
+    label.textContent = "Offline";
+    console.warn("⚠️ Socket disconnected");
+});
+
+// ── staff_update: one order changed status (fired by update_order route) ──
+
+socket.on("staff_update", function(data) {
+    const { order_id, status } = data;
+    const card = document.querySelector(`[data-order-id="${order_id}"]`);
+    if (!card) return;
+
+    // Update data-status so filter still works
+    card.dataset.status = status;
+
+    // Update the coloured left-strip class
+    const cat = card.querySelector(".item-cat");
+    if (cat) {
+        cat.className = `item-cat ${status}`;
+    }
+
+    // Update the inline status badge
+    const badge = card.querySelector(".status-badge");
+    if (badge) {
+        badge.textContent = status;
+        badge.className   = `status-badge status-${status}`;
+    }
+
+    // Update the "Ready in / Ready!" text (first <span> inside item-info)
+    const infoSpan = card.querySelector(".item-info > span");
+    if (infoSpan) {
+        const parts = infoSpan.textContent.split("•");
+        const suffix = parts.slice(1).join("•");           // keep payment label
+        infoSpan.textContent = (status === "ready" ? "Ready!" : parts[0].trim()) + " •" + suffix;
+    }
+
+    // Re-apply the current filter (card may need to hide/show)
+    applyFilterToRow(card);
+
+    // Flash the card yellow so staff notice
+    card.classList.remove("flash");
+    void card.offsetWidth;
+    card.classList.add("flash");
+
+    stampUpdated();
+});
+
+// ── dashboard_refresh: full data push every 10 s ──────────────────
+
+socket.on("dashboard_refresh", function(data) {
+    const { orders, stats } = data;
+
+    updateStats(stats);
+
+    const list   = document.getElementById("orderList");
+    const empty  = document.getElementById("empty-msg");
+
+    if (!orders || orders.length === 0) {
+        // Clear all rows, show empty state
+        list.querySelectorAll(".item-row").forEach(r => r.remove());
+        if (!empty) {
+            const e = document.createElement("div");
+            e.className = "empty";
+            e.id = "empty-msg";
+            e.innerHTML = "<b>No Orders Yet</b><span>New customer checkouts will appear here automatically.</span>";
+            list.appendChild(e);
+        }
+        stampUpdated();
+        return;
+    }
+
+    // Remove empty placeholder if present
+    if (empty) empty.remove();
+
+    const incomingIds = new Set(orders.map(o => String(o.order_id)));
+
+    // Remove rows that are no longer in the active list
+    list.querySelectorAll(".item-row[data-order-id]").forEach(row => {
+        if (!incomingIds.has(row.dataset.orderId)) {
+            row.style.transition = "opacity .4s";
+            row.style.opacity = "0";
+            setTimeout(() => row.remove(), 420);
+        }
     });
 
-    targetContent.innerHTML = `
-      <div style="display:flex; flex-direction:column; gap:15px; font-family:'DM Mono';">
-        <div>
-          <span style="font-size:10px; text-transform:uppercase; color:var(--smoke); display:block;">Dest Allocation</span>
-          <strong style="color:var(--ink); font-size:15px; font-family:'DM Sans';">Table ${order.table_number} (Session Ref Key: #${order.session_id})</strong>
-        </div>
+    // Update existing rows or insert new ones
+    orders.forEach((order, idx) => {
+        const existing = list.querySelector(`[data-order-id="${order.order_id}"]`);
 
-        <div>
-          <span style="font-size:10px; text-transform:uppercase; color:var(--smoke); display:block; margin-bottom:5px;">Ordered Line Items</span>
-          ${itemsLinesHTML}
-        </div>
+        if (existing) {
+            // Only patch the status if it changed; don't re-render the whole row
+            if (existing.dataset.status !== order.status) {
+                existing.dataset.status = order.status;
+                const badge = existing.querySelector(".status-badge");
+                if (badge) {
+                    badge.textContent = order.status;
+                    badge.className   = `status-badge status-${order.status}`;
+                }
+                const cat = existing.querySelector(".item-cat");
+                if (cat) cat.className = `item-cat ${order.status}`;
+                applyFilterToRow(existing);
+            }
+        } else {
+            // Brand-new order — build row, add NEW badge, prepend to list
+            const row = buildOrderRow(order, idx + 1);
+            const strong = row.querySelector("strong");
+            if (strong) {
+                const nb = document.createElement("span");
+                nb.className = "new-badge";
+                nb.textContent = "NEW";
+                strong.appendChild(nb);
+                setTimeout(() => nb.remove(), 6000);   // badge disappears after 6 s
+            }
+            applyFilterToRow(row);
+            list.prepend(row);
+        }
+    });
 
-        <div style="display:flex; justify-content:space-between; background:rgba(0,0,0,0.02); padding:10px; border:1px solid var(--rule);">
-          <div>
-            <span style="font-size:10px; text-transform:uppercase; color:var(--smoke); display:block;">Accounting Status</span>
-            <strong style="font-size:12px; color:var(--ink);">${order.payment_label}</strong>
-          </div>
-          <div style="text-align:right;">
-            <span style="font-size:10px; text-transform:uppercase; color:var(--smoke); display:block;">Total Bill</span>
-            <strong style="font-size:14px; color:var(--ink); font-weight:bold;">$${order.total_amount.toFixed(2)}</strong>
-          </div>
-        </div>
-
-        <form method="POST" action="/staff/orders/update" style="display:flex; flex-direction:column; gap:8px; margin-top:10px;">
-          <input type="hidden" name="order_id" value="${order.order_id}">
-          <label style="font-size:10px; text-transform:uppercase; color:var(--smoke);">Modify Production Status</label>
-          <div style="display:flex; gap:10px;">
-            <select name="status" style="flex:2; padding:10px; border:1px solid var(--rule); background:transparent; font-family:'DM Mono'; color:var(--ink); font-size:12px;">
-              <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>Pending</option>
-              <option value="preparing" ${order.status === 'preparing' ? 'selected' : ''}>Preparing</option>
-              <option value="ready" ${order.status === 'ready' ? 'selected' : ''}>Ready</option>
-            </select>
-            <button type="submit" class="date-select-btn" style="flex:1; background:var(--ink); color:var(--paper); font-weight:bold; justify-content:center; cursor:pointer;">Update</button>
-          </div>
-        </form>
-      </div>
-    `;
-
-    document.getElementById("modalOverlay").style.display = "block";
-    document.getElementById("portalModal").style.display = "block";
-  }
-
-  function closeModal() {
-    document.getElementById("modalOverlay").style.display = "none";
-    document.getElementById("portalModal").style.display = "none";
-  }
-
-  // Active DOM hardware mutation bindings
-  document.getElementById("searchInput").addEventListener("input", applyFiltersAndSorting);
-  document.getElementById("dateSort").addEventListener("change", applyFiltersAndSorting);
-
-  // Self-starter execution pipeline loops
-  applyFiltersAndSorting();
+    stampUpdated();
+});
 </script>
 
+<!-- ── existing scripts ─────────────────────────────────────────── -->
+<script>
+function prefillOrder(orderId, status, sessionId) {
+    document.getElementById("orderIdField").value  = orderId;
+    document.getElementById("statusField").value   = status;
+    document.getElementById("sessionField").value  = sessionId || "";
+}
+
+document.querySelectorAll(".filter-tab").forEach((button) => {
+    button.addEventListener("click", () => {
+        document.querySelectorAll(".filter-tab").forEach(t => t.classList.remove("on"));
+        button.classList.add("on");
+        const filter = button.dataset.filter;
+        document.querySelectorAll("#orderList .item-row").forEach(row => {
+            row.style.display = filter === "all" || row.dataset.status === filter ? "" : "none";
+        });
+    });
+});
+
+</script>
 {{ render_toast_script() }}
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+
+<script>
+const socket = io();
+
+socket.on("connect", () => {
+    console.log("STAFF CONNECTED");
+});
+
+socket.on("close_session_request", function(data) {
+
+    console.log("EVENT RECEIVED");
+    console.log(data);
+
+    alert(data.message);
+
+});
+</script>
 
 </body>
 </html>

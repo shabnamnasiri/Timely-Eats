@@ -1,9 +1,10 @@
-from flask import render_template, redirect, session, flash, request
-from datetime import datetime
+from flask import jsonify, render_template, redirect, session, flash, request
+from datetime import datetime, timedelta
 import MySQLdb.cursors
 
 
 def register_customer_place_order_routes(app, mysql):
+
     @app.route('/Customer/PlaceOrder', methods=['POST'])
     def place_order():
         user_id = session.get('user_id')
@@ -18,6 +19,20 @@ def register_customer_place_order_routes(app, mysql):
             return redirect('/signin')
 
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+
+        # Fetch table session — include updated_at for auto-close logic
+        cursor.execute("""
+            SELECT session_id, status, created_at, updated_at
+            FROM table_session
+            WHERE session_id = %s AND status IN ('active', 'ordered')
+        """, (session_id,))
+        table_session = cursor.fetchone()
+
+        if not table_session:
+            flash("Your table session is no longer valid. Please scan the QR code again.", "warning")
+            session.pop('table_session_id', None)
+            cursor.close()
+            return redirect('/signin')
 
         # Get active cart
         cursor.execute("""
@@ -50,60 +65,51 @@ def register_customer_place_order_routes(app, mysql):
             return redirect('/Customer/Cart')
 
         total_amount = sum(item['quantity'] * float(item['price']) for item in cart_items)
-        order_status = 'pending'
 
-        if payment_method == 'cash':
-            payment_status = 'pending'
-        elif payment_method == 'card':
-            payment_status = 'confirmed'
-        else:
+        # Get loyalty points
+        cursor.execute("SELECT loyalty_point FROM user WHERE user_id = %s", (user_id,))
+        user_row = cursor.fetchone()
+        loyalty_points = user_row['loyalty_point'] if user_row else 0
+
+        # Apply loyalty discount if user toggled redeem (100 pts = $1 discount)
+        loyalty_discount = 0
+        if session.get('redeem_points') and loyalty_points >= 100:
+            loyalty_discount = float(session.get('loyalty_discount', 0))
+            total_amount = max(0, total_amount - loyalty_discount)
+
+            points_used = int(loyalty_discount * 100)
+            cursor.execute("""
+                UPDATE user
+                SET loyalty_point = loyalty_point - %s
+                WHERE user_id = %s
+            """, (points_used, user_id))
+
+            session.pop('redeem_points', None)
+            session.pop('loyalty_discount', None)
+
+        if payment_method not in ('cash', 'card'):
             flash("Invalid payment method selected.", "danger")
             cursor.close()
             return redirect('/Customer/Cart')
 
-        # Check if redeeming points
-        redeem = request.form.get('redeem_points') == 'on'
+        payment_status = 'confirmed'
 
-        # Get current loyalty points
-        cursor.execute("""
-            SELECT loyalty_point FROM User WHERE user_id = %s
-        """, (user_id,))
-        user = cursor.fetchone()
-        current_points = user['loyalty_point'] if user else 0
-
-        # Calculate discount if redeeming
-        discount = 0
-        if redeem and current_points >= 100:
-            # how many full 100-point blocks does the user have?
-            redeemable_blocks = current_points // 100
-            discount = redeemable_blocks * 5  # 100 points = $5
-            discount = min(discount, total_amount)  # can't discount more than total
-
-        discounted_total = total_amount - discount
-
-        # Calculate points earned — 10% of discounted total
-        points_earned = int(discounted_total * 0.10)
         cursor.execute("""
             SELECT MAX(i.preparation_time) AS max_prep
             FROM cart_item ci
             JOIN item i ON i.item_id = ci.item_id
             WHERE ci.cart_id = %s
         """, (cart_id,))
-
         max_prep = cursor.fetchone()["max_prep"] or 10
 
+        order_time = datetime.now()
+
+        # Insert order
         cursor.execute("""
             INSERT INTO orders
             (user_id, cart_id, timestamp, preparation_time, status, total_amount, session_id)
             VALUES (%s, %s, %s, %s, 'pending', %s, %s)
-        """, (
-            user_id,
-            cart_id,
-            datetime.now(),
-            max_prep,
-            discounted_total,
-            session_id
-        ))
+        """, (user_id, cart_id, order_time, max_prep, total_amount, session_id))
         order_id = cursor.lastrowid
 
         # Insert order_details
@@ -112,58 +118,114 @@ def register_customer_place_order_routes(app, mysql):
                 INSERT INTO order_details
                 (order_id, item_id, quantity, customization_note)
                 VALUES (%s, %s, %s, %s)
-            """, (
-                order_id,
-                item['item_id'],
-                item['quantity'],
-                item['customization_note']
-            ))
+            """, (order_id, item['item_id'], item['quantity'], item['customization_note']))
 
         # Insert payment
         cursor.execute("""
             INSERT INTO payment (order_id, payment_method, payment_status, date)
             VALUES (%s, %s, %s, %s)
-        """, (order_id, payment_method, payment_status, datetime.now()))
+        """, (order_id, payment_method, payment_status, order_time))
 
-        # Mark cart as closed
+        # Close current cart
         cursor.execute("""
             UPDATE cart SET status = 'closed'
             WHERE cart_id = %s
         """, (cart_id,))
 
-        # 🔥 FIX 1: Explicitly drop items from cart_item table to empty out the cart content fields
+        # Open fresh cart for continued ordering
         cursor.execute("""
-            DELETE FROM cart_item 
-            WHERE cart_id = %s
-        """, (cart_id,))
+            INSERT INTO cart (user_id, status)
+            VALUES (%s, 'open')
+        """, (user_id,))
 
-        points_used = 0
-        # Update loyalty points
-        if redeem and current_points >= 100:
-            points_used = (current_points // 100) * 100  # deduct full blocks only
-            cursor.execute("""
-                UPDATE User
-                SET loyalty_point = loyalty_point - %s + %s
-                WHERE user_id = %s
-            """, (points_used, points_earned, user_id))
-        else:
-            cursor.execute("""
-                UPDATE User
-                SET loyalty_point = loyalty_point + %s
-                WHERE user_id = %s
-            """, (points_earned, user_id))
+        # Award loyalty points (1 pt per $1 spent after discount)
+        points_earned = int(total_amount)
+        cursor.execute("""
+            UPDATE user
+            SET loyalty_point = loyalty_point + %s
+            WHERE user_id = %s
+        """, (points_earned, user_id))
 
-        # Update session so cart page shows new points immediately
-        session['loyalty_points'] = current_points - (
-            points_used if redeem and current_points >= 100 else 0) + points_earned
+        # Update table_session: set status to 'ordered' and bump updated_at
+        cursor.execute("""
+            UPDATE table_session
+            SET status = CASE WHEN status = 'active' THEN 'ordered' ELSE status END,
+                updated_at = %s
+            WHERE session_id = %s
+        """, (order_time, session_id))
+
+        # Auto-close session if 20 minutes have passed since last update
+        last_updated = table_session['updated_at']
+        if last_updated is None:
+            # Fall back to created_at if updated_at has never been set
+            last_updated = table_session['created_at']
+        if isinstance(last_updated, str):
+            last_updated = datetime.strptime(last_updated, '%Y-%m-%d %H:%M:%S')
+
+        if order_time - last_updated >= timedelta(minutes=20):
+            cursor.execute("""
+                UPDATE table_session
+                SET status = 'closed', closed_at = %s
+                WHERE session_id = %s
+            """, (order_time, session_id))
+            session.pop('table_session_id', None)
 
         mysql.connection.commit()
         cursor.close()
 
-        if redeem and discount > 0:
-            flash(f"Order placed! ${discount:.2f} discount applied. You earned {points_earned} points.", "success")
-        else:
-            flash(f"Order placed! You earned {points_earned} loyalty points.", "success")
+        flash("Order placed successfully!", "success")
+        return redirect('/menu')
 
-        # ✅ FIX 2: Dynamic redirect straight to the custom customer order history panel
-        return redirect('/customer/order_history')
+
+    @app.route('/apply_loyalty', methods=['POST'])
+    def apply_loyalty():
+        data = request.get_json()
+        redeem = data.get('redeem', False)
+
+        user_id = session.get('user_id')
+        if not user_id:
+            return jsonify({'success': False, 'error': 'Not logged in'}), 401
+
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+
+        cursor.execute("SELECT loyalty_point FROM user WHERE user_id = %s", (user_id,))
+        user_row = cursor.fetchone()
+        loyalty_points = user_row['loyalty_point'] if user_row else 0
+
+        cursor.execute("""
+            SELECT ci.quantity, i.price
+            FROM cart_item ci
+            JOIN item i ON ci.item_id = i.item_id
+            WHERE ci.cart_id = (
+                SELECT cart_id FROM cart
+                WHERE user_id = %s AND status = 'open'
+                ORDER BY cart_id DESC
+                LIMIT 1
+            )
+        """, (user_id,))
+        items = cursor.fetchall()
+        cursor.close()
+
+        if not items:
+            return jsonify({'success': False, 'error': 'No open cart found'}), 400
+
+        order_total = sum(row['quantity'] * float(row['price']) for row in items)
+
+        discount = 0
+        if redeem and loyalty_points >= 100:
+            # 100 pts = $1 discount
+            discount = loyalty_points // 100
+            session['redeem_points'] = True
+            session['loyalty_discount'] = discount
+        else:
+            session.pop('redeem_points', None)
+            session.pop('loyalty_discount', None)
+
+        new_total = max(0, order_total - discount)
+
+        return jsonify({
+            'success': True,
+            'discount': round(discount, 2),
+            'new_total': round(new_total, 2),
+            'order_total': round(order_total, 2)
+        })

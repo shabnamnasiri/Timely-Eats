@@ -1,8 +1,7 @@
 from datetime import datetime
 from flask import flash, redirect, render_template, request, session
 import MySQLdb.cursors
-
-
+from app.extensions import socketio, mysql
 def require_staff():
     """Block access if user is not logged in or not a staff member."""
     if "user_id" not in session:
@@ -13,9 +12,8 @@ def require_staff():
 
 
 def get_orders(mysql):
-    """Fetch active orders belonging exclusively to LIVE active table sessions."""
+    """Fetch all active orders (pending/preparing/ready) from the database."""
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    # Filtered by ts.status = 'active' so completed/closed sessions drop off the live timeline
     cursor.execute("""
        SELECT
             o.order_id, o.user_id, o.timestamp, o.status,
@@ -25,17 +23,17 @@ def get_orders(mysql):
             i.name AS item_name, od.quantity, od.customization_note
         FROM orders o
         LEFT JOIN User u ON u.user_id = o.user_id
-        INNER JOIN Table_Session ts ON ts.session_id = o.session_id
+        LEFT JOIN Table_Session ts ON ts.session_id = o.session_id
         LEFT JOIN payment p ON p.order_id = o.order_id
         LEFT JOIN order_details od ON od.order_id = o.order_id
         LEFT JOIN item i ON i.item_id = od.item_id
         WHERE LOWER(COALESCE(o.status, '')) IN ('pending', 'preparing', 'ready')
-          AND LOWER(COALESCE(ts.status, '')) = 'active'
         ORDER BY o.timestamp DESC
     """)
     rows = cursor.fetchall()
     cursor.close()
 
+    # Each order can have multiple rows (one per item), so we group them by order_id
     orders = {}
     for row in rows:
         oid = row["order_id"]
@@ -47,69 +45,68 @@ def get_orders(mysql):
             remaining_minutes = max(prep_time - wait_minutes, 0)
 
             orders[oid] = {
-                "order_id": oid,
-                "session_id": row["session_id"],
-                "table_number": row["table_number"],
-                "customer_name": row["username"] or f"Customer #{row['user_id']}",
-                "status": (row["status"] or "").strip().lower(),
-                "payment_label": f"{(row['payment_method'] or 'unknown').upper()} - {(row['payment_status'] or 'pending').title()}",
-                "total_amount": float(row["total_amount"] or 0),
+                "order_id":         oid,
+                "session_id":       row["session_id"],
+                "table_number":     row["table_number"],
+                "customer_name":    row["username"] or f"Customer #{row['user_id']}",
+                "status":           (row["status"] or "").strip().lower(),
+                "payment_label":    f"{(row['payment_method'] or 'unknown').upper()} - {(row['payment_status'] or 'pending').title()}",
+                "total_amount":     float(row["total_amount"] or 0),
                 "preparation_time": prep_time,
-                "wait_minutes": wait_minutes,
+                "wait_minutes":     wait_minutes,
                 "remaining_minutes": remaining_minutes,
-                "created_label": ts.strftime("%Y-%m-%d %H:%M") if ts else "Unknown",
-                "lines": [],
+                "created_label":    ts.strftime("%Y-%m-%d %H:%M") if ts else "Unknown",
+                "lines":            [],
             }
 
+        # Append this row's item to the order
         if row["item_name"]:
             orders[oid]["lines"].append({
                 "item": f"{row['quantity'] or 0}x {row['item_name']}",
                 "note": (row["customization_note"] or "").strip()
             })
-
+    # Turn the dict into a list and build a readable item summary for each order
     orders = list(orders.values())
     for o in orders:
+    # Replace the summary line at the bottom with:
         o["summary"] = ", ".join(l["item"] for l in o["lines"]) if o["lines"] else "No items"
     return orders
 
 
 def get_sessions(mysql):
-    """Fetch only active table sessions so closed workspaces clear out instantly."""
+    """Fetch all table sessions so staff can see which tables are active."""
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    # Added WHERE constraint to match active tracking filters
     cursor.execute("""
-        SELECT 
-            ts.session_id, 
-            ts.table_number, 
-            ts.status, 
-            ts.created_at,
-            COUNT(o.order_id) AS order_count
+        SELECT ts.session_id, ts.table_number, ts.status, COUNT(o.order_id) AS order_count
         FROM Table_Session ts
         LEFT JOIN orders o ON o.session_id = ts.session_id
-        WHERE LOWER(COALESCE(ts.status, '')) = 'active'
-        GROUP BY ts.session_id, ts.table_number, ts.status, ts.created_at
+        GROUP BY ts.session_id, ts.table_number, ts.status
         ORDER BY ts.table_number ASC
     """)
     rows = cursor.fetchall()
     cursor.close()
-    return rows
+
+    active_sessions = [r for r in rows if (r["status"] or "").strip().lower() == "active"]
+    closed_sessions = [r for r in rows if (r["status"] or "").strip().lower() == "closed"]
+    return active_sessions, closed_sessions
 
 
 def register_staff_order_routes(app, mysql):
+
     @app.route("/staff/orders")
     def staff_orders():
         if (block := require_staff()):
             return block
 
         orders = get_orders(mysql)
-        sessions = get_sessions(mysql)
+        sessions, closed_sessions = get_sessions(mysql)
 
+        # Do not calculate or include average wait time — removed per UI request
         stats = {
-            "active_orders": len(orders),
-            "pending_orders": sum(1 for o in orders if o["status"] == "pending"),
+            "active_orders":    len(orders),
+            "pending_orders":   sum(1 for o in orders if o["status"] == "pending"),
             "preparing_orders": sum(1 for o in orders if o["status"] == "preparing"),
-            "ready_orders": sum(1 for o in orders if o["status"] == "ready"),
-            "avg_wait": int(sum(o["wait_minutes"] for o in orders) / len(orders)) if orders else 0,
+            "ready_orders":     sum(1 for o in orders if o["status"] == "ready"),
         }
 
         return render_template(
@@ -117,8 +114,9 @@ def register_staff_order_routes(app, mysql):
             orders=orders,
             stats=stats,
             sessions=sessions,
+            closed_sessions=closed_sessions,
             staff_name=session.get("username", "Staff"),
-            allowed_statuses=["pending", "preparing", "ready"],
+            allowed_statuses=["pending", "preparing", "ready","closed"],
         )
 
     @app.route("/staff/orders/update", methods=["POST"])
@@ -133,12 +131,13 @@ def register_staff_order_routes(app, mysql):
             return redirect("/staff/orders")
 
         new_status = (request.form.get("status") or "").strip().lower()
-        if new_status not in ("pending", "preparing", "ready"):
+        if new_status not in ("pending", "preparing", "ready", "closed"):
             flash("Choose a valid order status.", "warning")
             return redirect("/staff/orders")
 
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute("SELECT order_id, session_id, preparation_time FROM orders WHERE order_id = %s", (order_id,))
+
+        cursor.execute("SELECT order_id, status, preparation_time FROM orders WHERE order_id = %s", (order_id,))
         order = cursor.fetchone()
 
         if not order:
@@ -146,85 +145,73 @@ def register_staff_order_routes(app, mysql):
             flash("Order not found.", "warning")
             return redirect("/staff/orders")
 
-        session_id = order["session_id"]
+        current_status = (order["status"] or "").strip().lower()
+        if current_status == "ready" and new_status != "ready":
+            cursor.close()
+            flash("Ready orders cannot be changed back to pending or preparing.", "warning")
+            return redirect("/staff/orders")
+
         original_prep = order["preparation_time"] or 10
 
-        # 1. Standard Order Update Pipeline
         if new_status == "ready":
             cursor.execute("UPDATE orders SET status = 'ready', preparation_time = 0 WHERE order_id = %s", (order_id,))
         elif new_status == "pending":
-            cursor.execute("UPDATE orders SET status = 'pending', preparation_time = %s WHERE order_id = %s",
-                           (original_prep, order_id))
+            cursor.execute("UPDATE orders SET status = 'pending', preparation_time = %s WHERE order_id = %s", (original_prep, order_id))
+        elif new_status == "closed":
+            cursor.execute("UPDATE orders SET status = 'closed' WHERE order_id = %s", (order_id,))
         else:
             cursor.execute("UPDATE orders SET status = %s WHERE order_id = %s", (new_status, order_id))
 
         mysql.connection.commit()
 
-        # 2. AUTOMATION STEP: If order status became 'ready', check if the session is fully complete
-        if new_status == "ready" and session_id:
+        # ── Auto-close table session if all orders are ready ──────────────────────
+        # Step 1: Find the table_session this order belongs to
+        cursor.execute("""
+            SELECT o.session_id, ts.status AS session_status
+            FROM orders o
+            JOIN Table_Session ts ON ts.session_id = o.session_id
+            WHERE o.order_id = %s
+        """, (order_id,))
+        session_row = cursor.fetchone()
+
+        if session_row and session_row["session_status"] == "ordered":
+            session_id = session_row["session_id"]
+
+            # Step 2: Check if every order in this session is 'ready'
             cursor.execute("""
-                SELECT COUNT(*) AS active_count 
-                FROM orders 
-                WHERE session_id = %s 
-                AND LOWER(COALESCE(status, '')) IN ('pending', 'preparing')
+                SELECT COUNT(*) AS total,
+                    SUM(status = 'ready') AS ready_count
+                FROM orders
+                WHERE session_id = %s
             """, (session_id,))
-            remaining_orders = cursor.fetchone()["active_count"]
+            counts = cursor.fetchone()
 
-            # If 0 active cooking orders remain, auto-complete orders and close session
-            if remaining_orders == 0:
+            if counts and counts["total"] > 0 and counts["total"] == counts["ready_count"]:
+                # Step 3: All orders are ready — close the session
                 cursor.execute("""
-                    UPDATE orders 
-                    SET status = 'completed' 
-                    WHERE session_id = %s AND LOWER(status) = 'ready'
+                    UPDATE Table_Session SET status = 'closed' WHERE session_id = %s
                 """, (session_id,))
-
-                cursor.execute("UPDATE Table_Session SET status='closed' WHERE session_id=%s", (session_id,))
                 mysql.connection.commit()
-                flash("All table items finished! Table session successfully completed and cleared.", "success")
-            else:
-                flash(f"Order #{order_id} updated to ready.", "success")
-        else:
-            flash(f"Order #{order_id} updated to {new_status}.", "success")
+        # ──────────────────────────────────────────────────────────────────────────
 
+        # Notify the customer
+        cursor.execute("SELECT user_id FROM orders WHERE order_id = %s", (order_id,))
+        order_user = cursor.fetchone()
         cursor.close()
+
+        if order_user:
+            user_id = order_user["user_id"]
+            socketio.emit("order_update", {
+                "order_id": order_id,
+                "status": new_status,
+                "message": f"Your order #{order_id} is now {new_status}"
+            }, to=f"user_{user_id}")
+
+        # Notify staff dashboard
+        socketio.emit("staff_update", {
+            "order_id": order_id,
+            "status": new_status,
+        }, to="staff")
+
+        flash(f"Order #{order_id} updated to {new_status}.", "success")
         return redirect("/staff/orders")
-
-    # ==============================================================================
-    # INTEGRATED SESSION TERMINATOR ROUTE (Converts Ready -> Completed)
-    # ==============================================================================
-    @app.route('/staff/close-session/<int:session_id>', methods=['POST'])
-    def clear_order_board_session(session_id):
-        if (block := require_staff()):
-            return block
-
-        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-
-        # Block manual bypass if there are still unfinished cooking orders
-        cursor.execute("""
-            SELECT COUNT(*) AS open_count
-            FROM orders
-            WHERE session_id = %s
-            AND LOWER(COALESCE(status, '')) IN ('pending', 'preparing')
-        """, (session_id,))
-        check = cursor.fetchone()
-
-        if check and check["open_count"] > 0:
-            cursor.close()
-            flash("Finish all kitchen production line items before clearing this session.", "warning")
-            return redirect(request.referrer or "/staff/orders")
-
-        # Transition all current 'ready' orders belonging to this session to 'completed'
-        cursor.execute("""
-            UPDATE orders 
-            SET status = 'completed' 
-            WHERE session_id = %s AND LOWER(status) = 'ready'
-        """, (session_id,))
-
-        # Finalize and close the table session space
-        cursor.execute("UPDATE Table_Session SET status='closed' WHERE session_id=%s", (session_id,))
-
-        mysql.connection.commit()
-        cursor.close()
-
-        flash("Workspace cleared. Associated ready orders are now marked as Completed!", "success")
-        return redirect(request.referrer or "/staff/orders")

@@ -2,95 +2,78 @@
 {% from 'macros/toast_script.html' import render_toast_script %}
 
 <!DOCTYPE html>
-<html lang="en" class="h-full">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Timely Eats — Sign In</title>
-  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
-
-  <style>
-    body { font-family: 'DM Sans', sans-serif; }
-    .font-bebas { font-family: 'Bebas Neue', sans-serif; }
-    .font-mono-custom { font-family: 'DM Mono', monospace; }
-  </style>
+  <link rel="stylesheet" href="../static/css/Sign_in.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/toast.css') }}"/>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 </head>
-<body class="h-full bg-[#f9f7f4] text-[#0e0e0e] antialiased">
+<body>
 
-<div class="flex min-h-full">
+<div class="layout">
 
-  <aside class="hidden lg:flex lg:w-1/2 bg-[#0e0e0e] text-white p-16 flex-col justify-between relative overflow-hidden border-r-2 border-[#c8933a]">
-    <div class="absolute inset-0 opacity-[0.03] pointer-events-none" style="background-image: linear-gradient(#c8933a 1px, transparent 1px), linear-gradient(90deg, #c8933a 1px, transparent 1px); background-size: 32px 32px;"></div>
+  <!-- LEFT -->
 
-    <div class="relative z-10">
-      <div class="font-bebas text-3xl tracking-wider">Timely<span class="text-[#c8933a]">Eats</span></div>
-      <div class="font-mono-custom text-[10px] tracking-[0.2em] uppercase text-[#7a7a7a] mt-1">Restaurant Management System</div>
+  <aside class="panel-left">
+    <div class="logo-block">
+      <div class="logo-wordmark">Timely<span>Eats</span></div>
+      <div class="logo-sub">Restaurant Management System</div>
     </div>
 
-    <div class="relative z-10 max-w-md my-auto">
-      <h1 class="font-bebas text-5xl tracking-wide leading-none mb-4">Run Every <span class="text-[#c8933a]">Service.</span></h1>
-      <p class="text-sm font-light leading-relaxed text-[#b0b0b0]">
+    <div class="panel-left-body">
+      <h1 class="panel-headline">Run Every<span>Service.</span></h1>
+      <p class="panel-desc">
         One unified platform for tables, orders, staff, and kitchen — built for operators who move at the speed of service.
       </p>
     </div>
 
-    <div class="relative z-10 stats-row"></div>
+    <div class="stats-row">
+     
+    </div>
   </aside>
 
-  <main class="w-full lg:w-1/2 flex flex-col justify-between p-6 sm:p-12 md:p-20 relative bg-[#f9f7f4]">
+  <!-- RIGHT -->
+  {{ render_toast() }}  
 
-    {{ render_toast() }}
+  <main class="panel-right">
+    <div class="form-shell">
+      <h2 class="form-title">Sign In</h2>
+      <div class="divider"></div>
 
-    <div class="my-auto mx-auto w-full max-w-md">
-
-      <div class="lg:hidden mb-8 text-center">
-        <div class="font-bebas text-4xl tracking-wider">Timely<span class="text-[#c8933a]">Eats</span></div>
-        <div class="font-mono-custom text-[9px] tracking-[0.15em] uppercase text-[#7a7a7a] mt-1">Management System</div>
-      </div>
-
-      <h2 class="text-2xl font-bold tracking-tight text-[#0e0e0e]">Sign In</h2>
-      <div class="w-12 h-0.5 bg-[#c8933a] mt-2 mb-8"></div>
-
-      <form action="{{ url_for('signin', next=next_page) }}" method="post" class="space-y-5">
-        <div class="flex flex-col gap-1.5">
-          <label for="username_phone" class="font-mono-custom text-xs uppercase tracking-wider text-[#3d3d3d]">Username or Phone number</label>
-          <input type="text" id="username_phone" name="username_phone" placeholder="you" required autocomplete="username_phone"
-            class="w-full bg-[#f3f0ea] border border-[#d4cfc6] rounded-xs px-4 py-3 text-sm text-[#0e0e0e] placeholder-[#b0b0b0] outline-hidden focus:border-[#c8933a] focus:ring-1 focus:ring-[#c8933a] transition-all"/>
+      <form action="/signin" method="post">
+        <div class="field">
+          <label for="username_phone">Username or Phone number</label>
+          <input type="text" id="username_phone" name="username_phone" placeholder="you" required autocomplete="username_phone"/>
         </div>
 
-        <div class="flex flex-col gap-1.5">
-          <label for="password" class="font-mono-custom text-xs uppercase tracking-wider text-[#3d3d3d]">Password</label>
-          <input type="password" id="password" name="password" placeholder="••••••••" required autocomplete="current-password"
-            class="w-full bg-[#f3f0ea] border border-[#d4cfc6] rounded-xs px-4 py-3 text-sm text-[#0e0e0e] placeholder-[#b0b0b0] outline-hidden focus:border-[#c8933a] focus:ring-1 focus:ring-[#c8933a] transition-all"/>
+        <div class="field">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" placeholder="••••••••" required autocomplete="current-password"/>
         </div>
 
-        <div class="flex items-center justify-between text-xs sm:text-sm pt-1">
-          <label class="flex items-center gap-2 cursor-pointer text-[#3d3d3d] font-light select-none">
-            <input type="checkbox" name="remember" class="accent-[#c8933a] rounded-xs border-[#d4cfc6] text-[#c8933a] focus:ring-[#c8933a]"/>
+        <div class="options-row">
+          <label class="checkbox-label">
+            <input type="checkbox" name="remember"/>
             Keep me signed in
           </label>
-          <a href="Forgot_Password.html" class="text-xs font-mono-custom uppercase tracking-wider text-[#7a7a7a] hover:text-[#c8933a] transition-colors">Forgot password?</a>
+          <a href="forgot_password" class="forgot-link">Forgot password?</a>
         </div>
 
-        <button type="submit"
-          class="w-full bg-[#0e0e0e] text-[#f9f7f4] border border-[#0e0e0e] py-3.5 px-4 font-mono-custom text-xs uppercase tracking-widest hover:bg-[#c8933a] hover:border-[#c8933a] active:translate-y-px transition-all rounded-xs cursor-pointer shadow-sm mt-2">
-          Sign In to Dashboard
-        </button>
+        <button type="submit" class="btn-primary">Sign In to Dashboard</button>
       </form>
 
-      <p class="text-sm font-light text-[#7a7a7a] mt-8 text-center sm:text-left">
-        No account yet? <a href="signup" class="text-[#c8933a] font-medium hover:underline ml-1">Create one here →</a>
+      <p class="bottom-link">
+        No account yet? <a href="signup">Create one here →</a>
       </p>
     </div>
 
-    <div class="text-[11px] font-mono-custom uppercase tracking-wider text-[#b0b0b0] text-center w-full mt-12 lg:mt-0">
-      © 2026 Timely Eats
-    </div>
+    <div class="copyright">© 2026 Timely Eats</div>
   </main>
 
 </div>
-
 {{ render_toast_script() }}  
 </body>
 </html>

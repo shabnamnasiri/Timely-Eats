@@ -1,11 +1,9 @@
 from flask import render_template, request, redirect, session, flash
 from werkzeug.security import check_password_hash
 
-
 def register_login_routes(app, mysql):
     @app.route("/signin", methods=["GET", "POST"])
     def signin():
-        # Checking if user is already logged in
         if "user_id" in session:
             if session.get("role_id") == 1:
                 return redirect("/menu")
@@ -26,30 +24,53 @@ def register_login_routes(app, mysql):
             user = cursor.fetchone()
             cursor.close()
 
-            if user and check_password_hash(user[1], password):
-                session["user_id"] = user[0]
-                session["role_id"] = user[2]
-                session["username"] = user[3]
+            if not user or not check_password_hash(user[1], password):
+                flash("Invalid username or password.", "danger")
+                return render_template("Sign_In.html")
 
-                # ✅ debug lines in the RIGHT place
-                print("✅ Login success:", user[0], user[2])
-                print("✅ Session after login:", dict(session))
+            user_id  = user[0]
+            role_id  = user[2]
+            username = user[3]
 
-                if user[2] == 1:
-                    return redirect("/menu")
-                elif user[2] == 2:
-                    return redirect("/staff/qr")
-                else:
-                    return redirect("/admin/add_menu")
+            table_session_id = session.get("table_session_id")
+            expected_user_id = session.get("expected_user_id")
 
-            return "Invalid username or password"
+            if table_session_id and expected_user_id:
+                # Table is in 'ordered' state — only the owner can log in
+                if user_id != expected_user_id:
+                    flash(
+                        "This table already has an active order in progress. "
+                        "Please wait for it to be completed before placing a new one.",
+                        "warning"
+                    )
+                    return render_template("Sign_In.html")
+                # Correct user — clear the gate
+                session.pop("expected_user_id", None)
+
+            session["user_id"]  = user_id
+            session["role_id"]  = role_id
+            session["username"] = username
+
+            if role_id == 1:
+                return redirect("/menu")
+            elif role_id == 2:
+                return redirect("/staff/qr")
+            else:
+                return redirect("/admin/add_menu")
 
         return render_template("Sign_In.html")
 
     @app.route("/logout")
     def logout():
-        username = session.get("username")  # ✅ grab before clearing
+        username = session.get("username")
+        # Preserve table session across logout so user can log back in
+        table_session_id = session.get("table_session_id")
+        table_number     = session.get("table_number")
         session.clear()
+        if table_session_id:
+            session["table_session_id"] = table_session_id
+            session["table_number"]     = table_number
+            session.modified = True
         response = redirect("/signin")
         response.delete_cookie('session')
         flash(f"Goodbye {username}! You have been logged out.", "success")

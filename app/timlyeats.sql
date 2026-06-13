@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 12, 2026 at 12:34 PM
+-- Generation Time: Jun 13, 2026 at 09:58 AM
 -- Server version: 8.0.35
 -- PHP Version: 8.2.12
 
@@ -80,7 +80,8 @@ CREATE TABLE `orders` (
   `preparation_time` int NOT NULL,
   `status` varchar(50) DEFAULT NULL,
   `total_amount` decimal(10,2) DEFAULT NULL,
-  `session_id` int DEFAULT NULL
+  `session_id` int DEFAULT NULL,
+  `notified` tinyint(1) NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
@@ -137,6 +138,7 @@ CREATE TABLE `review` (
   `user_id` int NOT NULL,
   `item_id` int NOT NULL,
   `rating` int DEFAULT NULL,
+  `tag` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
   `comment` text
 ) ;
 
@@ -163,7 +165,9 @@ CREATE TABLE `table_session` (
   `table_number` int NOT NULL,
   `status` varchar(50) DEFAULT 'active',
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
-  `qr_code` longblob
+  `qr_code` longblob,
+  `closed_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------

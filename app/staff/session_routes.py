@@ -1,9 +1,10 @@
 import qrcode
 import os
-from flask import jsonify, redirect, render_template, request, flash
-
+from flask import jsonify, redirect, render_template, request, flash, session
+from app.extensions import socketio
 
 def register_session_routes(app, mysql):
+
     # 🔹 PRINT QR PAGE
     @app.route('/staff/print/<int:session_id>')
     def print_qr(session_id):
@@ -29,18 +30,16 @@ def register_session_routes(app, mysql):
             qr_code=f"qrcodes/session_{session_id}.png"
         )
 
-    # ==========================================================
-    # GET ALL ACTIVE SESSIONS (Excludes closed/inactive rows)
-    # ==========================================================
+    # =========================
+    # GET ALL SESSIONS
+    # =========================
     @app.route('/staff/sessions')
     def get_sessions():
         cursor = mysql.connection.cursor()
 
-        # Added WHERE clause so old closed sessions disappear from your live dashboards
         cursor.execute("""
             SELECT session_id, table_number, status, created_at
             FROM Table_Session
-            WHERE LOWER(status) = 'active'
             ORDER BY session_id DESC
         """)
 
@@ -57,30 +56,42 @@ def register_session_routes(app, mysql):
 
         return jsonify(data)
 
+
     # =========================
     # QR PAGE
     # =========================
     @app.route('/staff/qr')
     def staff_qr_page():
-        return render_template('EmpQR.html')
+        user_id = session.get('user_id')
+        cursor = mysql.connection.cursor()
+        cursor.execute("SELECT username FROM user WHERE user_id = %s", (user_id,))
+        user = cursor.fetchone()
+        cursor.close()
 
-    # ==========================================================
-    # START SESSION (Overwrites previous session to prevent duplicates)
-    # ==========================================================
+        return render_template("EmpQR.html", staff_name=user)
+
+
+    # =========================
+    # START SESSION (UPDATED)
+    # =========================
     @app.route('/staff/start-session/<int:table_number>', methods=['POST'])
     def start_session(table_number):
         cursor = mysql.connection.cursor()
 
-        # 🔄 AUTOMATIC OVERWRITE: Deactivate any existing active sessions for this table first
-        # This keeps your history safe for analytics but clears it from active views
+        # 🔴 NEW PART: CHECK IF ACTIVE SESSION EXISTS
         cursor.execute("""
-            UPDATE Table_Session 
-            SET status = 'closed' 
-            WHERE table_number = %s AND status = 'active'
+            SELECT * FROM Table_Session
+            WHERE table_number=%s AND status='active'
         """, (table_number,))
-        mysql.connection.commit()
 
-        # 🟢 SAFELY CREATE FRESH NEW ACTIVE SESSION
+        existing = cursor.fetchone()
+
+        if existing:
+            return jsonify({
+                "message": "Table already has an active session"
+            }), 400
+
+        # 🟢 CREATE NEW SESSION
         cursor.execute("""
             INSERT INTO Table_Session (table_number, status)
             VALUES (%s, 'active')
@@ -117,36 +128,55 @@ def register_session_routes(app, mysql):
         mysql.connection.commit()
 
         return jsonify({
-            "message": "Session started successfully",
+            "message": "Session started",
             "session_id": session_id,
             "qr_code": public_path
         })
+    
 
     # =========================
     # CLOSE SESSION
     # =========================
     @app.route('/staff/close-session/<int:session_id>', methods=['POST'])
     def close_session(session_id):
+
         cursor = mysql.connection.cursor()
 
-        # Double check if any open orders remain unfinished
+        # check unfinished orders
         cursor.execute("""
             SELECT COUNT(*)
             FROM orders
             WHERE session_id = %s
             AND LOWER(COALESCE(status, '')) NOT IN ('ready')
         """, (session_id,))
+
         open_order_count = cursor.fetchone()[0]
 
         if open_order_count:
             cursor.close()
-            flash("Finish all orders before closing this session.", "warning")
-            return redirect(request.referrer or '/staff/orders')
 
-        # Setting status to 'closed' drops it out of 'active' live feeds instantly
-        cursor.execute("UPDATE Table_Session SET status='closed' WHERE session_id=%s", (session_id,))
+            flash(
+                "Finish all orders before closing this session.",
+                "warning"
+            )
+
+            return redirect(request.referrer)
+
+        # close session
+        cursor.execute("""
+            UPDATE Table_Session
+            SET status='closed'
+            WHERE session_id=%s
+        """, (session_id,))
+
         mysql.connection.commit()
         cursor.close()
 
+        # REAL-TIME notification to customer
+        socketio.emit("session_closed", {
+            "session_id": session_id
+        })
+
         flash("Session closed successfully.", "success")
-        return redirect(request.referrer or '/staff/orders')
+
+        return redirect(request.referrer)
