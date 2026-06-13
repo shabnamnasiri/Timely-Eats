@@ -125,7 +125,10 @@ def get_table_report(mysql):
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     cursor.execute(
         """
-        SELECT COUNT(*) AS total_tables FROM restaurant_table
+        SELECT GREATEST(
+            (SELECT COUNT(*) FROM restaurant_table),
+            (SELECT COUNT(DISTINCT table_number) FROM table_session)
+        ) AS total_tables
         """
     )
     table_meta = cursor.fetchone()
@@ -255,19 +258,25 @@ def register_admin_report_routes(app, mysql):
         cursor.execute(
             """
             SELECT
-                rt.table_number,
-                rt.qr_status,
+                tc.table_number,
+                COALESCE(rt.qr_status, 'inactive') AS qr_status,
                 ts.session_id,
                 ts.status AS session_status,
                 COUNT(o.order_id) AS order_count,
                 COALESCE(SUM(o.total_amount), 0) AS running_total
-            FROM restaurant_table rt
+            FROM (
+                SELECT table_number FROM restaurant_table
+                UNION
+                SELECT table_number FROM table_session
+            ) AS tc
+            LEFT JOIN restaurant_table rt
+                ON rt.table_number = tc.table_number
             LEFT JOIN table_session ts
-                ON ts.table_number = rt.table_number
+                ON ts.table_number = tc.table_number
                AND LOWER(COALESCE(ts.status, '')) IN ('active', 'ordered')
             LEFT JOIN orders o ON o.session_id = ts.session_id
-            GROUP BY rt.table_number, rt.qr_status, ts.session_id, ts.status
-            ORDER BY rt.table_number ASC
+            GROUP BY tc.table_number, rt.qr_status, ts.session_id, ts.status
+            ORDER BY tc.table_number ASC
             """
         )
         tables = cursor.fetchall()

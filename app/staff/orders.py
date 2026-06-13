@@ -2,6 +2,7 @@ from datetime import datetime
 from flask import flash, redirect, render_template, request, session
 import MySQLdb.cursors
 from app.extensions import socketio, mysql
+
 def require_staff():
     """Block access if user is not logged in or not a staff member."""
     if "user_id" not in session:
@@ -22,8 +23,8 @@ def get_orders(mysql):
             p.payment_status, p.payment_method,
             i.name AS item_name, od.quantity, od.customization_note
         FROM orders o
-        LEFT JOIN User u ON u.user_id = o.user_id
-        LEFT JOIN Table_Session ts ON ts.session_id = o.session_id
+        LEFT JOIN user u ON u.user_id = o.user_id
+        LEFT JOIN table_session ts ON ts.session_id = o.session_id
         LEFT JOIN payment p ON p.order_id = o.order_id
         LEFT JOIN order_details od ON od.order_id = o.order_id
         LEFT JOIN item i ON i.item_id = od.item_id
@@ -78,7 +79,7 @@ def get_sessions(mysql):
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     cursor.execute("""
         SELECT ts.session_id, ts.table_number, ts.status, COUNT(o.order_id) AS order_count
-        FROM Table_Session ts
+        FROM table_session ts
         LEFT JOIN orders o ON o.session_id = ts.session_id
         GROUP BY ts.session_id, ts.table_number, ts.status
         ORDER BY ts.table_number ASC
@@ -86,7 +87,10 @@ def get_sessions(mysql):
     rows = cursor.fetchall()
     cursor.close()
 
-    active_sessions = [r for r in rows if (r["status"] or "").strip().lower() == "active"]
+    active_sessions = [
+        r for r in rows
+        if (r["status"] or "").strip().lower() in ("active", "ordered")
+    ]
     closed_sessions = [r for r in rows if (r["status"] or "").strip().lower() == "closed"]
     return active_sessions, closed_sessions
 
@@ -169,7 +173,7 @@ def register_staff_order_routes(app, mysql):
         cursor.execute("""
             SELECT o.session_id, ts.status AS session_status
             FROM orders o
-            JOIN Table_Session ts ON ts.session_id = o.session_id
+            JOIN table_session ts ON ts.session_id = o.session_id
             WHERE o.order_id = %s
         """, (order_id,))
         session_row = cursor.fetchone()
@@ -189,7 +193,7 @@ def register_staff_order_routes(app, mysql):
             if counts and counts["total"] > 0 and counts["total"] == counts["ready_count"]:
                 # Step 3: All orders are ready — close the session
                 cursor.execute("""
-                    UPDATE Table_Session SET status = 'closed' WHERE session_id = %s
+                    UPDATE table_session SET status = 'closed' WHERE session_id = %s
                 """, (session_id,))
                 mysql.connection.commit()
         # ──────────────────────────────────────────────────────────────────────────
