@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 11, 2026 at 01:25 PM
+-- Generation Time: Jun 13, 2026 at 09:58 AM
 -- Server version: 8.0.35
 -- PHP Version: 8.2.12
 
@@ -80,7 +80,8 @@ CREATE TABLE `orders` (
   `preparation_time` int NOT NULL,
   `status` varchar(50) DEFAULT NULL,
   `total_amount` decimal(10,2) DEFAULT NULL,
-  `session_id` int DEFAULT NULL
+  `session_id` int DEFAULT NULL,
+  `notified` tinyint(1) NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
