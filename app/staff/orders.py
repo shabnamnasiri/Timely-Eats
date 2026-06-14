@@ -177,7 +177,7 @@ def register_staff_order_routes(app, mysql):
             sessions=sessions,
             closed_sessions=closed_sessions,
             staff_name=session.get("username", "Staff"),
-            allowed_statuses=["pending", "preparing", "ready", "closed"],
+            allowed_statuses=["pending", "preparing", "ready"],
         )
 
     @app.route("/staff/orders/update", methods=["POST"])
