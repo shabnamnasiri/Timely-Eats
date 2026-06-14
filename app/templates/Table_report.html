@@ -1,16 +1,13 @@
+{% from 'macros/admin_sidebar.html' import render_admin_sidebar %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Table Report Analytics | TimelyEats</title>
-
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-
-    <link rel="stylesheet" href="../static/css/Revenue.css">
-
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Revenue.css') }}">
     <script src="https://cdn.tailwindcss.com"></script>
-
     <style>
         .search-input {
             background: var(--canvas);
@@ -20,14 +17,7 @@
             font-size: 11px;
             width: 280px;
             outline: none;
-            transition: all 0.2s ease;
         }
-        .search-input:focus {
-            border-color: var(--accent-strong);
-            background: #fff;
-            width: 320px;
-        }
-
         .table-toolbar {
             display: flex;
             align-items: center;
@@ -37,43 +27,13 @@
             border-bottom: 1px solid var(--rule);
             gap: 20px;
         }
-        
-        .toolbar-select {
-            background: transparent;
-            font-family: 'DM Mono', monospace;
-            font-size: 10px;
-            text-transform: uppercase;
-            border: 1px solid var(--rule);
-            padding: 6px 12px;
-            outline: none;
-            cursor: pointer;
-        }
-
-        .pagination {
-            display: flex;
-            gap: 5px;
-            margin-top: 24px;
-            justify-content: center;
-        }
-        .page-link {
-            padding: 8px 16px;
-            border: 1px solid var(--rule);
-            background: var(--paper);
-            font-family: 'DM Mono', monospace;
-            font-size: 10px;
-            text-transform: uppercase;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .page-link.active {
-            background: var(--ink);
-            color: var(--paper);
-        }
     </style>
 </head>
-
 <body class="bg-[var(--canvas)]">
 
+<<<<<<< Updated upstream
+{{ render_admin_sidebar('table_report', user) }}
+=======
 <aside class="sidebar hidden lg:flex lg:flex-col">
     <div class="sidebar-logo">
         <b>Timely<span style="color:#c8933a;">Eats</span></b>
@@ -83,13 +43,13 @@
     <div class="sidebar-section">Menu</div>
     <ul class="sidebar-nav">
         <li><a href="/admin/add_menu"><i class="ico">▤</i> Menu Items</a></li>
-        <li><a href="Categories.html"><i class="ico">⊞</i> Categories</a></li>
+        
     </ul>
 
     <div class="sidebar-section">Live Feed</div>
     <ul class="sidebar-nav">
         <li><a href="/admin/orders"><i class="ico">⊙</i> Orders</a></li>
-        <li><a href="/admin//admin/tables"><i class="ico">◫</i> Tables</a></li>
+        <li><a href="/admin/tables"><i class="ico">◫</i> Tables</a></li>
     </ul>
 
     <div class="sidebar-section">Users</div>
@@ -111,168 +71,80 @@
     <a href="/logout" class="sidebar-logout">⏻ Logout</a>
   </div>
 </aside>
+>>>>>>> Stashed changes
 
 <main class="main flex-1 min-w-0">
-
     <header class="topbar">
         <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
                           <button class="sidebar-toggle" id="sidebarToggle" aria-label="Open menu">&#9776;</button>
 
         <h1>Table Analytics</h1>
-        <div class="flex gap-4">
-            <button class="px-4 py-2 bg-[var(--ink)] text-[var(--paper)] font-['Bebas_Neue'] text-lg tracking-wide hover:bg-[var(--accent-strong)] transition-all">
-                Export CSV
-            </button>
-            <button class="px-4 py-2 border border-[var(--rule)] font-['Bebas_Neue'] text-lg tracking-wide hover:bg-white transition-all">
-                Print PDF
-            </button>
-        </div>
+        <p class="font-mono text-[10px] text-[var(--mist)] uppercase mt-1">Metrics from closed orders per table session</p>
     </header>
 
     <div class="content block">
         <section class="max-w-6xl mx-auto">
             <span class="label">Table Usage Overview</span>
-            
+
             <div class="stats grid grid-cols-2 md:grid-cols-4 gap-[2px] mb-8">
-                <div class="stat">
-                    <dt>Total Tables</dt>
-                    <dd>24</dd>
-                </div>
-                <div class="stat">
-                    <dt>Active Tables</dt>
-                    <dd>18</dd>
-                </div>
-                <div class="stat">
-                    <dt>Most Used</dt>
-                    <dd>#07</dd>
-                </div>
-                <div class="stat">
-                    <dt>Avg Turnover</dt>
-                    <dd>42<span>m</span></dd>
-                </div>
+                <div class="stat"><dt>Total Tables</dt><dd>{{ stats.total_tables }}</dd></div>
+                <div class="stat"><dt>Active Sessions</dt><dd>{{ stats.active_tables }}</dd></div>
+                <div class="stat"><dt>Most Used</dt><dd>#{{ stats.most_used }}</dd></div>
+                <div class="stat"><dt>Avg Prep</dt><dd>{{ stats.avg_turnover }}<span>m</span></dd></div>
             </div>
 
             <div class="panel !p-0 overflow-hidden shadow-sm">
-                
                 <div class="table-toolbar">
-                    <div class="flex items-center gap-4">
-                        <input type="text" placeholder="SEARCH BY TABLE ID..." class="search-input">
-                    </div>
-
-                    <div class="flex gap-4 items-center">
-                        <div class="flex items-center gap-2">
-                            <span class="font-mono text-[9px] text-[var(--mist)] uppercase">Status:</span>
-                            <select class="toolbar-select">
-                                <option>All Tables</option>
-                                <option>Active</option>
-                                <option>Idle</option>
-                                <option>Reserved</option>
-                            </select>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <span class="font-mono text-[9px] text-[var(--mist)] uppercase">Category Focus:</span>
-                            <select class="toolbar-select">
-                                <option>All Categories</option>
-                                <option>Mains</option>
-                                <option>Starters</option>
-                                <option>Drinks</option>
-                            </select>
-                        </div>
-                    </div>
+                    <input type="text" id="tableSearch" placeholder="SEARCH BY TABLE NUMBER..." class="search-input">
                 </div>
 
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
                         <thead>
                             <tr class="border-b border-[var(--rule)]">
-                                <th class="py-4 px-8 font-mono text-[9px] uppercase tracking-widest text-[var(--mist)]">ID</th>
+                                <th class="py-4 px-8 font-mono text-[9px] uppercase tracking-widest text-[var(--mist)]">Table</th>
                                 <th class="py-4 px-8 font-mono text-[9px] uppercase tracking-widest text-[var(--mist)]">Primary Focus</th>
-                                <th class="py-4 px-8 font-mono text-[9px] uppercase tracking-widest text-[var(--mist)] text-center">Orders</th>
-                                <th class="py-4 px-8 font-mono text-[9px] uppercase tracking-widest text-[var(--mist)]">Avg Time</th>
-                                <th class="py-4 px-8 font-mono text-[9px] uppercase tracking-widest text-[var(--mist)]">Efficiency</th>
+                                <th class="py-4 px-8 font-mono text-[9px] uppercase tracking-widest text-[var(--mist)] text-center">Closed Orders</th>
+                                <th class="py-4 px-8 font-mono text-[9px] uppercase tracking-widest text-[var(--mist)] text-right">Revenue</th>
+                                <th class="py-4 px-8 font-mono text-[9px] uppercase tracking-widest text-[var(--mist)]">Avg Prep</th>
+                                <th class="py-4 px-8 font-mono text-[9px] uppercase tracking-widest text-[var(--mist)]">Volume</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-[var(--rule)]">
-                            <tr class="hover:bg-[#fcfaf7] transition-colors group">
-                                <td class="py-5 px-8 font-['Bebas_Neue'] text-xl tracking-wide">Table 01</td>
-                                <td class="py-5 px-8 text-sm text-[var(--ink-soft)] uppercase font-medium">Mains</td>
-                                <td class="py-5 px-8 text-center font-mono text-sm font-bold">12</td>
-                                <td class="py-5 px-8 font-mono text-xs text-[var(--mist)]">38m</td>
+                            {% for table in tables %}
+                            <tr class="hover:bg-[#fcfaf7] transition-colors table-row">
+                                <td class="py-5 px-8 font-['Bebas_Neue'] text-xl tracking-wide table-num">Table {{ table.table_number }}</td>
+                                <td class="py-5 px-8 text-sm text-[var(--ink-soft)] uppercase font-medium">{{ table.primary_category }}</td>
+                                <td class="py-5 px-8 text-center font-mono text-sm font-bold">{{ table.order_count }}</td>
+                                <td class="py-5 px-8 text-right font-mono text-sm">${{ "%.2f"|format(table.revenue) }}</td>
+                                <td class="py-5 px-8 font-mono text-xs text-[var(--mist)]">{{ table.avg_prep|round|int }}m</td>
                                 <td class="py-5 px-8">
                                     <div class="w-full bg-[var(--canvas)] h-1.5 w-32">
-                                        <div class="bg-[var(--ink)] h-full" style="width: 75%"></div>
+                                        <div class="bg-[var(--ink)] h-full" style="width: {{ table.efficiency }}%"></div>
                                     </div>
                                 </td>
                             </tr>
-                            <tr class="hover:bg-[#fcfaf7] transition-colors group">
-                                <td class="py-5 px-8 font-['Bebas_Neue'] text-xl tracking-wide">Table 02</td>
-                                <td class="py-5 px-8 text-sm text-[var(--ink-soft)] uppercase font-medium">Drinks</td>
-                                <td class="py-5 px-8 text-center font-mono text-sm font-bold">09</td>
-                                <td class="py-5 px-8 font-mono text-xs text-[var(--mist)]">22m</td>
-                                <td class="py-5 px-8">
-                                    <div class="w-full bg-[var(--canvas)] h-1.5 w-32">
-                                        <div class="bg-[var(--ink)] h-full" style="width: 40%"></div>
-                                    </div>
-                                </td>
+                            {% else %}
+                            <tr>
+                                <td colspan="6" class="py-8 px-8 text-center font-mono text-sm text-[var(--mist)]">No table session data yet.</td>
                             </tr>
-                            <tr class="hover:bg-[#fcfaf7] transition-colors group">
-                                <td class="py-5 px-8 font-['Bebas_Neue'] text-xl tracking-wide text-[var(--accent-strong)]">Table 07</td>
-                                <td class="py-5 px-8 text-sm text-[var(--ink-soft)] uppercase font-medium">Starters</td>
-                                <td class="py-5 px-8 text-center font-mono text-sm font-bold">18</td>
-                                <td class="py-5 px-8 font-mono text-xs text-[var(--mist)]">45m</td>
-                                <td class="py-5 px-8">
-                                    <div class="w-full bg-[var(--canvas)] h-1.5 w-32">
-                                        <div class="bg-[var(--accent-strong)] h-full" style="width: 95%"></div>
-                                    </div>
-                                </td>
-                            </tr>
+                            {% endfor %}
                         </tbody>
                     </table>
                 </div>
             </div>
-
-            <div class="pagination pb-10">
-                <button class="page-link">← Prev</button>
-                <button class="page-link active">1</button>
-                <button class="page-link">2</button>
-                <button class="page-link">3</button>
-                <button class="page-link">Next →</button>
-            </div>
         </section>
     </div>
 </main>
+
 <script>
-(function () {
-  const sidebar  = document.querySelector('.sidebar');
-  const backdrop = document.querySelector('.sidebar-backdrop');
-  const toggle   = document.querySelector('.sidebar-toggle');
-
-  if (!sidebar || !backdrop || !toggle) return;
-
-  function openSidebar() {
-    sidebar.classList.add('open');
-    backdrop.classList.add('open');
-    document.body.style.overflow = 'hidden';
-  }
-
-  function closeSidebar() {
-    sidebar.classList.remove('open');
-    backdrop.classList.remove('open');
-    document.body.style.overflow = '';
-  }
-
-  toggle.addEventListener('click', openSidebar);
-  backdrop.addEventListener('click', closeSidebar);
-
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape') closeSidebar();
-  });
-
-  sidebar.querySelectorAll('a').forEach(function (link) {
-    link.addEventListener('click', function () {
-      if (window.innerWidth < 1024) closeSidebar();
+document.getElementById("tableSearch")?.addEventListener("input", (e) => {
+    const q = e.target.value.toLowerCase();
+    document.querySelectorAll(".table-row").forEach(row => {
+        const num = row.querySelector(".table-num")?.textContent.toLowerCase() || "";
+        row.style.display = num.includes(q) ? "" : "none";
     });
-  });
-})();</script>
+});
+</script>
 </body>
 </html>

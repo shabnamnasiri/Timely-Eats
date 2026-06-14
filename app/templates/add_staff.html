@@ -1,5 +1,7 @@
 {% from 'macros/toast.html' import render_toast %}
 {% from 'macros/toast_script.html' import render_toast_script %}
+{% from 'macros/admin_sidebar.html' import render_admin_sidebar %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -15,17 +17,20 @@
 </head>
 <body>
 
-<div id="sidebarBackdrop"></div>
+{{ render_admin_sidebar('staff', user) }}
 
-<aside class="sidebar" id="sidebar">
-  <div class="sidebar-logo">
-    <b>Timely<span style="color: #f0b347;">Eats</span></b>
-    <small>Admin Pane</small>
+<main class="main">
+<header class="topbar">
+  <div style="display:flex; align-items:center; gap:12px;">
+    <button class="sidebar-toggle" id="sidebarToggle" aria-label="Open menu">&#9776;</button>
+    <h1>Staff Directory</h1>
   </div>
+<<<<<<< Updated upstream
+=======
   <div class="sidebar-section">Menu</div>
   <ul class="sidebar-nav">
     <li><a href="/admin/add_menu"><i class="ico">▤</i> Menu Items</a></li>
-    <li><a href="/admin/categories"><i class="ico">⊞</i> Categories</a></li>
+    
   </ul>
   <div class="sidebar-section">Live Feed</div>
   <ul class="sidebar-nav">
@@ -67,53 +72,119 @@
   </header>
 
   {{ render_toast() }}
+>>>>>>> Stashed changes
 
   <div class="content">
-    <section style="flex:2; min-width:0;">
-      <div class="panel">
-        <span class="label">Kitchen Workforce</span>
-        <h2 class="panel-title">Staff (Paginated View)</h2>
 
-        <input id="searchInput" type="text" placeholder="Search staff by username…"
-          style="width:100%; margin-bottom:15px; padding:10px; border:1px solid var(--rule); background:transparent; font-family:'DM Mono'; color:var(--ink);">
+    <!-- LEFT: STAFF LIST -->
+    <div class="list-panel">
+      <span class="label">Current Workers</span>
 
-        <div class="item-row" style="opacity:0.7; font-weight:600; background:transparent; border-color:transparent; pointer-events:none;">
-          <div class="item-info"><strong>Staff Member</strong><span>Phone Identification</span></div>
-          <div style="display:flex; gap:10px; font-family:'DM Mono'; font-size:11px; color:var(--mist); padding-right:15px;"><span>Actions</span></div>
+      <div class="item-list" id="item-list">
+        {% if staffs %}
+          {% for staff in staffs %}
+          <div class="item-row" style="--i:{{ loop.index0 }}">
+
+            <!-- Role / Category -->
+            <span class="item-cat">{{ staff[0] }}</span>
+
+            <!-- Info -->
+            <div class="item-info">
+              <strong>{{ staff[1] }}</strong> <!-- Username -->
+              <span>{{ staff[2] }}</span> <!-- Phone -->
+            </div>
+
+            <!-- Role label -->
+            <span class="item-price">Staff</span>
+
+            <div class="item-actions">
+              <button class="btn-icon"
+                onclick="openEditModal({{ staff[0] }}, '{{ staff[1]|replace("'", "\\'") }}', '{{ staff[2] }}')">
+                Edit
+              </button>
+              <form action="/delete_staff/{{ staff[0] }}" method="POST" style="display:inline">
+                <button type="submit" class="btn-icon del">Delete</button>
+              </form>
+            </div>
+
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="empty">
+            <b>No Staff Added Yet</b>
+            <span>Use the form to add first staff.</span>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- RIGHT: ADD STAFF FORM -->
+       {{ render_toast() }}  
+    <div class="form-panel">
+      <div class="form-divider"></div>
+
+      <h2>Add Staff</h2>
+      <p>Fill in the details below to add a new staff member.</p>
+
+
+      <form method="POST" action="/admin/add_new_staff" autocomplete="off">
+
+        <!-- Username -->
+        <div class="field">
+          <label for="username">Username</label>
+          <input 
+            type="text"
+            id="username"
+            name="username"
+            placeholder="JaneSmith"
+            required
+            autocomplete="username"
+            value="{{ form_data.username if form_data and form_data.username }}"
+          />
         </div>
 
-        <div id="tableBody"></div>
-        <div id="pagination" style="display:flex; gap:8px; margin-top:20px; justify-content:center;"></div>
-      </div>
-    </section>
+        <!-- Phone -->
+        <div class="field">
+          <label for="phone">Phone Number</label>
+          <input 
+            type="tel"
+            id="phone"
+            name="phone"
+            placeholder="+1 (000) 000-0000"
+            autocomplete="tel"
+            value="{{ form_data.phone if form_data and form_data.phone }}"
+          />
+        </div>
 
-    <aside class="side-panel" style="width:340px; flex-shrink:0;">
-      <span class="label">Admin Tools</span>
-      <h2 class="panel-title">Add Staff</h2>
-      <div class="insight" style="pointer-events:none;">
-        <small>Security Constraint</small>
-        <strong>Passwords require minimum 8 characters with numbers and symbols.</strong>
-      </div>
-      <form method="POST" action="/admin/add_new_staff" autocomplete="off"
-        style="display:flex; flex-direction:column; gap:12px; margin-top:15px;">
-        <label>Username</label>
-        <input type="text" name="username" placeholder="Username" required
-          style="width:100%; padding:10px; border:1px solid var(--rule); background:transparent; font-family:'DM Mono'; font-size:12px; color:var(--ink);"
-          value="{{ form_data.username if form_data and form_data.username }}">
-        <label>Phone Number</label>
-        <input type="tel" name="phone" placeholder="+12025550143" required
-          style="width:100%; padding:10px; border:1px solid var(--rule); background:transparent; font-family:'DM Mono'; font-size:12px; color:var(--ink);"
-          value="{{ form_data.phone if form_data and form_data.phone }}">
-        <label>Password</label>
-        <input type="password" name="password" placeholder="Account Password" required
-          style="width:100%; padding:10px; border:1px solid var(--rule); background:transparent; font-family:'DM Mono'; font-size:12px; color:var(--ink);">
-        <label>Confirm Password</label>
-        <input type="password" name="confirm_password" placeholder="Confirm Password" required
-          style="width:100%; padding:10px; border:1px solid var(--rule); background:transparent; font-family:'DM Mono'; font-size:12px; color:var(--ink);">
-        <button type="submit" class="date-select-btn"
-          style="margin-top:10px; justify-content:center; cursor:pointer; background:var(--ink); color:var(--paper); font-weight:bold;">
-          + Create Staff
-        </button>
+        <!-- Password -->
+        <div class="field">
+          <label for="password">Password</label>
+          <input 
+            type="password"
+            id="password"
+            name="password"
+            placeholder="••••••••"
+            required
+            autocomplete="new-password"
+          />
+          <p class="hint">Minimum 8 characters, including a number and symbol.</p>
+        </div>
+
+        <!-- Confirm Password -->
+        <div class="field">
+          <label for="confirm">Confirm Password</label>
+          <input 
+            type="password"
+            id="confirm"
+            name="confirm_password"
+            placeholder="••••••••"
+            required
+            autocomplete="new-password"
+          />
+        </div>
+
+        <button type="submit" class="btn-submit">+ Add Staff</button>
+
       </form>
     </aside>
   </div>

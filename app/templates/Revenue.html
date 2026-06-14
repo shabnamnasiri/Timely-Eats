@@ -1,17 +1,14 @@
+{% from 'macros/admin_sidebar.html' import render_admin_sidebar %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Revenue Report | TimelyEats</title>
-
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Mono:wght@300;400&family=Bebas+Neue&display=swap" rel="stylesheet">
-
   <link rel="stylesheet" href="{{ url_for('static', filename='css/Revenue.css') }}">
   <script src="https://cdn.tailwindcss.com"></script>
-
   <style>
-    /* Internal Panel Search/Filter UI */
     .panel-toolbar {
       display: flex;
       align-items: center;
@@ -19,9 +16,8 @@
       padding: 12px 20px;
       background: #faf9f6;
       border-bottom: 1px solid var(--rule);
-      margin: -24px -24px 24px -24px; /* Flushed with panel edges */
+      margin: -24px -24px 24px -24px;
     }
-
     .inline-search {
       background: var(--canvas);
       border: 1px solid var(--rule);
@@ -31,22 +27,7 @@
       width: 200px;
       outline: none;
     }
-
-    .inline-select {
-      background: transparent;
-      font-family: 'DM Mono', monospace;
-      font-size: 10px;
-      text-transform: uppercase;
-      border: 1px solid var(--rule);
-      padding: 5px 10px;
-      cursor: pointer;
-    }
-
-    /* Custom Table Style for Best Sellers */
-    .seller-table {
-      width: 100%;
-      border-collapse: collapse;
-    }
+    .seller-table { width: 100%; border-collapse: collapse; }
     .seller-table th {
       font-family: 'DM Mono', monospace;
       font-size: 9px;
@@ -65,6 +46,9 @@
 
 <body class="bg-[var(--canvas)]">
 
+<<<<<<< Updated upstream
+{{ render_admin_sidebar('revenue', user) }}
+=======
 <aside class="sidebar hidden lg:flex lg:flex-col">
   <div class="sidebar-logo">
       <b>Timely<span style="color: #c8933a;">Eats</span></b>
@@ -73,12 +57,12 @@
   <div class="sidebar-section">Menu</div>
   <ul class="sidebar-nav">
     <li><a href="/admin/add_menu"><i class="ico">▤</i> Menu Items</a></li>
-    <li><a href="/admin/add_staff"><i class="ico">⊞</i> Categories</a></li>
+
   </ul>
   <div class="sidebar-section">Live_feed</div>
   <ul class="sidebar-nav">
     <li><a href="/admin/orders"><i class="ico">⊙</i> Orders</a></li>
-    <li><a href="/admin//admin/tables"><i class="ico">◫</i> Tables</a></li>
+    <li><a href="/admin/tables"><i class="ico">◫</i> Tables</a></li>
   </ul>
   <div class="sidebar-section">Users</div>
   <ul class="sidebar-nav">
@@ -99,6 +83,7 @@
   </div>
 </aside>
 <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+>>>>>>> Stashed changes
 
 <main class="main flex-1 min-w-0">
   <header class="topbar">
@@ -120,29 +105,12 @@
       </div>
 
       <div class="panel shadow-sm">
-
         <div class="panel-toolbar">
           <div class="flex items-center gap-3">
-            <span class="label !mb-0">Sales Data</span>
+            <span class="label !mb-0">Product Performance</span>
             <input type="text" id="itemSearch" placeholder="FILTER ITEMS..." class="inline-search">
           </div>
-
-          <div class="flex gap-2">
-            <select class="inline-select">
-              <option>Today</option>
-              <option>Yesterday</option>
-              <option>Last 7 Days</option>
-            </select>
-            <select class="inline-select">
-              <option>All Categories</option>
-              {% for cat in items|map(attribute='category')|reject('none')|unique %}
-              <option>{{ cat }}</option>
-              {% endfor %}
-            </select>
-          </div>
         </div>
-
-        <div class="panel-title">Product Performance</div>
 
         <table class="seller-table">
           <thead>
@@ -173,21 +141,11 @@
             {% endfor %}
           </tbody>
         </table>
-
-        <div class="mt-6 pt-4 border-t border-[var(--rule)] flex justify-between items-center">
-            <div class="font-mono text-[10px] text-[var(--mist)] uppercase">
-                Showing {{ items|length }} of {{ items|length }} items
-            </div>
-            <div class="flex gap-1">
-                <button class="px-3 py-1 border border-[var(--rule)] font-mono text-[9px] hover:bg-[var(--canvas)]">PREV</button>
-                <button class="px-3 py-1 border border-[var(--rule)] font-mono text-[9px] hover:bg-[var(--canvas)]">NEXT</button>
-            </div>
-        </div>
       </div>
-
     </div>
   </div>
 </main>
+
 <script>
 document.getElementById("itemSearch")?.addEventListener("input", (e) => {
     const q = e.target.value.toLowerCase();
@@ -196,39 +154,6 @@ document.getElementById("itemSearch")?.addEventListener("input", (e) => {
         row.style.display = name.includes(q) ? "" : "none";
     });
 });
-
-(function () {
-  const sidebar  = document.querySelector('.sidebar');
-  const backdrop = document.querySelector('.sidebar-backdrop');
-  const toggle   = document.querySelector('.sidebar-toggle');
-
-  if (!sidebar || !backdrop || !toggle) return;
-
-  function openSidebar() {
-    sidebar.classList.add('open');
-    backdrop.classList.add('open');
-    document.body.style.overflow = 'hidden';
-  }
-
-  function closeSidebar() {
-    sidebar.classList.remove('open');
-    backdrop.classList.remove('open');
-    document.body.style.overflow = '';
-  }
-
-  toggle.addEventListener('click', openSidebar);
-  backdrop.addEventListener('click', closeSidebar);
-
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape') closeSidebar();
-  });
-
-  sidebar.querySelectorAll('a').forEach(function (link) {
-    link.addEventListener('click', function () {
-      if (window.innerWidth < 1024) closeSidebar();
-    });
-  });
-})();
 </script>
 </body>
 </html>

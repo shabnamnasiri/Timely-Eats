@@ -1,5 +1,6 @@
 {% from 'macros/toast.html' import render_toast %}
 {% from 'macros/toast_script.html' import render_toast_script %}
+{% from 'macros/admin_sidebar.html' import render_admin_sidebar %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -18,6 +19,14 @@
 <!-- Backdrop OUTSIDE sidebar, BEFORE it -->
 <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
+<<<<<<< Updated upstream
+{{ render_admin_sidebar('menu', user) }}
+=======
+<body class="overflow-x-hidden">
+
+<!-- Backdrop OUTSIDE sidebar, BEFORE it -->
+<div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
 <aside id="sidebar" class="sidebar">
   <div class="sidebar-logo">
     <b>Timely<span style="color: #f0b347;">Eats</span></b>
@@ -27,7 +36,7 @@
   <div class="sidebar-section">Menu</div>
   <ul class="sidebar-nav flex-1">
     <li><a href="/admin/add_menu" class="active"><i class="ico">▤</i> Menu Items</a></li>
-    <li><a href="Categories.html"><i class="ico">⊞</i> Categories</a></li>
+    
   </ul>
 
   <div class="sidebar-section">Live Feed</div>
@@ -56,6 +65,7 @@
     <a href="/logout" class="sidebar-logout">⏻ Logout</a>
   </div>
 </aside>
+>>>>>>> Stashed changes
 
 <div class="main">
 
@@ -129,16 +139,26 @@
                 <button type="submit" class="btn-icon del">Delete</button>
               </form>
             </div>
+
           </div>
+          {% endfor %}
+        {% else %}
+          <div class="empty">
+            <b>No Items Yet</b>
+            <span>Use the form to add your first menu item.</span>
+          </div>
+<<<<<<< Updated upstream
+=======
 
         </div>
-        {% endfor %}
+      {% endfor %}
 
         {% if not items %}
         <div class="empty text-center p-5 col-span-full">
           <b>No Items Yet</b>
           <div class="text-muted">Add your first menu item.</div>
         </div>
+>>>>>>> Stashed changes
         {% endif %}
       </div>
     </div>

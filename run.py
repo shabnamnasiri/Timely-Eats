@@ -2,7 +2,7 @@ import os
 import pymysql
 pymysql.install_as_MySQLdb()
 
-from flask import Flask, session
+from flask import Flask, send_from_directory, session
 from flask_socketio import join_room
 
 from app.extensions import socketio, mysql
@@ -14,19 +14,19 @@ from app.extensions import socketio, mysql
 template_path = os.path.join(
     os.path.dirname(os.path.abspath(__file__)),
     "app",
-    "templates"
+    "templates",
 )
 
 static_path = os.path.join(
     os.path.dirname(os.path.abspath(__file__)),
     "app",
-    "static"
+    "static",
 )
 
 app = Flask(
     __name__,
     template_folder=template_path,
-    static_folder=static_path
+    static_folder=static_path,
 )
 
 app.secret_key = os.getenv("SECRET_KEY", "secret_key_123")
@@ -37,7 +37,7 @@ app.secret_key = os.getenv("SECRET_KEY", "secret_key_123")
 
 app.config["MYSQL_HOST"] = "localhost"
 app.config["MYSQL_USER"] = "root"
-app.config["MYSQL_PASSWORD"] = "22703380"
+app.config["MYSQL_PASSWORD"] = ""
 app.config["MYSQL_DB"] = "timlyeats"
 app.config["MYSQL_PORT"] = 3306
 app.config["MYSQL_AUTOCOMMIT"] = True
@@ -52,7 +52,7 @@ socketio.init_app(
     app,
     manage_session=False,
     cors_allowed_origins="*",
-    async_mode="threading"
+    async_mode="threading",
 )
 
 # =========================
@@ -72,12 +72,15 @@ from app.customer.cart import register_customer_cart_routes
 from app.customer.place_order import register_customer_place_order_routes
 from app.admin.add_menu import register_admin_add_menu_routes
 from app.admin.add_staff import register_admin_add_staff_routes
+from app.admin.list_customer import register_admin_list_customer_routes
+from app.admin.orders import register_admin_order_routes
+from app.admin.reports import register_admin_report_routes
 from app.staff.api.staff_api import register_staff_api
 from app.staff.session_routes import register_session_routes
 from app.staff.orders import (
     register_staff_order_routes,
     get_orders,
-    get_sessions
+    get_sessions,
 )
 # =========================
 # REGISTER ROUTES
@@ -93,6 +96,9 @@ register_customer_cart_routes(app, mysql)
 register_admin_add_menu_routes(app, mysql)
 register_customer_place_order_routes(app, mysql)
 register_admin_add_staff_routes(app, mysql)
+register_admin_list_customer_routes(app, mysql)
+register_admin_order_routes(app, mysql)
+register_admin_report_routes(app, mysql)
 register_staff_api(app, mysql)
 register_session_routes(app, mysql)
 register_staff_order_routes(app, mysql)
@@ -121,9 +127,10 @@ def connect():
     if role_id == 2:
         join_room("staff")
 
-    if role_id == 1:
+    if role_id == 3:
         join_room("admin")
-        
+
+
 # =========================
 # REAL-TIME STAFF DASHBOARD
 # =========================
@@ -134,11 +141,9 @@ def push_staff_dashboard():
 
         try:
             with app.app_context():
-
                 orders = get_orders(mysql)
                 sessions, closed_sessions = get_sessions(mysql)
 
-                # Do not compute average wait time (removed from UI)
                 stats = {
                     "active_orders": len(orders),
                     "pending_orders": sum(
@@ -160,11 +165,12 @@ def push_staff_dashboard():
                         "sessions": sessions,
                         "closed_sessions": closed_sessions,
                     },
-                    to="staff"
+                    to="staff",
                 )
 
         except Exception as e:
             print("[push_staff_dashboard ERROR]", e)
+
 
 # =========================
 # START BACKGROUND TASK
@@ -174,6 +180,7 @@ socketio.start_background_task(push_staff_dashboard)
 
 register_session_expiry_task(app, mysql, socketio)
 register_session_room_events(socketio)
+
 
 # =========================
 # RUN SERVER
