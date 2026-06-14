@@ -22,12 +22,15 @@ def register_admin_add_menu_routes(app, mysql):
         guard = admin_required()
         if guard:
             return guard
-        # Fetch all menu items to display in the admin dashboard
+
         user_id = session.get('user_id')
         cursor = mysql.connection.cursor()
         cursor.execute("SELECT item_id, name, description, preparation_time, price, category FROM item")
         items = cursor.fetchall()
-        user = get_admin_user(mysql)
+
+        # Replace get_admin_user(mysql) with this
+        cursor.execute("SELECT username, email FROM user WHERE user_id = %s", (user_id,))
+        user = cursor.fetchone()
         cursor.close()
 
         return render_template("Add_menu.html", items=items, user=user)
