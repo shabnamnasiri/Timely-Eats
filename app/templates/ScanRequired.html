@@ -21,6 +21,9 @@
     h1 { font-family: 'Bebas Neue', sans-serif; font-size: 3rem; margin: 0 0 0.5rem; color: #c9a96e; }
     p { color: #999; margin: 0 0 2rem; }
     .btn { display: inline-block; padding: 0.8rem 2rem; background: #c9a96e; color: #0a0a0a; text-decoration: none; font-weight: 500; border-radius: 4px; }
+    .links { margin-top: 1.5rem; display: flex; justify-content: center; gap: 1.5rem; }
+    .links a { color: #666; text-decoration: none; font-size: 0.8rem; letter-spacing: 0.05em; transition: color 0.2s; }
+    .links a:hover { color: #c9a96e; }
   </style>
 </head>
 <body>
@@ -29,6 +32,10 @@
     <h1>Scan QR Code</h1>
     <p>Please scan the QR code on your table to continue ordering.</p>
     <a href="/logout" class="btn">Logout</a>
+    <div class="links">
+      <a href="/customer/profile">My Profile</a>
+      <a href="/customer/order_history">Past Orders</a>
+    </div>
   </div>
 </body>
 </html>

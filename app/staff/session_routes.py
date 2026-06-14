@@ -38,20 +38,25 @@ def register_session_routes(app, mysql):
         cursor = mysql.connection.cursor()
 
         cursor.execute("""
-            SELECT session_id, table_number, status, created_at
-            FROM Table_Session
-            ORDER BY session_id DESC
+            SELECT ts.session_id, ts.table_number, ts.status, ts.created_at,
+                COUNT(o.order_id) AS order_count
+            FROM Table_Session ts
+            LEFT JOIN orders o ON o.session_id = ts.session_id
+            GROUP BY ts.session_id, ts.table_number, ts.status, ts.created_at
+            ORDER BY ts.session_id DESC
         """)
 
         sessions = cursor.fetchall()
+        cursor.close()
 
         data = []
         for s in sessions:
             data.append({
-                "session_id": s[0],
+                "session_id":   s[0],
                 "table_number": s[1],
-                "status": s[2],
-                "created_at": s[3]
+                "status":       s[2],
+                "created_at":   str(s[3]),
+                "order_count":  s[4],
             })
 
         return jsonify(data)

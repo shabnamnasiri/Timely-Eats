@@ -1,5 +1,5 @@
 from flask import jsonify, render_template, redirect, session, flash, request
-from datetime import datetime, timedelta
+from datetime import datetime
 import MySQLdb.cursors
 
 
@@ -20,9 +20,8 @@ def register_customer_place_order_routes(app, mysql):
 
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
 
-        # Fetch table session — include updated_at for auto-close logic
         cursor.execute("""
-            SELECT session_id, status, created_at, updated_at
+            SELECT session_id, status
             FROM table_session
             WHERE session_id = %s AND status IN ('active', 'ordered')
         """, (session_id,))
@@ -72,15 +71,13 @@ def register_customer_place_order_routes(app, mysql):
         loyalty_points = user_row['loyalty_point'] if user_row else 0
 
         # Apply loyalty discount if user toggled redeem (100 pts = $1 discount)
-        loyalty_discount = 0
         if session.get('redeem_points') and loyalty_points >= 100:
             loyalty_discount = float(session.get('loyalty_discount', 0))
             total_amount = max(0, total_amount - loyalty_discount)
 
             points_used = int(loyalty_discount * 100)
             cursor.execute("""
-                UPDATE user
-                SET loyalty_point = loyalty_point - %s
+                UPDATE user SET loyalty_point = loyalty_point - %s
                 WHERE user_id = %s
             """, (points_used, user_id))
 
@@ -91,8 +88,6 @@ def register_customer_place_order_routes(app, mysql):
             flash("Invalid payment method selected.", "danger")
             cursor.close()
             return redirect('/Customer/Cart')
-
-        payment_status = 'confirmed'
 
         cursor.execute("""
             SELECT MAX(i.preparation_time) AS max_prep
@@ -115,8 +110,7 @@ def register_customer_place_order_routes(app, mysql):
         # Insert order_details
         for item in cart_items:
             cursor.execute("""
-                INSERT INTO order_details
-                (order_id, item_id, quantity, customization_note)
+                INSERT INTO order_details (order_id, item_id, quantity, customization_note)
                 VALUES (%s, %s, %s, %s)
             """, (order_id, item['item_id'], item['quantity'], item['customization_note']))
 
@@ -124,29 +118,22 @@ def register_customer_place_order_routes(app, mysql):
         cursor.execute("""
             INSERT INTO payment (order_id, payment_method, payment_status, date)
             VALUES (%s, %s, %s, %s)
-        """, (order_id, payment_method, payment_status, order_time))
+        """, (order_id, payment_method, 'confirmed', order_time))
 
         # Close current cart
-        cursor.execute("""
-            UPDATE cart SET status = 'closed'
-            WHERE cart_id = %s
-        """, (cart_id,))
+        cursor.execute("UPDATE cart SET status = 'closed' WHERE cart_id = %s", (cart_id,))
 
         # Open fresh cart for continued ordering
-        cursor.execute("""
-            INSERT INTO cart (user_id, status)
-            VALUES (%s, 'open')
-        """, (user_id,))
+        cursor.execute("INSERT INTO cart (user_id, status) VALUES (%s, 'open')", (user_id,))
 
         # Award loyalty points (1 pt per $1 spent after discount)
         points_earned = int(total_amount)
         cursor.execute("""
-            UPDATE user
-            SET loyalty_point = loyalty_point + %s
+            UPDATE user SET loyalty_point = loyalty_point + %s
             WHERE user_id = %s
         """, (points_earned, user_id))
 
-        # Update table_session: set status to 'ordered' and bump updated_at
+        # Mark session as 'ordered' on first order, bump updated_at
         cursor.execute("""
             UPDATE table_session
             SET status = CASE WHEN status = 'active' THEN 'ordered' ELSE status END,
@@ -154,27 +141,11 @@ def register_customer_place_order_routes(app, mysql):
             WHERE session_id = %s
         """, (order_time, session_id))
 
-        # Auto-close session if 20 minutes have passed since last update
-        last_updated = table_session['updated_at']
-        if last_updated is None:
-            # Fall back to created_at if updated_at has never been set
-            last_updated = table_session['created_at']
-        if isinstance(last_updated, str):
-            last_updated = datetime.strptime(last_updated, '%Y-%m-%d %H:%M:%S')
-
-        if order_time - last_updated >= timedelta(minutes=20):
-            cursor.execute("""
-                UPDATE table_session
-                SET status = 'closed', closed_at = %s
-                WHERE session_id = %s
-            """, (order_time, session_id))
-            session.pop('table_session_id', None)
-
         mysql.connection.commit()
         cursor.close()
 
         flash("Order placed successfully!", "success")
-        return redirect('/menu')
+        return redirect('/customer/order_history')
 
 
     @app.route('/apply_loyalty', methods=['POST'])
@@ -213,8 +184,7 @@ def register_customer_place_order_routes(app, mysql):
 
         discount = 0
         if redeem and loyalty_points >= 100:
-            # 100 pts = $1 discount
-            discount = loyalty_points // 100
+            discount = min(loyalty_points // 100, order_total)  # can't exceed order total
             session['redeem_points'] = True
             session['loyalty_discount'] = discount
         else:

@@ -2,25 +2,23 @@
 {% from 'macros/toast_script.html' import render_toast_script %}
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Timely Eats — Menu · Table {{ table_number or '?' }}</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/toast.css') }}"/>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant:ital,wght@0,400;0,600;1,300;1,400&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;700&display=swap" rel="stylesheet"/>
 
-  <title>
-    Timely Eats — Menu · Table {{ table_number or '?' }}
-  </title>
-
-  <link rel="stylesheet"
-        href="{{ url_for('static', filename='css/Menu.css') }}"/>
-
-  <link rel="stylesheet"
-        href="{{ url_for('static', filename='css/toast.css') }}"/>
-
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant:ital,wght@0,400;0,600;1,300;1,400&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;700&display=swap"
-        rel="stylesheet"/>
-
-  {{ render_toast_script() }}
+  <style>
+    body { font-family: 'DM Sans', sans-serif; }
+    .font-bebas { font-family: 'Bebas Neue', sans-serif; }
+    .font-mono-custom { font-family: 'DM Mono', monospace; }
+    /* Hide scrollbars for category panel swiping */
+    .scrollbar-none::-webkit-scrollbar { display: none; }
+    .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
 
   <script>
     const SESSION_ID = "{{ session_id }}";
@@ -50,207 +48,189 @@
       margin-top: 18px;
     }
 
-    /* review buttons */
-
-    .review-btn,
-    .reviews-btn {
-      margin-top: 10px;
-      align-self: flex-start;
-
-      font-family: 'DM Mono', monospace;
-      font-size: 10px;
-      letter-spacing: .2em;
-      text-transform: uppercase;
-
-      color: var(--ink);
-      background: transparent;
-
-      border: 1px solid var(--accent);
-      padding: 10px 16px;
-
-      cursor: pointer;
-      transition: all .25s ease;
-      position: relative;
-
-      text-decoration: none;
-      display: inline-block;
-    }
-
-    /* hover */
-
-    .review-btn:hover,
-    .reviews-btn:hover {
-      background: var(--accent);
-      color: var(--paper);
-      border-color: var(--accent);
-    }
-
-    /* click */
-
-    .review-btn:active,
-    .reviews-btn:active {
-      transform: translateY(1px);
-      opacity: 0.9;
-    }
-
-    /* animated underline */
-
-    .review-btn::after,
-    .reviews-btn::after {
-      content: '';
-
-      position: absolute;
-      left: 0;
-      bottom: 0;
-
-      width: 0%;
-      height: 1px;
-
-      background: var(--accent);
-
-      transition: width .25s ease;
-    }
-
-    .review-btn:hover::after,
-    .reviews-btn:hover::after {
-      width: 100%;
-    }
 
   </style>
 </head>
+<body class="bg-[#f9f7f4] text-[#0e0e0e] min-h-screen antialiased">
 
-<body>
+  {{ render_toast() }}
 
-{{ render_toast() }}
-
-<header class="topbar">
-
-  <div class="logo">
-    <b>Timely<span>Eats</span></b>
-    <small>Restaurant</small>
-  </div>
-
-  <div class="table-badge">
-    <span>Table</span>
-    <strong>{{ table_number or '?' }}</strong>
-  </div>
-
-  <a href="/Customer/Cart?session_id={{ session_id }}"
-     class="cart">
-    ⊡ Cart
-  </a>
-
-  <a href="/logout"
-     class="cart">
-    Logout
-  </a>
-
-</header>
-
-<section class="hero">
-
-  <div class="hero-inner">
-    <small>
-      Dine-in Menu · Table {{ table_number or '?' }}
-    </small>
-
-    <h1>
-      Today's<span>Menu</span>
-    </h1>
-
-    <p>
-      Locally sourced. Freshly prepared. Served with care.
-    </p>
-  </div>
-
-</section>
-
-<nav class="cat-nav">
-  <ul>
-    <li><a href="#starters">Starters</a></li>
-    <li><a href="#mains">Mains</a></li>
-    <li><a href="#sides">Sides</a></li>
-    <li><a href="#desserts">Desserts</a></li>
-    <li><a href="#drinks">Drinks</a></li>
-  </ul>
-</nav>
-
-<main class="content">
-
-  <!-- STARTERS -->
-
-  {% set starters = items | selectattr('5', 'equalto', 'starters') | list %}
-
-  <section class="menu-section" id="starters">
-
-    <div class="section-header">
-      <h2>Starters</h2>
-      <span>{{ starters | length }} dishes</span>
+  <header class="sticky top-0 z-50 bg-[#0e0e0e] border-b-2 border-[#c8933a] h-16 px-4 md:px-8 flex items-center justify-between shadow-md">
+    <div class="flex items-baseline gap-2">
+      <b class="font-bebas text-2xl tracking-wider text-[#f9f7f4] font-normal">Timely<span class="text-[#c8933a]">Eats</span></b>
+      <small class="font-mono-custom text-[9px] tracking-[0.25em] uppercase text-[#7a7a7a] hidden sm:inline">Restaurant</small>
     </div>
 
-    <div class="grid">
+    <div class="flex items-center gap-4 md:gap-6">
+      <div class="flex items-center gap-2">
+        <span class="font-mono-custom text-[9px] tracking-widest uppercase text-[#7a7a7a] hidden xs:inline">Table</span>
+        <strong class="font-bebas text-lg tracking-wider text-[#f9f7f4] bg-[#c8933a] px-3 py-0.5 font-normal rounded-sm">{{ table_number or '?' }}</strong>
+      </div>
+<a href="/Customer/Cart?session_id={{ session_id }}" class="relative inline-flex items-center justify-center gap-2 p-2 text-[#b0b0b0] hover:text-[#c8933a] transition-all duration-200 group" aria-label="Shopping Cart">
 
-      {% for item in starters %}
+  <span class="font-mono-custom text-xs md:text-sm tracking-widest uppercase">Cart</span>
 
-      <div class="card" style="--i:{{ loop.index0 }}">
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 transition-transform group-hover:scale-105">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+  </svg>
 
-        <img src="/item_photo/{{ item[0] }}"
-             class="card-photo"
-             alt="{{ item[1] }}"
-             onerror="this.style.display='none'">
+  {% if session.get('cart_count', 0) > 0 %}
+  <span class="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-[#c8933a] font-mono-custom text-[9px] font-bold text-[#0e0e0e] shadow-xs ring-2 ring-[#0e0e0e]">
+    {{ session['cart_count'] }}
+  </span>
+  {% endif %}
 
-        <div class="card-row">
-          <h3>{{ item[1] }}</h3>
-          <span class="price">${{ item[4] }}</span>
-        </div>
+</a>
 
-        <p>{{ item[2] }}</p>
+      <div class="relative group">
+        <button class="flex items-center justify-center w-8 h-8 rounded-full border border-[#c8933a] bg-[#1a1a1a] text-[#c8933a] hover:bg-[#c8933a] hover:text-[#0e0e0e] transition-all cursor-pointer focus:outline-hidden" aria-label="User Menu">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+          </svg>
+        </button>
 
-        <footer>
-          <div class="tags">
-            <span class="tag">
-              ⏱ {{ item[3] or '—' }} min
-            </span>
+        <div class="absolute right-0 mt-2 w-48 bg-[#1a1a1a] border border-[#3d3d3d] rounded-xs shadow-xl opacity-0 scale-95 pointer-events-none group-focus-within:opacity-100 group-focus-within:scale-100 group-focus-within:pointer-events-auto group-hover:opacity-100 group-hover:scale-100 group-hover:pointer-events-auto transition-all duration-150 z-50">
+          <div class="py-1 divide-y divide-[#3d3d3d]">
+            <div class="px-4 py-2 text-[10px] font-mono-custom text-[#7a7a7a] tracking-wider uppercase">
+              Guest Options
+            </div>
+            <div class="py-1">
+              <a href="/customer/profile" class="block px-4 py-2.5 text-xs text-[#b0b0b0] hover:bg-[#c8933a] hover:text-[#0e0e0e] font-mono-custom uppercase tracking-wider transition-colors">Profile Details</a>
+              <a href="/customer/order_history" class="block px-4 py-2.5 text-xs text-[#b0b0b0] hover:bg-[#c8933a] hover:text-[#0e0e0e] font-mono-custom uppercase tracking-wider transition-colors">Order History</a>
+              <a href="/customer/loyalty" class="block px-4 py-2.5 text-xs text-[#b0b0b0] hover:bg-[#c8933a] hover:text-[#0e0e0e] font-mono-custom uppercase tracking-wider transition-colors">Loyalty Points</a>
+            </div>
+            <div class="py-1">
+              <a href="/logout" class="block px-4 py-2.5 text-xs text-red-400 hover:bg-red-500 hover:text-white font-mono-custom uppercase tracking-wider transition-colors">Logout</a>
+            </div>
           </div>
-        </footer>
-
-        <div class="rating-box">
-          {% if item[6] %}
-            ⭐ {{ item[6] }}/5
-          {% else %}
-            ⭐ No ratings yet
-          {% endif %}
         </div>
+      </div>
 
-        <div class="card-actions">
+    </div>
+  </header>
 
-          <form action="{{ url_for('add_to_cart') }}"
-                method="post">
+  <section class="bg-[#1a1a1a] py-8 px-4 md:px-8 border-b border-[#3d3d3d]">
+    <div class="max-w-6xl mx-auto">
+      <small class="font-mono-custom text-[9px] tracking-[0.3em] uppercase text-[#c8933a] block mb-1">
+        Dine-in Menu · Table {{ table_number or '?' }}
+      </small>
+      <h1 class="font-bebas text-4xl md:text-5xl tracking-wide text-[#f9f7f4] leading-none">
+        Today's <span class="text-[#c8933a]">Menu</span>
+      </h1>
+      <p class="text-xs md:text-sm font-light italic text-[#7a7a7a] mt-2 border-left-2 border-[#c8933a] pl-3 max-w-md">
+        Locally sourced. Freshly prepared. Served with care.
+      </p>
+    </div>
+  </section>
 
-            <input type="hidden"
-                   name="item_id"
-                   value="{{ item[0] }}">
+  <nav class="sticky top-16 z-40 bg-[#f9f7f4] border-b border-[#d4cfc6] shadow-sm">
+    <ul class="max-w-6xl mx-auto flex items-center overflow-x-auto scrollbar-none snap-x">
+      {% for cat in ['starters', 'mains', 'sides', 'desserts', 'drinks'] %}
+      <li class="snap-mini">
+        <a href="#{{ cat }}" class="block font-mono-custom text-xs tracking-widest uppercase text-[#0e0e0e] px-4 py-3.5 border-b-2 border-transparent hover:text-[#c8933a] hover:border-[#c8933a] transition-all whitespace-nowrap">
+          {{ cat | capitalize }}
+        </a>
+      </li>
+      {% endfor %}
+    </ul>
+  </nav>
 
-            <input type="hidden"
-                   name="item_name"
-                   value="{{ item[1] }}">
+  <main class="max-w-6xl mx-auto px-4 md:px-8 py-10 space-y-16">
 
-            <input type="hidden"
-                   name="item_price"
-                   value="{{ item[4] }}">
+    {% set starters = items | selectattr('5', 'equalto', 'starters') | list %}
+    <section class="scroll-mt-32" id="starters">
+      <div class="flex items-center justify-between mb-6 pb-2 border-b-2 border-[#0e0e0e]">
+        <h2 class="font-bebas text-2xl md:text-3xl tracking-wide uppercase">Starters</h2>
+        <a href="/menu/search?category=starters" class="text-[#7a7a7a] hover:text-[#c8933a] transition-colors p-1" aria-label="Search Starters">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.602 10.601Z" />
+          </svg>
+        </a>
+      </div>
 
-            <input type="hidden"
-                   name="session_id"
-                   value="{{ session_id }}">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for item in starters %}
+        <div class="bg-[#f3f0ea] border border-[#d4cfc6] rounded-sm overflow-hidden flex flex-col justify-between p-4 hover:border-[#c8933a] hover:bg-white transition-all group shadow-xs">
+          <div>
+            <img src="/item_photo/{{ item[0] }}" class="w-full h-44 object-cover rounded-sm mb-3 group-hover:scale-[1.01] transition-transform" alt="{{ item[1] }}" onerror="this.style.display='none'">
+            <div class="flex justify-between items-start gap-2 mb-1">
+              <h3 class="font-bebas text-xl tracking-wide text-[#0e0e0e]">{{ item[1] }}</h3>
+              <span class="font-mono-custom text-sm font-medium text-[#c8933a] whitespace-nowrap">${{ item[4] }}</span>
+            </div>
+            <p class="text-xs font-light text-[#7a7a7a] line-clamp-3 mb-4 leading-relaxed">{{ item[2] }}</p>
+          </div>
 
-            <button type="submit"
-                    class="order-btn">
-              Add to Order
-            </button>
+          <div class="space-y-3 mt-auto">
+            <div class="flex gap-2">
+              <span class="font-mono-custom text-[9px] tracking-wider uppercase px-2 py-0.5 bg-[#e8e4dc] text-[#3d3d3d] rounded-xs">
+                ⏱ {{ item[3] or '—' }} min
+              </span>
+            </div>
+            <form action="{{ url_for('add_to_cart') }}" method="post" class="w-full">
+              <input type="hidden" name="item_id" value="{{ item[0] }}">
+              <input type="hidden" name="item_name" value="{{ item[1] }}">
+              <input type="hidden" name="item_price" value="{{ item[4] }}">
+              <input type="hidden" name="session_id" value="{{ session_id }}">
+              <button type="submit" class="w-full text-center font-mono-custom text-xs tracking-widest uppercase border border-[#c8933a] py-2 px-4 bg-transparent text-[#0e0e0e] hover:bg-[#c8933a] hover:text-[#f9f7f4] active:translate-y-px transition-all rounded-xs cursor-pointer">
+                Add to Cart
+              </button>
+            </form>
+             <a href="/item/{{ item[0] }}/review-page"
+             class="w-full mt-2 mr-2 text-center font-mono-custom text-xs tracking-widest uppercase border border-[#c8933a] py-2 px-4 bg-transparent text-[#0e0e0e] hover:bg-[#c8933a] hover:text-[#f9f7f4] active:translate-y-px transition-all rounded-xs cursor-pointer">
+            Write Review
+          </a>
 
-          </form>
+          <a href="/item/{{ item[0] }}/reviews-display"
+             class="w-full mt-2 mr-2 text-center font-mono-custom text-xs tracking-widest uppercase border border-[#c8933a] py-2 px-4 bg-transparent text-[#0e0e0e] hover:bg-[#c8933a] hover:text-[#f9f7f4] active:translate-y-px transition-all rounded-xs cursor-pointer">
+            View Reviews
+          </a>
+          </div>
+        </div>
+        {% else %}
+        <p class="text-sm font-light italic text-[#7a7a7a] col-span-full">No starters available today.</p>
+        {% endfor %}
+      </div>
+    </section>
 
-          <a href="/item/{{ item[0] }}/review-page"
+    {% set mains = items | selectattr('5', 'equalto', 'mains') | list %}
+    <section class="scroll-mt-32" id="mains">
+      <div class="flex items-center justify-between mb-6 pb-2 border-b-2 border-[#0e0e0e]">
+        <h2 class="font-bebas text-2xl md:text-3xl tracking-wide uppercase">Mains</h2>
+        <a href="/menu/search?category=mains" class="text-[#7a7a7a] hover:text-[#c8933a] transition-colors p-1" aria-label="Search Mains">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.602 10.601Z" />
+          </svg>
+        </a>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for item in mains %}
+        <div class="bg-[#f3f0ea] border border-[#d4cfc6] rounded-sm overflow-hidden flex flex-col justify-between p-4 hover:border-[#c8933a] hover:bg-white transition-all group shadow-xs">
+          <div>
+            <img src="/item_photo/{{ item[0] }}" class="w-full h-44 object-cover rounded-sm mb-3 group-hover:scale-[1.01] transition-transform" alt="{{ item[1] }}" onerror="this.style.display='none'">
+            <div class="flex justify-between items-start gap-2 mb-1">
+              <h3 class="font-bebas text-xl tracking-wide text-[#0e0e0e]">{{ item[1] }}</h3>
+              <span class="font-mono-custom text-sm font-medium text-[#c8933a] whitespace-nowrap">${{ item[4] }}</span>
+            </div>
+            <p class="text-xs font-light text-[#7a7a7a] line-clamp-3 mb-4 leading-relaxed">{{ item[2] }}</p>
+          </div>
+
+          <div class="space-y-3 mt-auto">
+            <div class="flex gap-2">
+              <span class="font-mono-custom text-[9px] tracking-wider uppercase px-2 py-0.5 bg-[#e8e4dc] text-[#3d3d3d] rounded-xs">
+                ⏱ {{ item[3] or '—' }} min
+              </span>
+            </div>
+            <form action="{{ url_for('add_to_cart') }}" method="post" class="w-full">
+              <input type="hidden" name="item_id" value="{{ item[0] }}">
+              <input type="hidden" name="item_name" value="{{ item[1] }}">
+              <input type="hidden" name="item_price" value="{{ item[4] }}">
+              <input type="hidden" name="session_id" value="{{ session_id }}">
+              <button type="submit" class="w-full text-center font-mono-custom text-xs tracking-widest uppercase border border-[#c8933a] py-2 px-4 bg-transparent text-[#0e0e0e] hover:bg-[#c8933a] hover:text-[#f9f7f4] active:translate-y-px transition-all rounded-xs cursor-pointer">
+                Add to Cart
+              </button>
+            </form>
+             <a href="/item/{{ item[0] }}/review-page"
              class="review-btn">
             Write Review
           </a>
@@ -259,97 +239,48 @@
              class="reviews-btn">
             View Reviews
           </a>
-
+          </div>
         </div>
+        {% else %}
+        <p class="text-sm font-light italic text-[#7a7a7a] col-span-full">No mains available today.</p>
+        {% endfor %}
+      </div>
+    </section>
 
+    {% set sides = items | selectattr('5', 'equalto', 'sides') | list %}
+    <section class="scroll-mt-32" id="sides">
+      <div class="flex items-center justify-between mb-6 pb-2 border-b-2 border-[#0e0e0e]">
+        <h2 class="font-bebas text-2xl md:text-3xl tracking-wide uppercase">Sides</h2>
+        <a href="/menu/search?category=sides" class="text-[#7a7a7a] hover:text-[#c8933a] transition-colors p-1" aria-label="Search Sides">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.602 10.601Z" />
+          </svg>
+        </a>
       </div>
 
-      {% else %}
-
-      <p class="empty-cat">
-        No starters available today.
-      </p>
-
-      {% endfor %}
-
-    </div>
-
-  </section>
-
-  <!-- MAINS -->
-
-  {% set mains = items | selectattr('5', 'equalto', 'mains') | list %}
-
-  <section class="menu-section" id="mains">
-
-    <div class="section-header">
-      <h2>Mains</h2>
-      <span>{{ mains | length }} dishes</span>
-    </div>
-
-    <div class="grid">
-
-      {% for item in mains %}
-
-      <div class="card" style="--i:{{ loop.index0 }}">
-
-        <img src="/item_photo/{{ item[0] }}"
-             class="card-photo"
-             alt="{{ item[1] }}"
-             onerror="this.style.display='none'">
-
-        <div class="card-row">
-          <h3>{{ item[1] }}</h3>
-          <span class="price">${{ item[4] }}</span>
-        </div>
-
-        <p>{{ item[2] }}</p>
-
-        <footer>
-          <div class="tags">
-            <span class="tag">
-              ⏱ {{ item[3] or '—' }} min
-            </span>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for item in sides %}
+        <div class="bg-[#f3f0ea] border border-[#d4cfc6] rounded-sm overflow-hidden flex flex-col justify-between p-4 hover:border-[#c8933a] hover:bg-white transition-all group shadow-xs">
+          <div>
+            <img src="/item_photo/{{ item[0] }}" class="w-full h-44 object-cover rounded-sm mb-3 group-hover:scale-[1.01] transition-transform" alt="{{ item[1] }}" onerror="this.style.display='none'">
+            <div class="flex justify-between items-start gap-2 mb-1">
+              <h3 class="font-bebas text-xl tracking-wide text-[#0e0e0e]">{{ item[1] }}</h3>
+              <span class="font-mono-custom text-sm font-medium text-[#c8933a] whitespace-nowrap">${{ item[4] }}</span>
+            </div>
+            <p class="text-xs font-light text-[#7a7a7a] line-clamp-3 mb-4 leading-relaxed">{{ item[2] }}</p>
           </div>
-        </footer>
 
-        <div class="rating-box">
-          {% if item[6] %}
-            ⭐ {{ item[6] }}/5
-          {% else %}
-            ⭐ No ratings yet
-          {% endif %}
-        </div>
-
-        <div class="card-actions">
-
-          <form action="{{ url_for('add_to_cart') }}"
-                method="post">
-
-            <input type="hidden"
-                   name="item_id"
-                   value="{{ item[0] }}">
-
-            <input type="hidden"
-                   name="item_name"
-                   value="{{ item[1] }}">
-
-            <input type="hidden"
-                   name="item_price"
-                   value="{{ item[4] }}">
-
-            <input type="hidden"
-                   name="session_id"
-                   value="{{ session_id }}">
-
-            <button type="submit"
-                    class="order-btn">
-              Add to Order
-            </button>
-
-          </form>
-
-          <a href="/item/{{ item[0] }}/review-page"
+          <div class="space-y-3 mt-auto">
+            <form action="{{ url_for('add_to_cart') }}" method="post" class="w-full">
+              <input type="hidden" name="item_id" value="{{ item[0] }}">
+              <input type="hidden" name="item_name" value="{{ item[1] }}">
+              <input type="hidden" name="item_price" value="{{ item[4] }}">
+              <input type="hidden" name="session_id" value="{{ session_id }}">
+              <button type="submit" class="w-full text-center font-mono-custom text-xs tracking-widest uppercase border border-[#c8933a] py-2 px-4 bg-transparent text-[#0e0e0e] hover:bg-[#c8933a] hover:text-[#f9f7f4] active:translate-y-px transition-all rounded-xs cursor-pointer">
+                Add to Cart
+              </button>
+            </form>
+             <a href="/item/{{ item[0] }}/review-page"
              class="review-btn">
             Write Review
           </a>
@@ -358,270 +289,116 @@
              class="reviews-btn">
             View Reviews
           </a>
-
+          </div>
         </div>
-
-      </div>
-
-      {% else %}
-
-      <p class="empty-cat">
-        No mains available today.
-      </p>
-
-      {% endfor %}
-
-    </div>
-
-  </section>
-<!-- SIDES -->
-{% set sides = items | selectattr('5', 'equalto', 'sides') | list %}
-
-<section class="menu-section" id="sides">
-
-  <div class="section-header">
-    <h2>Sides</h2>
-    <span>{{ sides | length }} items</span>
-  </div>
-
-  <div class="grid">
-
-    {% for item in sides %}
-
-    <div class="card" style="--i:{{ loop.index0 }}">
-
-      <img src="/item_photo/{{ item[0] }}"
-           class="card-photo"
-           alt="{{ item[1] }}"
-           onerror="this.style.display='none'">
-
-      <div class="card-row">
-        <h3>{{ item[1] }}</h3>
-        <span class="price">${{ item[4] }}</span>
-      </div>
-
-      <p>{{ item[2] }}</p>
-
-      <footer>
-        <div class="tags">
-          <span class="tag">⏱ {{ item[3] or '—' }} min</span>
-        </div>
-      </footer>
-
-      <div class="rating-box">
-        {% if item[6] %}
-          ⭐ {{ item[6] }}/5
         {% else %}
-          ⭐ No ratings yet
-        {% endif %}
+        <p class="text-sm font-light italic text-[#7a7a7a] col-span-full">No sides available today.</p>
+        {% endfor %}
       </div>
+    </section>
 
-      <div class="card-actions">
-
-        <form action="{{ url_for('add_to_cart') }}" method="post">
-          <input type="hidden" name="item_id" value="{{ item[0] }}">
-          <input type="hidden" name="item_name" value="{{ item[1] }}">
-          <input type="hidden" name="item_price" value="{{ item[4] }}">
-          <input type="hidden" name="session_id" value="{{ session_id }}">
-
-          <button type="submit" class="order-btn">
-            Add to Order
-          </button>
-        </form>
-
-        <a href="/item/{{ item[0] }}/review-page" class="review-btn">
-          Write Review
+    {% set desserts = items | selectattr('5', 'equalto', 'desserts') | list %}
+    <section class="scroll-mt-32" id="desserts">
+      <div class="flex items-center justify-between mb-6 pb-2 border-b-2 border-[#0e0e0e]">
+        <h2 class="font-bebas text-2xl md:text-3xl tracking-wide uppercase">Desserts</h2>
+        <a href="/menu/search?category=desserts" class="text-[#7a7a7a] hover:text-[#c8933a] transition-colors p-1" aria-label="Search Desserts">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.602 10.601Z" />
+          </svg>
         </a>
-
-        <a href="/item/{{ item[0] }}/reviews-display" class="reviews-btn">
-          View Reviews
-        </a>
-
       </div>
 
-    </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for item in desserts %}
+        <div class="bg-[#f3f0ea] border border-[#d4cfc6] rounded-sm overflow-hidden flex flex-col justify-between p-4 hover:border-[#c8933a] hover:bg-white transition-all group shadow-xs">
+          <div>
+            <img src="/item_photo/{{ item[0] }}" class="w-full h-44 object-cover rounded-sm mb-3 group-hover:scale-[1.01] transition-transform" alt="{{ item[1] }}" onerror="this.style.display='none'">
+            <div class="flex justify-between items-start gap-2 mb-1">
+              <h3 class="font-bebas text-xl tracking-wide text-[#0e0e0e]">{{ item[1] }}</h3>
+              <span class="font-mono-custom text-sm font-medium text-[#c8933a] whitespace-nowrap">${{ item[4] }}</span>
+            </div>
+            <p class="text-xs font-light text-[#7a7a7a] line-clamp-3 mb-4 leading-relaxed">{{ item[2] }}</p>
+          </div>
 
-    {% else %}
-    <p class="empty-cat">No sides available today.</p>
-    {% endfor %}
+          <div class="space-y-3 mt-auto">
+            <form action="{{ url_for('add_to_cart') }}" method="post" class="w-full">
+              <input type="hidden" name="item_id" value="{{ item[0] }}">
+              <input type="hidden" name="item_name" value="{{ item[1] }}">
+              <input type="hidden" name="item_price" value="{{ item[4] }}">
+              <input type="hidden" name="session_id" value="{{ session_id }}">
+              <button type="submit" class="w-full text-center font-mono-custom text-xs tracking-widest uppercase border border-[#c8933a] py-2 px-4 bg-transparent text-[#0e0e0e] hover:bg-[#c8933a] hover:text-[#f9f7f4] active:translate-y-px transition-all rounded-xs cursor-pointer">
+                Add to Cart
+              </button>
+            </form>
+             <a href="/item/{{ item[0] }}/review-page"
+             class="review-btn">
+            Write Review
+          </a>
 
-  </div>
-</section>
-
-<!-- DESSERTS -->
-{% set desserts = items | selectattr('5', 'equalto', 'desserts') | list %}
-
-<section class="menu-section" id="desserts">
-
-  <div class="section-header">
-    <h2>Desserts</h2>
-    <span>{{ desserts | length }} items</span>
-  </div>
-
-  <div class="grid">
-
-    {% for item in desserts %}
-
-    <div class="card" style="--i:{{ loop.index0 }}">
-
-      <img src="/item_photo/{{ item[0] }}"
-           class="card-photo"
-           alt="{{ item[1] }}"
-           onerror="this.style.display='none'">
-
-      <div class="card-row">
-        <h3>{{ item[1] }}</h3>
-        <span class="price">${{ item[4] }}</span>
-      </div>
-
-      <p>{{ item[2] }}</p>
-
-      <footer>
-        <div class="tags">
-          <span class="tag">⏱ {{ item[3] or '—' }} min</span>
+          <a href="/item/{{ item[0] }}/reviews-display"
+             class="reviews-btn">
+            View Reviews
+          </a>
+          </div>
         </div>
-      </footer>
-
-      <div class="rating-box">
-        {% if item[6] %}
-          ⭐ {{ item[6] }}/5
         {% else %}
-          ⭐ No ratings yet
-        {% endif %}
+        <p class="text-sm font-light italic text-[#7a7a7a] col-span-full">No desserts available today.</p>
+        {% endfor %}
       </div>
+    </section>
 
-      <div class="card-actions">
-
-        <form action="{{ url_for('add_to_cart') }}" method="post">
-          <input type="hidden" name="item_id" value="{{ item[0] }}">
-          <input type="hidden" name="item_name" value="{{ item[1] }}">
-          <input type="hidden" name="item_price" value="{{ item[4] }}">
-          <input type="hidden" name="session_id" value="{{ session_id }}">
-
-          <button type="submit" class="order-btn">
-            Add to Order
-          </button>
-        </form>
-
-        <a href="/item/{{ item[0] }}/review-page" class="review-btn">
-          Write Review
+    {% set drinks = items | selectattr('5', 'equalto', 'drinks') | list %}
+    <section class="scroll-mt-32" id="drinks">
+      <div class="flex items-center justify-between mb-6 pb-2 border-b-2 border-[#0e0e0e]">
+        <h2 class="font-bebas text-2xl md:text-3xl tracking-wide uppercase">Drinks</h2>
+        <a href="/menu/search?category=drinks" class="text-[#7a7a7a] hover:text-[#c8933a] transition-colors p-1" aria-label="Search Drinks">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.602 10.601Z" />
+          </svg>
         </a>
-
-        <a href="/item/{{ item[0] }}/reviews-display" class="reviews-btn">
-          View Reviews
-        </a>
-
       </div>
 
-    </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for item in drinks %}
+        <div class="bg-[#f3f0ea] border border-[#d4cfc6] rounded-sm overflow-hidden flex flex-col justify-between p-4 hover:border-[#c8933a] hover:bg-white transition-all group shadow-xs">
+          <div>
+            <img src="/item_photo/{{ item[0] }}" class="w-full h-44 object-cover rounded-sm mb-3 group-hover:scale-[1.01] transition-transform" alt="{{ item[1] }}" onerror="this.style.display='none'">
+            <div class="flex justify-between items-start gap-2 mb-1">
+              <h3 class="font-bebas text-xl tracking-wide text-[#0e0e0e]">{{ item[1] }}</h3>
+              <span class="font-mono-custom text-sm font-medium text-[#c8933a] whitespace-nowrap">${{ item[4] }}</span>
+            </div>
+            <p class="text-xs font-light text-[#7a7a7a] line-clamp-3 mb-4 leading-relaxed">{{ item[2] }}</p>
+          </div>
 
-    {% else %}
-    <p class="empty-cat">No desserts available today.</p>
-    {% endfor %}
+          <div class="space-y-3 mt-auto">
+            <form action="{{ url_for('add_to_cart') }}" method="post" class="w-full">
+              <input type="hidden" name="item_id" value="{{ item[0] }}">
+              <input type="hidden" name="item_name" value="{{ item[1] }}">
+              <input type="hidden" name="item_price" value="{{ item[4] }}">
+              <input type="hidden" name="session_id" value="{{ session_id }}">
+              <button type="submit" class="w-full text-center font-mono-custom text-xs tracking-widest uppercase border border-[#c8933a] py-2 px-4 bg-transparent text-[#0e0e0e] hover:bg-[#c8933a] hover:text-[#f9f7f4] active:translate-y-px transition-all rounded-xs cursor-pointer">
+                Add to Cart
+              </button>
+            </form>
+             <a href="/item/{{ item[0] }}/review-page"
+             class="review-btn">
+            Write Review
+          </a>
 
-  </div>
-</section>
-
-<!-- DRINKS -->
-{% set drinks = items | selectattr('5', 'equalto', 'drinks') | list %}
-
-<section class="menu-section" id="drinks">
-
-  <div class="section-header">
-    <h2>Drinks</h2>
-    <span>{{ drinks | length }} items</span>
-  </div>
-
-  <div class="grid">
-
-    {% for item in drinks %}
-
-    <div class="card" style="--i:{{ loop.index0 }}">
-
-      <img src="/item_photo/{{ item[0] }}"
-           class="card-photo"
-           alt="{{ item[1] }}"
-           onerror="this.style.display='none'">
-
-      <div class="card-row">
-        <h3>{{ item[1] }}</h3>
-        <span class="price">${{ item[4] }}</span>
-      </div>
-
-      <p>{{ item[2] }}</p>
-
-      <footer>
-        <div class="tags">
-          <span class="tag">⏱ {{ item[3] or '—' }} min</span>
+          <a href="/item/{{ item[0] }}/reviews-display"
+             class="reviews-btn">
+            View Reviews
+          </a>
+          </div>
         </div>
-      </footer>
-
-      <div class="rating-box">
-        {% if item[6] %}
-          ⭐ {{ item[6] }}/5
         {% else %}
-          ⭐ No ratings yet
-        {% endif %}
+        <p class="text-sm font-light italic text-[#7a7a7a] col-span-full">No drinks available today.</p>
+        {% endfor %}
       </div>
+    </section>
 
-      <div class="card-actions">
+  </main>
 
-        <form action="{{ url_for('add_to_cart') }}" method="post">
-          <input type="hidden" name="item_id" value="{{ item[0] }}">
-          <input type="hidden" name="item_name" value="{{ item[1] }}">
-          <input type="hidden" name="item_price" value="{{ item[4] }}">
-          <input type="hidden" name="session_id" value="{{ session_id }}">
-
-          <button type="submit" class="order-btn">
-            Add to Order
-          </button>
-        </form>
-
-        <a href="/item/{{ item[0] }}/review-page" class="review-btn">
-          Write Review
-        </a>
-
-        <a href="/item/{{ item[0] }}/reviews-display" class="reviews-btn">
-          View Reviews
-        </a>
-
-      </div>
-
-    </div>
-
-    {% else %}
-    <p class="empty-cat">No drinks available today.</p>
-    {% endfor %}
-
-  </div>
-</section>
-</main>
-
-{{ render_toast_script() }}
-
-<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
-
-<script>
-
-const socket = io();
-
-socket.on("order_update", function(data) {
-
-    console.log(data);
-
-    alert(data.message);
-
-});
-
-</script>
-<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
-<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
-<script>
-  const socket = io();
-
-  socket.on('session_closed', function (data) {
-    alert(data.message || 'Your table session has ended.');
-    window.location.href = '/Customer/scan-required';
-  });
-</script></body>
+  {{ render_toast_script() }}
+</body>
 </html>

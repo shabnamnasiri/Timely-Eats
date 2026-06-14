@@ -1,21 +1,29 @@
-import os
 from flask import request, jsonify, render_template, Response, redirect, url_for, session, flash
 from werkzeug.utils import secure_filename
-
-from app.admin.helpers import admin_required, get_admin_user
-
+# For handling file uploads and validating file types
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'webp'}
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def register_admin_add_menu_routes(app, mysql):
 
+    def admin_required():
+        # Access control: Only allow admins to access these routes
+        if "user_id" not in session:
+            flash("Please sign in to access this page.", "warning")
+            return redirect("/signin")
+        if session.get("role_id") != 3:
+            flash("Access denied. Admins only.", "danger")
+            return redirect("/signin")
+        return None
+
     @app.route("/admin/add_menu", methods=["GET", "POST"])
     def admin_menu():
         guard = admin_required()
         if guard:
             return guard
-
+        # Fetch all menu items to display in the admin dashboard
+        user_id = session.get('user_id')
         cursor = mysql.connection.cursor()
         cursor.execute("SELECT item_id, name, description, preparation_time, price, category FROM item")
         items = cursor.fetchall()
@@ -29,7 +37,7 @@ def register_admin_add_menu_routes(app, mysql):
         guard = admin_required()
         if guard:
             return guard
-
+        # Extract form data
         name        = request.form.get("name")
         description = request.form.get("description")
         price       = request.form.get("price")
@@ -37,11 +45,11 @@ def register_admin_add_menu_routes(app, mysql):
         category    = request.form.get("category")
         photo_data      = None
         photo_mimetype  = None
-
+        # Basic validation
         if not name or not price or not category:
             flash("Name, price and category are required.", "danger")
             return redirect(url_for('admin_menu'))
-
+        # Handle photo upload if provided
         if 'photo' in request.files:
             file = request.files['photo']
             if file and file.filename:
@@ -51,7 +59,7 @@ def register_admin_add_menu_routes(app, mysql):
                 else:
                     flash("Invalid file type. Allowed: png, jpg, jpeg, webp.", "danger")
                     return redirect(url_for('admin_menu'))
-
+        # Insert new item into database
         try:
             cursor = mysql.connection.cursor()
             cursor.execute("""
@@ -61,13 +69,13 @@ def register_admin_add_menu_routes(app, mysql):
             mysql.connection.commit()
             cursor.close()
             flash(f"'{name}' added to menu successfully!", "success")
-
+        # Handle database errors gracefully
         except Exception as e:
             flash(f"Database error: {str(e)}", "danger")
-
+        # Redirect back to the admin menu page after processing
         return redirect(url_for('admin_menu'))
 
-    # ── serve photo by item_id ──
+    #serve photo by item_id
     @app.route("/item_photo/<int:item_id>")
     def item_photo(item_id):
         try:
@@ -83,19 +91,19 @@ def register_admin_add_menu_routes(app, mysql):
         except Exception as e:
             return jsonify({'error': str(e)}), 500
 
-    # ── update item ──
+    #update item 
     @app.route("/update_item/<int:item_id>", methods=["POST"])
     def update_item(item_id):
         guard = admin_required()
         if guard:
             return guard
-
+        # Extract form data
         name        = request.form.get("name")
         description = request.form.get("description")
         price       = request.form.get("price")
         prep_time   = request.form.get("prep_time")
         category    = request.form.get("category")
-
+        # Basic validation
         try:
             cursor = mysql.connection.cursor()
 
@@ -105,6 +113,7 @@ def register_admin_add_menu_routes(app, mysql):
                     if not allowed_file(file.filename):
                         flash("Invalid file type. Allowed: png, jpg, jpeg, webp.", "danger")
                         return redirect(url_for('admin_menu'))
+                    # If a new photo is uploaded, we read it and update the photo data and mimetype in the database. If no new photo is uploaded, we leave the existing photo unchanged.
                     photo_data     = file.read()
                     photo_mimetype = file.mimetype
                     cursor.execute("""
@@ -134,7 +143,7 @@ def register_admin_add_menu_routes(app, mysql):
 
         return redirect(url_for('admin_menu'))
 
-    # ── delete item ──
+    # delete item
     @app.route("/delete_item/<int:item_id>", methods=["POST"])
     def delete_item(item_id):
         guard = admin_required()
@@ -143,7 +152,6 @@ def register_admin_add_menu_routes(app, mysql):
 
         try:
             cursor = mysql.connection.cursor()
-
             # Get name before deleting for flash message
             cursor.execute("SELECT name FROM item WHERE item_id=%s", (item_id,))
             item = cursor.fetchone()

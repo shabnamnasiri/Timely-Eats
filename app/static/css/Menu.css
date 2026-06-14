@@ -491,71 +491,7 @@ body {
   flex-grow: 1;
 }
 
-/* MOBILE */
-.review-btn,
-.reviews-btn {
-  margin-top: 10px;
-  align-self: flex-start;
 
-  font-family: 'DM Mono', monospace;
-  font-size: 10px;
-  letter-spacing: .2em;
-  text-transform: uppercase;
-
-  color: var(--ink);
-  background: transparent;
-
-  border: 1px solid var(--accent);
-  padding: 10px 16px;
-
-  cursor: pointer;
-  transition: all .25s ease;
-  position: relative;
-
-  text-decoration: none;
-  display: inline-block;
-}
-
-/* Hover */
-.review-btn:hover,
-.reviews-btn:hover {
-  background: var(--accent);
-  color: var(--paper);
-  border-color: var(--accent);
-}
-
-/* Click */
-.review-btn:active,
-.reviews-btn:active {
-  transform: translateY(1px);
-  opacity: 0.9;
-}
-
-/* Animated underline */
-.review-btn::after,
-.reviews-btn::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  width: 0%;
-  height: 1px;
-  background: var(--accent);
-  transition: width .25s ease;
-}
-
-.review-btn:hover::after,
-.reviews-btn:hover::after {
-  width: 100%;
-}
-
-/* Disabled */
-.review-btn:disabled,
-.reviews-btn:disabled {
-  border-color: var(--rule);
-  color: var(--ash);
-  cursor: not-allowed;
-}
 
 @media (max-width: 700px) {
 
