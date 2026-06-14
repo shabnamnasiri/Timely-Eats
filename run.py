@@ -15,19 +15,19 @@ from app.extensions import socketio, mysql
 template_path = os.path.join(
     os.path.dirname(os.path.abspath(__file__)),
     "app",
-    "templates"
+    "templates",
 )
 
 static_path = os.path.join(
     os.path.dirname(os.path.abspath(__file__)),
     "app",
-    "static"
+    "static",
 )
 
 app = Flask(
     __name__,
     template_folder=template_path,
-    static_folder=static_path
+    static_folder=static_path,
 )
 
 app.secret_key = os.getenv("SECRET_KEY", "secret_key_123")
@@ -53,13 +53,17 @@ socketio.init_app(
     app,
     manage_session=False,
     cors_allowed_origins="*",
-    async_mode="threading"
+    async_mode="threading",
 )
 
 # =========================
 # IMPORT ROUTES AFTER INIT
 # =========================
-from app.customer.session_expiry import register_session_expiry_task, register_session_room_events
+
+from app.customer.session_expiry import (
+    register_session_expiry_task,
+    register_session_room_events,
+)
 from app.customer.order_notifications import register_notification_routes
 from app.auth.login.Sign_in import register_login_routes
 from app.auth.login.Sign_up import register_register_routes
@@ -71,25 +75,15 @@ from app.customer.cart import register_customer_cart_routes
 from app.customer.place_order import register_customer_place_order_routes
 from app.admin.add_menu import register_admin_add_menu_routes
 from app.admin.add_staff import register_admin_add_staff_routes
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-from app.admin.orders import register_admin_order_routes
-from app.admin.reports import register_admin_report_routes
-=======
-from app.admin.analytics import register_admin_analytics_routes
->>>>>>> Stashed changes
-=======
-from app.admin.categories import register_admin_category_routes
 from app.admin.list_customer import register_admin_list_customer_routes
 from app.admin.orders import register_admin_order_routes
 from app.admin.reports import register_admin_report_routes
->>>>>>> Stashed changes
 from app.staff.api.staff_api import register_staff_api
 from app.staff.session_routes import register_session_routes
 from app.staff.orders import (
     register_staff_order_routes,
     get_orders,
-    get_sessions
+    get_sessions,
 )
 from app.auth.login.forgot_password import register_forgotpassword_routes
 
@@ -107,11 +101,7 @@ register_customer_cart_routes(app, mysql)
 register_admin_add_menu_routes(app, mysql)
 register_customer_place_order_routes(app, mysql)
 register_admin_add_staff_routes(app, mysql)
-<<<<<<< Updated upstream
-=======
-register_admin_category_routes(app, mysql)
 register_admin_list_customer_routes(app, mysql)
->>>>>>> Stashed changes
 register_admin_order_routes(app, mysql)
 register_admin_report_routes(app, mysql)
 register_staff_api(app, mysql)
@@ -119,11 +109,6 @@ register_session_routes(app, mysql)
 register_staff_order_routes(app, mysql)
 register_forgotpassword_routes(app, mysql)
 register_notification_routes(app, mysql)
-<<<<<<< Updated upstream
-
-=======
-register_customer_profile_routes(app, mysql)
-register_customer_order_history_routes(app, mysql)
 
 
 # =========================
@@ -136,7 +121,8 @@ def legacy_add_menu_css():
         os.path.join(app.static_folder, "css"),
         "Add_menu.css",
     )
->>>>>>> Stashed changes
+
+
 # =========================
 # SOCKET CONNECTIONS
 # =========================
@@ -161,7 +147,8 @@ def connect():
 
     if role_id == 3:
         join_room("admin")
-        
+
+
 # =========================
 # REAL-TIME STAFF DASHBOARD
 # =========================
@@ -172,11 +159,9 @@ def push_staff_dashboard():
 
         try:
             with app.app_context():
-
                 orders = get_orders(mysql)
                 sessions, closed_sessions = get_sessions(mysql)
 
-                # Do not compute average wait time (removed from UI)
                 stats = {
                     "active_orders": len(orders),
                     "pending_orders": sum(
@@ -198,11 +183,12 @@ def push_staff_dashboard():
                         "sessions": sessions,
                         "closed_sessions": closed_sessions,
                     },
-                    to="staff"
+                    to="staff",
                 )
 
         except Exception as e:
             print("[push_staff_dashboard ERROR]", e)
+
 
 # =========================
 # START BACKGROUND TASK
@@ -213,13 +199,10 @@ socketio.start_background_task(push_staff_dashboard)
 register_session_expiry_task(app, mysql, socketio)
 register_session_room_events(socketio)
 
+
 # =========================
 # RUN SERVER
 # =========================
 
 if __name__ == "__main__":
-<<<<<<< Updated upstream
-    socketio.run(app, debug=True)
-=======
     socketio.run(app, host="0.0.0.0", port=5000, debug=True)
->>>>>>> Stashed changes
