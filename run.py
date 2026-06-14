@@ -71,8 +71,12 @@ from app.customer.cart import register_customer_cart_routes
 from app.customer.place_order import register_customer_place_order_routes
 from app.admin.add_menu import register_admin_add_menu_routes
 from app.admin.add_staff import register_admin_add_staff_routes
+<<<<<<< Updated upstream
 from app.admin.orders import register_admin_order_routes
 from app.admin.reports import register_admin_report_routes
+=======
+from app.admin.analytics import register_admin_analytics_routes
+>>>>>>> Stashed changes
 from app.staff.api.staff_api import register_staff_api
 from app.staff.session_routes import register_session_routes
 from app.staff.orders import (
