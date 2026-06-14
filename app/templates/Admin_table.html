@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Table Management — TimelyEats</title>
 
-  <link rel="stylesheet" href="../static/css/Revenue.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/Revenue.css') }}">
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
   <script src="https://cdn.tailwindcss.com"></script>
 
   <style>
-    /* ───────────────── UPDATED TABLE CARDS ───────────────── */
+    /* ───────────────── TABLE CARDS ───────────────── */
     .table-card {
       background: var(--paper);
       border: 1px solid var(--rule);
@@ -92,19 +92,19 @@
       color: var(--ink);
     }
 
-    /* Status Varients */
+    /* Status Variants */
     .occupied { border-top: 3px solid var(--ink); }
     .occupied .status-dot { background: var(--ink); }
 
     .available { border-top: 3px solid #ded8cd; opacity: 0.8; }
     .available .status-dot { border: 1px solid var(--rule); }
 
-    .attention { 
-      border-top: 3px solid var(--accent-strong); 
+    .attention {
+      border-top: 3px solid var(--accent-strong);
       background: #fffcf5;
     }
-    .attention .status-dot { 
-      background: var(--accent-strong); 
+    .attention .status-dot {
+      background: var(--accent-strong);
       animation: pulse-ring 1.5s infinite;
     }
 
@@ -114,7 +114,7 @@
       100% { box-shadow: 0 0 0 0 rgba(224, 169, 75, 0); }
     }
 
-    /* ───────────────── REDESIGNED WAITLIST ───────────────── */
+    /* ───────────────── SESSION LISTS ───────────────── */
     .wait-item {
       padding: 14px;
       border: 1px solid var(--rule);
@@ -144,35 +144,12 @@
       color: var(--ink);
     }
 
-    .vip-tag {
+    .status-tag {
       color: var(--accent-strong);
       font-weight: bold;
     }
-
-    .wait-actions {
-      display: flex;
-      gap: 8px;
-      margin-top: 10px;
-    }
-
-    .btn-small {
-      flex: 1;
-      font-family: 'DM Mono', monospace;
-      font-size: 8px;
-      text-transform: uppercase;
-      padding: 6px;
-      border: 1px solid var(--rule);
-      transition: all 0.2s;
-    }
-
-    .btn-small:hover {
-      background: var(--ink);
-      color: #fff;
-    }
   </style>
 </head>
-
-
 
 <body>
 
@@ -184,148 +161,142 @@
 
   <div class="sidebar-section">Menu</div>
   <ul class="sidebar-nav">
-    <li><a href="Add_menu.html"><i class="ico">▤</i> Menu Items</a></li>
-    <li><a href="Categories.html" class=""><i class="ico">⊞</i> Categories</a></li>
+    <li><a href="/admin/add_menu"><i class="ico">▤</i> Menu Items</a></li>
+    <li><a href="Categories.html"><i class="ico">⊞</i> Categories</a></li>
   </ul>
   <div class="sidebar-section">Live_feed</div>
   <ul class="sidebar-nav">
-    <li><a href="Admin_order.html"><i class="ico">⊙</i> Orders</a></li>
-    <li><a href="Admin_table.html" class ="active"><i class="ico">◫</i> Tables</a></li>
-  </ul> 
-   <div class="sidebar-section">Users</div>
-    <ul class="sidebar-nav">
-    <li><a href="Admin_staff.html"><i class="ico">⊙</i>Staff</a></li>
-    <li><a href="Admin_customer.html"><i class="ico">◫</i> Customers</a></li>
+    <li><a href="/admin/orders"><i class="ico">⊙</i> Orders</a></li>
+    <li><a href="/admin//admin/tables" class="active"><i class="ico">◫</i> Tables</a></li>
+  </ul>
+  <div class="sidebar-section">Users</div>
+  <ul class="sidebar-nav">
+    <li><a href="/admin/add_staff"><i class="ico">⊙</i> Staff</a></li>
+    <li><a href="/admin/orders"><i class="ico">◫</i> Customers</a></li>
   </ul>
   <div class="sidebar-section">analytics</div>
   <ul class="sidebar-nav">
-    <li><a href="Revenue.html"><i class="ico">▦</i> Revenue</a></li>
-    <li><a href="Order_Report.html"><i class="ico">▦</i> Order_Report</a></li>
-        <li><a href="Customer_report"><i class="ico">▦</i>Customer_Report</a></li>
-            <li><a href="Table_report.html"><i class="ico">▦</i>Table_Report</a></li>
-
+    <li><a href="/admin/revenue"><i class="ico">▦</i> Revenue</a></li>
+    <li><a href="/admin/order_report"><i class="ico">▦</i> Order_Report</a></li>
+    <li><a href="Customer_report"><i class="ico">▦</i> Customer_Report</a></li>
+    <li><a href="/admin/table_report"><i class="ico">▦</i> Table_Report</a></li>
   </ul>
-<div class="sidebar-user">
+  <div class="sidebar-user">
     <small>Signed in as</small>
     <span>Admin · {{ user[0] }}</span>
     <a href="/logout" class="sidebar-logout">⏻ Logout</a>
   </div>
 </aside>
 <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
 <main class="main">
   <header class="topbar">
-<button class="sidebar-toggle" id="sidebarToggle" aria-label="Open menu">&#9776;</button>
+    <button class="sidebar-toggle" id="sidebarToggle" aria-label="Open menu">&#9776;</button>
 
     <h1>Floor Management</h1>
 
     <div class="flex gap-4 items-center">
       <div class="flex items-center gap-2">
         <span class="status-dot" style="background: #22c55e;"></span>
-        <span class="font-mono text-[10px] uppercase">Service Live</span>
+        <span class="font-mono text-[10px] uppercase">View Only — Live Status</span>
       </div>
     </div>
   </header>
 
   <section class="content grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-8">
-    
+
+    {% set occupied = tables|selectattr('session_id')|list|length %}
+    {% set total = tables|length %}
+
     <div class="tables-area">
       <div class="stats grid grid-cols-2 md:grid-cols-4 gap-[2px] mb-8">
-        <div class="stat"><dt>Total Tables</dt><dd>24</dd></div>
-        <div class="stat"><dt>Occupied</dt><dd>18 <span>(75%)</span></dd></div>
-        <div class="stat"><dt>Available</dt><dd>06</dd></div>
-        <div class="stat"><dt>Avg Turn</dt><dd>42 <span>m</span></dd></div>
+        <div class="stat"><dt>Total Tables</dt><dd>{{ "%02d"|format(total) }}</dd></div>
+        <div class="stat"><dt>Occupied</dt><dd>{{ "%02d"|format(occupied) }}{% if total %} <span>({{ ((occupied / total) * 100)|round|int }}%)</span>{% endif %}</dd></div>
+        <div class="stat"><dt>Available</dt><dd>{{ "%02d"|format(total - occupied) }}</dd></div>
+        <div class="stat"><dt>Active Sessions</dt><dd>{{ "%02d"|format(sessions|length) }}</dd></div>
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 2xl:grid-cols-4 gap-4">
-        
-        <div class="table-card occupied">
+        {% for table in tables %}
+        {% set card_class = 'occupied' if table.session_id else 'available' %}
+        {% if table.session_status == 'ordered' %}{% set card_class = 'attention' %}{% endif %}
+        <div class="table-card {{ card_class }}">
           <div class="card-header">
-            <span class="table-id">T-01</span>
+            <span class="table-id">T-{{ "%02d"|format(table.table_number) }}</span>
             <div class="status-dot"></div>
           </div>
           <div class="card-body">
-            <h3>4 Guests</h3>
-            <p>Order: Entrées Served. Server: Alex M.</p>
+            {% if table.session_id %}
+            <h3>Session #{{ table.session_id }}</h3>
+            <p>Status: {{ table.session_status|title }} • {{ table.order_count }} order(s)</p>
+            {% else %}
+            <h3>Available</h3>
+            <p>QR: {{ table.qr_status|title }}</p>
+            {% endif %}
           </div>
           <div class="card-footer">
-            <span class="timer">Active 45m</span>
-            <span class="running-total">$142.50</span>
+            <span class="timer">{% if table.session_id %}In service{% else %}Idle{% endif %}</span>
+            {% if table.session_id %}
+            <span class="running-total">${{ "%.2f"|format(table.running_total) }}</span>
+            {% endif %}
           </div>
         </div>
-
-        <div class="table-card available">
-          <div class="card-header">
-            <span class="table-id">T-02</span>
-            <div class="status-dot"></div>
-          </div>
-          <div class="card-body">
-            <h3>Ready</h3>
-            <p>Cleaned & Reset. High-top window seat.</p>
-          </div>
-          <div class="card-footer">
-            <span class="timer">Idle 12m</span>
-          </div>
-        </div>
-
-        <div class="table-card attention">
-          <div class="card-header">
-            <span class="table-id">T-03</span>
-            <div class="status-dot"></div>
-          </div>
-          <div class="card-body">
-            <h3>2 Guests</h3>
-            <p>Action Required: Bill Requested.</p>
-          </div>
-          <div class="card-footer">
-            <span class="timer">Active 1h 10m</span>
-            <span class="running-total">$64.00</span>
-          </div>
-        </div>
-
+        {% else %}
+        <p class="font-mono text-sm text-[var(--mist)]">No tables configured.</p>
+        {% endfor %}
       </div>
     </div>
 
     <aside class="side-panel !p-0 bg-transparent border-0">
       <div class="panel !p-6 shadow-sm">
-        <span class="label">Queue Dashboard</span>
-        <h2 class="panel-title">Waitlist</h2>
-        
+        <span class="label">Live Sessions</span>
+        <h2 class="panel-title">Active</h2>
+
         <div class="wait-list mt-6">
-          
+          {% for s in sessions %}
           <div class="wait-item">
             <div class="wait-meta">
-              <span>Party of 4</span>
-              <span>Wait: 15m</span>
+              <span>Table {{ "%02d"|format(s.table_number) }}</span>
+              <span>{{ s.order_count }} order(s)</span>
             </div>
-            <div class="wait-name">Thompson</div>
-            <div class="wait-actions">
-              <button class="btn-small">Notify</button>
-              <button class="btn-small">Seat</button>
+            <div class="wait-name">Session #{{ s.session_id }}</div>
+            <div class="wait-meta" style="margin-top:6px;">
+              <span class="status-tag">{{ s.status|title }}</span>
             </div>
           </div>
-
+          {% else %}
           <div class="wait-item">
-            <div class="wait-meta">
-              <span class="vip-tag">★ VIP Party of 2</span>
-              <span>Wait: 08m</span>
-            </div>
-            <div class="wait-name">Miller</div>
-            <div class="wait-actions">
-              <button class="btn-small">Notify</button>
-              <button class="btn-small">Seat</button>
-            </div>
+            <div class="wait-name" style="font-size:13px; color: var(--mist);">No active sessions.</div>
           </div>
-
+          {% endfor %}
         </div>
+      </div>
 
-        <div class="mt-8 pt-6 border-t border-[var(--rule)]">
-          <button class="btn-submit !py-3 !text-sm">Add New Party</button>
+      <div class="panel !p-6 shadow-sm mt-6">
+        <span class="label">History</span>
+        <h2 class="panel-title">Recently closed</h2>
+
+        <div class="wait-list mt-6">
+          {% for s in closed_sessions[:8] %}
+          <div class="wait-item">
+            <div class="wait-meta">
+              <span>Table {{ "%02d"|format(s.table_number) }}</span>
+              <span>{{ s.order_count }} order(s)</span>
+            </div>
+            <div class="wait-name">Session #{{ s.session_id }}</div>
+          </div>
+          {% else %}
+          <div class="wait-item">
+            <div class="wait-name" style="font-size:13px; color: var(--mist);">No closed sessions yet.</div>
+          </div>
+          {% endfor %}
         </div>
       </div>
     </aside>
 
   </section>
 </main>
+
 <script>(function () {
   const sidebar  = document.querySelector('.sidebar');
   const backdrop = document.querySelector('.sidebar-backdrop');

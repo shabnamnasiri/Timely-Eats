@@ -23,7 +23,7 @@ def register_admin_order_routes(app, mysql):
         }
 
         return render_template(
-            "admin_orders.html",
+            "Admin_order.html",
             orders=orders,
             stats=stats,
             sessions=sessions,

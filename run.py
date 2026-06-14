@@ -22,6 +22,9 @@ from app.customer.order_history import register_order_history_routes
 from app.customer.loyalty import register_loyalty_routes
 from app.staff.orders import register_staff_order_routes
 from app.staff.order_hist import register_staff_order_history_routes
+from app.admin.orders import register_admin_order_routes
+from app.admin.reports import register_admin_report_routes
+
 template_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "app", "templates")
 static_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "app", "static")
 app = Flask(__name__, template_folder=template_path, static_folder=static_path)
@@ -33,6 +36,7 @@ app.config['MYSQL_DB'] = 'timlyeats'
 app.config['MYSQL_PORT'] = 3306
 
 mysql = MySQL(app)
+
 register_staff_order_routes(app, mysql)
 register_login_routes(app, mysql)
 register_register_routes(app, mysql)
@@ -42,18 +46,22 @@ register_add_item_routes(app, mysql)
 register_review_routes(app, mysql)
 register_customer_cart_routes(app, mysql)
 register_admin_add_menu_routes(app, mysql)
-register_customer_place_order_routes(app,mysql)
+register_customer_place_order_routes(app, mysql)
 register_admin_add_staff_routes(app, mysql)
 register_staff_api(app, mysql)
 register_session_routes(app, mysql)
 register_profile_routes(app, mysql)
-register_order_history_routes(app,mysql)
+register_order_history_routes(app, mysql)
 register_loyalty_routes(app, mysql)
 register_staff_order_history_routes(app, mysql)
+register_admin_order_routes(app, mysql)
+register_admin_report_routes(app, mysql)
+
 @app.route("/")
 def home():
     if "user_id" in session:
         return redirect("/Customer/Menu")
     return redirect("/signin")
+
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000, debug=True)

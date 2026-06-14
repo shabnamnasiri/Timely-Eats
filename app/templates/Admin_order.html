@@ -3,213 +3,221 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Employee Order Portal | System</title>
+    <title>Live Orders | TimelyEats</title>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../static/css/Add_Menu.css"> </head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Add_menu.css') }}">
+    <style>
+        .status-badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 99px;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: .05em;
+            text-transform: uppercase;
+        }
+        .status-badge.status-pending   { background: rgba(250,204,21,.15); color: #ca8a04; }
+        .status-badge.status-preparing { background: rgba(59,130,246,.15);  color: #2563eb; }
+        .status-badge.status-ready     { background: rgba(34,197,94,.15);   color: #16a34a; }
+        .view-only-note {
+            font-size: 12px;
+            color: var(--mist);
+            margin-top: 8px;
+        }
+    </style>
+</head>
 
 <body>
 
- <aside class="sidebar">
-  <div class="sidebar-logo">
-      <b>Timely<span style = "color: #c8933a;">Eats</span></b>
-    <small>Admin Panel</small>
-  </div>
-  <div class="sidebar-section">Menu</div>
-  <ul class="sidebar-nav">
-    <li><a href="Add_menu.html"><i class="ico">▤</i> Menu Items</a></li>
-    <li><a href="Categories.html"><i class="ico">⊞</i> Categories</a></li>
-  </ul>
-  <div class="sidebar-section">Live_feed</div>
-  <ul class="sidebar-nav">
-    <li><a href="#" class = "active"><i class="ico">⊙</i> Orders</a></li>
-    <li><a href="Admin_table.html"><i class="ico">◫</i> Tables</a></li>
-  </ul> 
-   <div class="sidebar-section">Users</div>
+<aside id="sidebar" class="sidebar">
+    <div class="sidebar-logo">
+        <b>Timely<span style="color: #f0b347;">Eats</span></b>
+        <small>Admin Panel</small>
+    </div>
+    <div class="sidebar-section">Menu</div>
+    <ul class="sidebar-nav flex-1">
+        <li><a href="/admin/add_menu"><i class="ico">▤</i> Menu Items</a></li>
+        <li><a href="/admin/categories"><i class="ico">⊞</i> Categories</a></li>
+    </ul>
+    <div class="sidebar-section">Live Feed</div>
     <ul class="sidebar-nav">
-    <li><a href="Admin_staff.html"><i class="ico">⊙</i>Staff</a></li>
-    <li><a href="Admin_customer.html"><i class="ico">◫</i> Customers</a></li>
-  </ul>
-  <div class="sidebar-section">analytics</div>
-  <ul class="sidebar-nav">
-    <li><a href="Revenue.html"><i class="ico">▦</i> Revenue</a></li>
-    <li><a href="Order_Report.html"><i class="ico">▦</i> Order_Report</a></li>
-        <li><a href="Customer_report.html"><i class="ico">▦</i>Customer_Report</a></li>
-            <li><a href="#"><i class="ico">▦</i>Table_Report</a></li>
-
-  </ul>
-<div class="sidebar-user">
-    <small>Signed in as</small>
-    <span>Admin · {{ user[0] }}</span>
-    <a href="/logout" class="sidebar-logout">⏻ Logout</a>
-  </div>
+        <li><a href="/admin/orders" class="active"><i class="ico">⊙</i> Orders</a></li>
+        <li><a href="/admin/tables"><i class="ico">◫</i> Tables</a></li>
+    </ul>
+    <div class="sidebar-section">Users</div>
+    <ul class="sidebar-nav">
+        <li><a href="/admin/add_staff"><i class="ico">⊙</i> Staff</a></li>
+        <li><a href="/admin/customers"><i class="ico">◫</i> Customers</a></li>
+    </ul>
+    <div class="sidebar-section">Analytics</div>
+    <ul class="sidebar-nav">
+        <li><a href="/admin/revenue"><i class="ico">▦</i> Revenue</a></li>
+        <li><a href="/admin/order_report"><i class="ico">▦</i> Order Report</a></li>
+        <li><a href="/admin/customer_report"><i class="ico">▦</i> Customer Report</a></li>
+        <li><a href="/admin/table_report"><i class="ico">▦</i> Table Report</a></li>
+    </ul>
+    <div class="sidebar-user">
+        <small>Signed in as</small>
+        <span>Admin · {{ user[0] }}</span>
+        <a href="/logout" class="sidebar-logout">⏻ Logout</a>
+    </div>
 </aside>
 <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
-    <main class="main">
-        <header class="topbar">
-                          <button class="sidebar-toggle" id="sidebarToggle" aria-label="Open menu">&#9776;</button>
+<main class="main">
+    <header class="topbar">
+        <button class="sidebar-toggle" id="sidebarToggle" aria-label="Open menu">&#9776;</button>
 
-            <h1>Current Expeditions</h1>
-            <div class="topbar-right">
-                <span class="badge badge-items">Network: Online</span>
-                <span class="badge badge-items" style="color: var(--success)">8 Active Orders</span>
-            </div>
-        </header>
-
-        <div class="content">
-            <div class="list-panel">
-                <span class="label">Live Queue</span>
-                
-                <div class="stats">
-                    <div class="stat"><dt>Pending</dt><dd>03</dd></div>
-                    <div class="stat"><dt>Preparing</dt><dd>04</dd></div>
-                    <div class="stat"><dt>Ready</dt><dd>01</dd></div>
-                    <div class="stat"><dt>Avg Time</dt><dd>14<span>min</span></dd></div>
-                    <div class="stat"><dt>Revenue</dt><dd><span>$</span>842</dd></div>
-                </div>
-
-                <div class="list-controls">
-                    <div class="filter-tabs">
-                        <div class="filter-tab on">All Orders</div>
-                        <div class="filter-tab">Priority</div>
-                        <div class="filter-tab">Dine-In</div>
-                        <div class="filter-tab">Takeaway</div>
-                    </div>
-                </div>
-
-                <div class="item-list">
-                    <div class="item-row" style="--i: 1">
-                        <div class="item-cat starters">#1024</div>
-                        <div class="item-info">
-                            <b>Table 12 - 2x Burger, 1x Fries</b>
-                            <span>Status: Pending • Wait: 4m • <b style="color: var(--accent)">VISA **** 1234</b></span>
-                        </div>
-                        <div class="item-price">$42.50</div>
-                        <div class="item-actions">
-                            <button class="btn-icon">Modify</button>
-                            <button class="btn-icon" style="background: var(--success); color: white; border: none;">Start</button>
-                        </div>
-                    </div>
-
-                    <div class="item-row" style="--i: 2">
-                        <div class="item-cat mains">#1023</div>
-                        <div class="item-info">
-                            <b>Pickup: Sarah J. - 1x Caesar Salad</b>
-                            <span>Status: Preparing • Wait: 12m • <b style="color: var(--accent)">CASH</b></span>
-                        </div>
-                        <div class="item-price">$18.00</div>
-                        <div class="item-actions">
-                            <button class="btn-icon">Modify</button>
-                            <button class="btn-icon" style="background: var(--ink); color: white;">Ready</button>
-                        </div>
-                    </div>
-
-                    <div class="item-row" style="--i: 3">
-                        <div class="item-cat sides">#1022</div>
-                        <div class="item-info">
-                            <b>Table 04 - Full Course Dinner</b>
-                            <span>Status: Ready to Serve • <b style="color: var(--accent)">AMEX **** 9002</b></span>
-                        </div>
-                        <div class="item-price">$124.90</div>
-                        <div class="item-actions">
-                            <button class="btn-icon del">Void</button>
-                            <button class="btn-icon" style="border-color: var(--success); color: var(--success);">Complete</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <aside class="form-panel">
-                <h2>Order Assistance</h2>
-                <p>Modify existing order details or manually update order status for synchronization.</p>
-                <div class="form-divider"></div>
-
-                <form>
-                    <div class="field">
-                        <label>Target Order ID</label>
-                        <input type="text" placeholder="e.g. #1024" value="#1024">
-                    </div>
-
-                    <div class="field-row">
-                        <div class="field">
-                            <label>Update Status</label>
-                            <div class="select-wrap">
-                                <select>
-                                    <option>Pending</option>
-                                    <option selected>Preparing</option>
-                                    <option>Ready</option>
-                                    <option>Completed</option>
-                                    <option>Voided</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="field">
-                            <label>Payment Mode</label>
-                            <div class="select-wrap">
-                                <select>
-                                    <option>Credit Card</option>
-                                    <option>Cash</option>
-                                    <option>Mobile Pay</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="field">
-                        <label>Special Instructions / Assistance Notes</label>
-                        <textarea placeholder="Add allergy warnings or table change notes here..."></textarea>
-                    </div>
-
-                    <label class="label">Priority Level</label>
-                    <div class="tags-group">
-                        <input type="checkbox" id="tag1" class="tag-toggle">
-                        <label for="tag1">Standard</label>
-                        
-                        <input type="checkbox" id="tag2" class="tag-toggle" checked>
-                        <label for="tag2">Rush</label>
-                        
-                        <input type="checkbox" id="tag3" class="tag-toggle">
-                        <label for="tag3">VIP</label>
-                    </div>
-
-                    <button type="submit" class="btn-submit">Update Order Details</button>
-                </form>
-            </aside>
+        <h1>Live Orders</h1>
+        <div class="topbar-right">
+            <span class="badge badge-items">Network: Online</span>
+            <span class="badge badge-items" style="color: var(--success)">{{ stats.active_orders }} Active Orders</span>
         </div>
-    </main>
+    </header>
+
+    <div class="content">
+        <div class="list-panel" style="flex: 1;">
+            <span class="label">Live Queue <span class="view-only-note">(view only)</span></span>
+
+            <div class="stats">
+                <div class="stat"><dt>Pending</dt><dd>{{ "%02d"|format(stats.pending_orders) }}</dd></div>
+                <div class="stat"><dt>Preparing</dt><dd>{{ "%02d"|format(stats.preparing_orders) }}</dd></div>
+                <div class="stat"><dt>Ready</dt><dd>{{ "%02d"|format(stats.ready_orders) }}</dd></div>
+                <div class="stat"><dt>Total Active</dt><dd>{{ "%02d"|format(stats.active_orders) }}</dd></div>
+            </div>
+
+            <div class="list-controls">
+                <div class="filter-tabs">
+                    <button type="button" class="filter-tab on" data-filter="all">All Orders</button>
+                    <button type="button" class="filter-tab" data-filter="pending">Pending</button>
+                    <button type="button" class="filter-tab" data-filter="preparing">Preparing</button>
+                    <button type="button" class="filter-tab" data-filter="ready">Ready</button>
+                </div>
+            </div>
+
+            <div class="item-list" id="orderList">
+                {% if orders %}
+                    {% for order in orders %}
+                    <div class="item-row" style="--i: {{ loop.index }}" data-status="{{ order.status }}">
+                        <div class="item-cat {{ order.status }}">#{{ order.order_id }}</div>
+                        <div class="item-info">
+                            <strong>
+                                Table {{ order.table_number or "?" }} — {{ order.customer_name }}
+                                <span class="status-badge status-{{ order.status }}">{{ order.status }}</span>
+                            </strong>
+                            <span>
+                                {% if order.status == 'ready' %}
+                                    Ready to serve
+                                {% elif order.remaining_minutes > 0 %}
+                                    Est. {{ order.remaining_minutes }}m remaining
+                                {% else %}
+                                    Ready to serve
+                                {% endif %}
+                                • {{ order.payment_label }}
+                                • {{ order.created_label }}
+                            </span>
+                            <div class="item-lines">
+                                {% for line in order.lines %}
+                                <span>{{ line.item }}{% if line.note %} — <em>{{ line.note }}</em>{% endif %}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="item-price">${{ "%.2f"|format(order.total_amount) }}</div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                <div class="empty">
+                    <b>No Active Orders</b>
+                    <span>Pending, preparing, and ready orders will appear here.</span>
+                </div>
+                {% endif %}
+            </div>
+
+            <span class="label" style="margin-top: 24px;">Active Table Sessions</span>
+            <div class="item-list">
+                {% for table_session in sessions %}
+                <div class="item-row" style="--i: {{ loop.index }}">
+                    <div class="item-cat {{ table_session.status }}">T{{ table_session.table_number }}</div>
+                    <div class="item-info">
+                        <strong>Session #{{ table_session.session_id }}</strong>
+                        <span>Status: {{ table_session.status|title }} • Orders: {{ table_session.order_count }}</span>
+                    </div>
+                </div>
+                {% else %}
+                <div class="empty">
+                    <b>No active sessions</b>
+                    <span>Tables with open sessions will appear here.</span>
+                </div>
+                {% endfor %}
+            </div>
+
+            <span class="label label-closed">Closed Table Sessions</span>
+            <div class="item-list">
+                {% for table_session in closed_sessions %}
+                <div class="item-row closed" style="--i: {{ loop.index }}">
+                    <div class="item-cat closed">T{{ table_session.table_number }}</div>
+                    <div class="item-info">
+                        <strong>Session #{{ table_session.session_id }}</strong>
+                        <span>Status: {{ table_session.status|title }} • Orders: {{ table_session.order_count }}</span>
+                    </div>
+                </div>
+                {% else %}
+                <div class="empty">
+                    <b>No closed sessions</b>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</main>
+
 <script>
+    /* ---------- sidebar toggle ---------- */
     (function () {
-  const sidebar  = document.querySelector('.sidebar');
-  const backdrop = document.querySelector('.sidebar-backdrop');
-  const toggle   = document.querySelector('.sidebar-toggle');
+        const sidebar  = document.querySelector('.sidebar');
+        const backdrop = document.querySelector('.sidebar-backdrop');
+        const toggle   = document.querySelector('.sidebar-toggle');
 
-  if (!sidebar || !backdrop || !toggle) return;
+        if (!sidebar || !backdrop || !toggle) return;
 
-  function openSidebar() {
-    sidebar.classList.add('open');
-    backdrop.classList.add('open');
-    document.body.style.overflow = 'hidden';
-  }
+        function openSidebar() {
+            sidebar.classList.add('open');
+            backdrop.classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
 
-  function closeSidebar() {
-    sidebar.classList.remove('open');
-    backdrop.classList.remove('open');
-    document.body.style.overflow = '';
-  }
+        function closeSidebar() {
+            sidebar.classList.remove('open');
+            backdrop.classList.remove('open');
+            document.body.style.overflow = '';
+        }
 
-  toggle.addEventListener('click', openSidebar);
-  backdrop.addEventListener('click', closeSidebar);
+        toggle.addEventListener('click', openSidebar);
+        backdrop.addEventListener('click', closeSidebar);
 
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape') closeSidebar();
-  });
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') closeSidebar();
+        });
 
-  sidebar.querySelectorAll('a').forEach(function (link) {
-    link.addEventListener('click', function () {
-      if (window.innerWidth < 1024) closeSidebar();
+        sidebar.querySelectorAll('a').forEach(function (link) {
+            link.addEventListener('click', function () {
+                if (window.innerWidth < 1024) closeSidebar();
+            });
+        });
+    })();
+
+    /* ---------- order filter tabs ---------- */
+    document.querySelectorAll(".filter-tab").forEach(tab => {
+        tab.addEventListener("click", () => {
+            document.querySelectorAll(".filter-tab").forEach(t => t.classList.remove("on"));
+            tab.classList.add("on");
+            const filter = tab.dataset.filter;
+            document.querySelectorAll("#orderList .item-row").forEach(row => {
+                row.style.display = (filter === "all" || row.dataset.status === filter) ? "" : "none";
+            });
+        });
     });
-  });
-})();
 </script>
+
 </body>
 </html>

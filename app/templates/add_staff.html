@@ -8,7 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Staff Directory | Admin</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/Add_menu.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/Revenue.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/toast.css') }}"/>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
   
@@ -25,24 +25,24 @@
   <div class="sidebar-section">Menu</div>
   <ul class="sidebar-nav">
     <li><a href="/admin/add_menu"><i class="ico">▤</i> Menu Items</a></li>
-    <li><a href="#"><i class="ico">⊞</i> Categories</a></li>
+    <li><a href="/admin/categories"><i class="ico">⊞</i> Categories</a></li>
   </ul>
   <div class="sidebar-section">Live Feed</div>
   <ul class="sidebar-nav">
-    <li><a href="#"><i class="ico">⊙</i> Orders</a></li>
-    <li><a href="#"><i class="ico">◫</i> Tables</a></li>
+    <li><a href="/admin/orders"><i class="ico">⊙</i> Orders</a></li>
+    <li><a href="/admin/tables"><i class="ico">◫</i> Tables</a></li>
   </ul>
   <div class="sidebar-section">Users</div>
   <ul class="sidebar-nav">
     <li><a href="{{ url_for('admin_staff') }}" class="active"><i class="ico">⊙</i> Staff</a></li>
-    <li><a href="#"><i class="ico">◫</i> Customers</a></li>
+    <li><a href="/admin/customers"><i class="ico">◫</i> Customers</a></li>
   </ul>
   <div class="sidebar-section">Analytics</div>
   <ul class="sidebar-nav">
-    <li><a href="#"><i class="ico">▦</i> Revenue</a></li>
-    <li><a href="#"><i class="ico">▦</i> Order Report</a></li>
-    <li><a href="#"><i class="ico">▦</i> Customer Report</a></li>
-    <li><a href="#"><i class="ico">▦</i> Table Report</a></li>
+    <li><a href="/admin/revenue"><i class="ico">▦</i> Revenue</a></li>
+    <li><a href="/admin/order_report"><i class="ico">▦</i> Order Report</a></li>
+    <li><a href="/admin/customer_report"><i class="ico">▦</i> Customer Report</a></li>
+    <li><a href="/admin/table_report"><i class="ico">▦</i> Table Report</a></li>
   </ul>
   {% if user %}
   <div class="sidebar-user">
@@ -59,17 +59,11 @@
     <button class="sidebar-toggle" id="sidebarToggle" aria-label="Open menu">&#9776;</button>
     <h1>Staff Directory</h1>
   </div>
-  <div class="topbar-right">
-    <a href="/logout" style="font-family:'DM Mono',monospace; font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--ink); text-decoration:none; opacity:.7;">⏻ Logout</a>
-  </div>
+
 </header>
     <!-- Left: hamburger + title -->
     <!-- Right: logout -->
-    <div class="topbar-right">
-      <a href="/logout" style="font-family:'DM Mono',monospace; font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--ink); text-decoration:none; opacity:.7; transition:opacity .2s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.7">
-        ⏻ Logout
-      </a>
-    </div>
+ 
   </header>
 
   {{ render_toast() }}
@@ -251,6 +245,7 @@ renderPaginationControls();
     link.addEventListener('click', function() { if (window.innerWidth < 1024) closeSidebar(); });
   });
 })();
+
 </script>
 
 </body>

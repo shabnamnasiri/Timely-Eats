@@ -283,7 +283,7 @@ def register_admin_report_routes(app, mysql):
         cursor.close()
 
         return render_template(
-            "admin_tables.html",
+            "Admin_table.html",
             tables=tables,
             sessions=sessions,
             closed_sessions=closed_sessions,
