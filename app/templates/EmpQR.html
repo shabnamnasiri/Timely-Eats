@@ -16,10 +16,10 @@
 <aside class="sidebar">
     <div class="sidebar-logo">
         <b>ORDER<span>FLOW</span></b>
-        <small>Internal Terminal v2.0</small>
+        <small>Staff Protal</small>
     </div>
 
-    <div class="sidebar-section">Navigation</div>
+    <div class="sidebar-section">Management</div>
     <nav class="sidebar-nav">
         <a href="/staff/orders"><i class="ico">⬢</i> Live Orders</a>
         <a href="/staff/qr" class="active"><i class="ico">▣</i> QR Generator</a>
@@ -37,6 +37,7 @@
     {{ render_toast() }}
 
     <header class="topbar">
+        <button class="sidebar-toggle" id="sidebarToggle" aria-label="Open menu">☰</button>
         <h1>QR Code Management</h1>
         <div class="topbar-right">
             <span class="badge badge-items">Printer: Ready</span>
@@ -180,6 +181,17 @@ function updateDropdown(sessions) {
     }
 });
 }
+
+  const _toggle   = document.getElementById("sidebarToggle");
+  const _sidebar  = document.querySelector(".sidebar");
+  const _backdrop = document.getElementById("sidebarBackdrop");
+
+  function openSidebar()  { _sidebar.classList.add("open");  _backdrop.classList.add("open"); }
+  function closeSidebar() { _sidebar.classList.remove("open"); _backdrop.classList.remove("open"); }
+
+  _toggle.addEventListener("click", openSidebar);
+  _backdrop.addEventListener("click", closeSidebar);
+  _sidebar.querySelectorAll("a").forEach(a => a.addEventListener("click", closeSidebar));
 
 function printQR(id) {
     window.open(`/staff/print/${id}`);
