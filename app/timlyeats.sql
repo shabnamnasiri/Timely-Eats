@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 13, 2026 at 04:25 PM
+-- Generation Time: Jun 14, 2026 at 08:16 PM
 -- Server version: 8.0.35
 -- PHP Version: 8.2.12
 
@@ -81,7 +81,8 @@ CREATE TABLE `orders` (
   `status` varchar(50) DEFAULT NULL,
   `total_amount` decimal(10,2) DEFAULT NULL,
   `session_id` int DEFAULT NULL,
-  `notified` tinyint(1) NOT NULL DEFAULT '0'
+  `notified` tinyint(1) NOT NULL DEFAULT '0',
+  `ready_notified` tinyint(1) DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
@@ -111,21 +112,6 @@ CREATE TABLE `payment` (
   `payment_status` varchar(50) DEFAULT NULL,
   `date` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `restaurant_table`
---
-
-CREATE TABLE `restaurant_table` (
-  `table_id` int NOT NULL,
-  `table_number` int NOT NULL,
-  `qr_token` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `qr_status` varchar(50) COLLATE utf8mb4_general_ci DEFAULT 'inactive',
-  `created_at` datetime DEFAULT NULL,
-  `used_at` datetime DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
