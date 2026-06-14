@@ -184,7 +184,7 @@ def register_customer_place_order_routes(app, mysql):
 
         discount = 0
         if redeem and loyalty_points >= 100:
-            discount = loyalty_points // 100
+            discount = min(loyalty_points // 100, order_total)  # can't exceed order total
             session['redeem_points'] = True
             session['loyalty_discount'] = discount
         else:
