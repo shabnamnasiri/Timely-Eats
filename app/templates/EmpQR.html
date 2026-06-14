@@ -100,6 +100,25 @@ function generateQR(event) {
 
 function loadSessions() {
     fetch('/staff/sessions')
+    .then(res => {
+        console.log("Status:", res.status);
+        return res.json();
+    })
+    .then(data => {
+        console.log("Sessions data:", data);
+
+        const active = data.filter(s => s.status === "active");
+        const closed = data.filter(s => s.status !== "active");
+
+        console.log("Active:", active);
+        console.log("Closed:", closed);
+
+        updateDropdown(active);
+
+        // rest of your render logic...
+    })
+    .catch(err => console.error("FETCH ERROR:", err));
+}    fetch('/staff/sessions')
     .then(res => res.json())
     .then(data => {
         // split active and closed sessions for clearer UI
@@ -165,23 +184,21 @@ function loadSessions() {
         updateDropdown(active);
     })
     .catch(err => console.error("LOAD ERROR:", err));
-}
 
-function updateDropdown(sessions) {
+
+function updateDropdown(activeSessions) {
     const select = document.getElementById("tableNumber");
     select.innerHTML = `<option value="">Select Table...</option>`;
 
-   ALL_TABLES.forEach(table => {
-    const active = sessions.some(s => s.table_number == table && s.status == "active");
-    const ordered = sessions.some(s => s.table_number == table && s.status == "ordered");
-    if (active || ordered) {
-        select.innerHTML += `<option disabled>Table ${table} (In Use)</option>`;
-    } else {
-        select.innerHTML += `<option value="${table}">Table ${table}</option>`;
-    }
-});
+    ALL_TABLES.forEach(table => {
+        const inUse = activeSessions.some(s => s.table_number == table && (s.status == "active" || s.status == "ordered"));
+        if (inUse) {
+            select.innerHTML += `<option disabled>Table ${table} (In Use)</option>`;
+        } else {
+            select.innerHTML += `<option value="${table}">Table ${table}</option>`;
+        }
+    });
 }
-
   const _toggle   = document.getElementById("sidebarToggle");
   const _sidebar  = document.querySelector(".sidebar");
   const _backdrop = document.getElementById("sidebarBackdrop");

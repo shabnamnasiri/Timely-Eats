@@ -31,7 +31,7 @@ app = Flask(__name__, template_folder=template_path, static_folder=static_path)
 app.secret_key = "secret_key_123"
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = '123qweasdzxc'
+app.config['MYSQL_PASSWORD'] = '22703380'
 app.config['MYSQL_DB'] = 'timlyeats'
 app.config['MYSQL_PORT'] = 3306
 
