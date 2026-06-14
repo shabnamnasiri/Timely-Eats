@@ -92,11 +92,11 @@
     </style>
 </head>
 <body>
-
+<div class="sidebar-backdrop" id="sidebarBackdrop"></div>
     <aside class="sidebar">
         <div class="sidebar-logo">
             <b>ORDER<span>FLOW</span></b>
-            <small>Internal Terminal v2.0</small>
+            <small>Staff Portal</small>
         </div>
 
         <div class="sidebar-section">Management</div>
@@ -116,6 +116,7 @@
         {{ render_toast() }}
 
         <header class="topbar">
+            <button class="sidebar-toggle" id="sidebarToggle" aria-label="Open menu">☰</button>
             <h1>Current Expeditions</h1>
             <div class="topbar-right">
                 <span class="badge badge-items" id="network-badge">
@@ -423,6 +424,17 @@ socket.on("staff_update", function(data) {
 
     stampUpdated();
 });
+
+  const _toggle   = document.getElementById("sidebarToggle");
+  const _sidebar  = document.querySelector(".sidebar");
+  const _backdrop = document.getElementById("sidebarBackdrop");
+
+  function openSidebar()  { _sidebar.classList.add("open");  _backdrop.classList.add("open"); }
+  function closeSidebar() { _sidebar.classList.remove("open"); _backdrop.classList.remove("open"); }
+
+  _toggle.addEventListener("click", openSidebar);
+  _backdrop.addEventListener("click", closeSidebar);
+  _sidebar.querySelectorAll("a").forEach(a => a.addEventListener("click", closeSidebar));
 
 // ── dashboard_refresh: full data push every 10 s ──────────────────
 
