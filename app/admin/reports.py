@@ -123,43 +123,49 @@ def get_customer_report(mysql):
 
 def get_table_report(mysql):
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+
+    # replaced restaurant_table with DISTINCT from table_session
     cursor.execute(
         """
-        SELECT GREATEST(
-            (SELECT COUNT(*) FROM restaurant_table),
-            (SELECT COUNT(DISTINCT table_number) FROM table_session)
-        ) AS total_tables
+        SELECT COUNT(DISTINCT table_number) AS total_tables
+        FROM table_session
         """
     )
     table_meta = cursor.fetchone()
 
     cursor.execute(
-        f"""
-        SELECT
-            ts.table_number,
-            COUNT(DISTINCT o.order_id) AS order_count,
-            COALESCE(SUM(o.total_amount), 0) AS revenue,
-            COALESCE(AVG(o.preparation_time), 0) AS avg_prep,
-            (
-                SELECT i.category
-                FROM order_details od
-                JOIN item i ON i.item_id = od.item_id
-                JOIN orders o2 ON o2.order_id = od.order_id
-                WHERE o2.session_id = ts.session_id
-                  AND LOWER(COALESCE(o2.status, '')) = %s
-                GROUP BY i.category
-                ORDER BY SUM(od.quantity) DESC
-                LIMIT 1
-            ) AS primary_category
-        FROM table_session ts
-        LEFT JOIN orders o
-            ON o.session_id = ts.session_id
-           AND LOWER(COALESCE(o.status, '')) = %s
-        GROUP BY ts.table_number
-        ORDER BY order_count DESC, ts.table_number ASC
-        """,
-        (COMPLETED_ORDER_STATUS, COMPLETED_ORDER_STATUS),
-    )
+    """
+    SELECT
+        ts.table_number,
+        COUNT(DISTINCT o.order_id) AS order_count,
+        COALESCE(SUM(o.total_amount), 0) AS revenue,
+        COALESCE(AVG(o.preparation_time), 0) AS avg_prep,
+        (
+            SELECT i.category
+            FROM order_details od
+            JOIN item i
+                ON i.item_id = od.item_id
+            JOIN orders o2
+                ON o2.order_id = od.order_id
+            WHERE o2.session_id IN (
+                SELECT ts2.session_id
+                FROM table_session ts2
+                WHERE ts2.table_number = ts.table_number
+            )
+            AND LOWER(COALESCE(o2.status, '')) = %s
+            GROUP BY i.category
+            ORDER BY SUM(od.quantity) DESC
+            LIMIT 1
+        ) AS primary_category
+    FROM table_session ts
+    LEFT JOIN orders o
+        ON o.session_id = ts.session_id
+       AND LOWER(COALESCE(o.status, '')) = %s
+    GROUP BY ts.table_number
+    ORDER BY order_count DESC, ts.table_number ASC
+    """,
+    (COMPLETED_ORDER_STATUS, COMPLETED_ORDER_STATUS),
+)
     tables = cursor.fetchall()
     cursor.close()
 
@@ -180,7 +186,6 @@ def get_table_report(mysql):
             sum(t["avg_prep"] or 0 for t in tables) / len(tables)
         ) if tables else 0,
     }
-
 
 def register_admin_report_routes(app, mysql):
 
@@ -258,25 +263,20 @@ def register_admin_report_routes(app, mysql):
         cursor.execute(
             """
             SELECT
-                tc.table_number,
-                COALESCE(rt.qr_status, 'inactive') AS qr_status,
+                ts_all.table_number,
                 ts.session_id,
                 ts.status AS session_status,
                 COUNT(o.order_id) AS order_count,
                 COALESCE(SUM(o.total_amount), 0) AS running_total
             FROM (
-                SELECT table_number FROM restaurant_table
-                UNION
-                SELECT table_number FROM table_session
-            ) AS tc
-            LEFT JOIN restaurant_table rt
-                ON rt.table_number = tc.table_number
+                SELECT DISTINCT table_number FROM table_session
+            ) AS ts_all
             LEFT JOIN table_session ts
-                ON ts.table_number = tc.table_number
-               AND LOWER(COALESCE(ts.status, '')) IN ('active', 'ordered')
+                ON ts.table_number = ts_all.table_number
+            AND LOWER(COALESCE(ts.status, '')) IN ('active', 'ordered')
             LEFT JOIN orders o ON o.session_id = ts.session_id
-            GROUP BY tc.table_number, rt.qr_status, ts.session_id, ts.status
-            ORDER BY tc.table_number ASC
+            GROUP BY ts_all.table_number, ts.session_id, ts.status
+            ORDER BY ts_all.table_number ASC
             """
         )
         tables = cursor.fetchall()

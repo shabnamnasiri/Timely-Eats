@@ -31,54 +31,16 @@
 </head>
 <body class="bg-[var(--canvas)]">
 
-<<<<<<< Updated upstream
+<div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
 {{ render_admin_sidebar('table_report', user) }}
-=======
-<aside class="sidebar hidden lg:flex lg:flex-col">
-    <div class="sidebar-logo">
-        <b>Timely<span style="color:#c8933a;">Eats</span></b>
-        <small>Admin Panel</small>
-    </div>
-
-    <div class="sidebar-section">Menu</div>
-    <ul class="sidebar-nav">
-        <li><a href="/admin/add_menu"><i class="ico">▤</i> Menu Items</a></li>
-        
-    </ul>
-
-    <div class="sidebar-section">Live Feed</div>
-    <ul class="sidebar-nav">
-        <li><a href="/admin/orders"><i class="ico">⊙</i> Orders</a></li>
-        <li><a href="/admin/tables"><i class="ico">◫</i> Tables</a></li>
-    </ul>
-
-    <div class="sidebar-section">Users</div>
-    <ul class="sidebar-nav">
-        <li><a href="/admin/add_staff"><i class="ico">⊙</i> Staff</a></li>
-        <li><a href="/admin/orders"><i class="ico">◫</i> Customers</a></li>
-    </ul>
-
-    <div class="sidebar-section">Analytics</div>
-    <ul class="sidebar-nav">
-        <li><a href="/admin/revenue"><i class="ico">▦</i> Revenue</a></li>
-        <li><a href="/admin/order_report"><i class="ico">▦</i> Order Report</a></li>
-        <li><a href="/admin/customer_report"><i class="ico">▦</i> Customer Report</a></li>
-        <li><a href="/admin/table_report" class="active"><i class="ico">▦</i> Table Report</a></li>
-    </ul>
-    <div class="sidebar-user">
-    <small>Signed in as</small>
-    <span>Admin · {{ user[0] }}</span>
-    <a href="/logout" class="sidebar-logout">⏻ Logout</a>
-  </div>
-</aside>
->>>>>>> Stashed changes
 
 <main class="main flex-1 min-w-0">
     <header class="topbar">
-        <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
-                          <button class="sidebar-toggle" id="sidebarToggle" aria-label="Open menu">&#9776;</button>
-
-        <h1>Table Analytics</h1>
+        <div style="display:flex; align-items:center; gap:12px;">
+            <button class="sidebar-toggle" id="sidebarToggle" aria-label="Open menu">&#9776;</button>
+            <h1>Table Analytics</h1>
+        </div>
         <p class="font-mono text-[10px] text-[var(--mist)] uppercase mt-1">Metrics from closed orders per table session</p>
     </header>
 
@@ -145,6 +107,22 @@ document.getElementById("tableSearch")?.addEventListener("input", (e) => {
         row.style.display = num.includes(q) ? "" : "none";
     });
 });
+
+(function () {
+    const sidebar  = document.getElementById('sidebar');
+    const backdrop = document.getElementById('sidebarBackdrop');
+    const toggle   = document.getElementById('sidebarToggle');
+    if (!sidebar || !backdrop || !toggle) return;
+    function openSidebar()  { sidebar.classList.add('open');    backdrop.classList.add('open');    document.body.style.overflow = 'hidden'; }
+    function closeSidebar() { sidebar.classList.remove('open'); backdrop.classList.remove('open'); document.body.style.overflow = ''; }
+    toggle.addEventListener('click', openSidebar);
+    backdrop.addEventListener('click', closeSidebar);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSidebar(); });
+    sidebar.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => { if (window.innerWidth < 1024) closeSidebar(); });
+    });
+})();
 </script>
+
 </body>
 </html>

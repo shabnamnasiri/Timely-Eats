@@ -5,74 +5,31 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Staff Directory | Admin</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/Revenue.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Add_menu.css') }}">
+
   <link rel="stylesheet" href="{{ url_for('static', filename='css/toast.css') }}"/>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
-  
 </head>
 <body>
+
+<div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
 {{ render_admin_sidebar('staff', user) }}
 
 <main class="main">
-<header class="topbar">
-  <div style="display:flex; align-items:center; gap:12px;">
-    <button class="sidebar-toggle" id="sidebarToggle" aria-label="Open menu">&#9776;</button>
-    <h1>Staff Directory</h1>
-  </div>
-<<<<<<< Updated upstream
-=======
-  <div class="sidebar-section">Menu</div>
-  <ul class="sidebar-nav">
-    <li><a href="/admin/add_menu"><i class="ico">▤</i> Menu Items</a></li>
-    
-  </ul>
-  <div class="sidebar-section">Live Feed</div>
-  <ul class="sidebar-nav">
-    <li><a href="/admin/orders"><i class="ico">⊙</i> Orders</a></li>
-    <li><a href="/admin/tables"><i class="ico">◫</i> Tables</a></li>
-  </ul>
-  <div class="sidebar-section">Users</div>
-  <ul class="sidebar-nav">
-    <li><a href="{{ url_for('admin_staff') }}" class="active"><i class="ico">⊙</i> Staff</a></li>
-    <li><a href="/admin/customers"><i class="ico">◫</i> Customers</a></li>
-  </ul>
-  <div class="sidebar-section">Analytics</div>
-  <ul class="sidebar-nav">
-    <li><a href="/admin/revenue"><i class="ico">▦</i> Revenue</a></li>
-    <li><a href="/admin/order_report"><i class="ico">▦</i> Order Report</a></li>
-    <li><a href="/admin/customer_report"><i class="ico">▦</i> Customer Report</a></li>
-    <li><a href="/admin/table_report"><i class="ico">▦</i> Table Report</a></li>
-  </ul>
-  {% if user %}
-  <div class="sidebar-user">
-    <small>Signed in as</small>
-    <span>Admin · {{ user[0] }}</span>
-    <a href="/logout" class="sidebar-logout">⏻ Logout</a>
-  </div>
-  {% endif %}
-</aside>
-
-<main class="main">
-<header class="topbar">
-  <div style="display:flex; align-items:center; gap:12px;">
-    <button class="sidebar-toggle" id="sidebarToggle" aria-label="Open menu">&#9776;</button>
-    <h1>Staff Directory</h1>
-  </div>
-
-</header>
-    <!-- Left: hamburger + title -->
-    <!-- Right: logout -->
- 
+  <header class="topbar">
+    <div style="display:flex; align-items:center; gap:12px;">
+      <button class="sidebar-toggle" id="sidebarToggle" aria-label="Open menu">&#9776;</button>
+      <h1>Staff Directory</h1>
+    </div>
   </header>
 
   {{ render_toast() }}
->>>>>>> Stashed changes
 
   <div class="content">
 
@@ -80,59 +37,32 @@
     <div class="list-panel">
       <span class="label">Current Workers</span>
 
-      <div class="item-list" id="item-list">
-        {% if staffs %}
-          {% for staff in staffs %}
-          <div class="item-row" style="--i:{{ loop.index0 }}">
-
-            <!-- Role / Category -->
-            <span class="item-cat">{{ staff[0] }}</span>
-
-            <!-- Info -->
-            <div class="item-info">
-              <strong>{{ staff[1] }}</strong> <!-- Username -->
-              <span>{{ staff[2] }}</span> <!-- Phone -->
-            </div>
-
-            <!-- Role label -->
-            <span class="item-price">Staff</span>
-
-            <div class="item-actions">
-              <button class="btn-icon"
-                onclick="openEditModal({{ staff[0] }}, '{{ staff[1]|replace("'", "\\'") }}', '{{ staff[2] }}')">
-                Edit
-              </button>
-              <form action="/delete_staff/{{ staff[0] }}" method="POST" style="display:inline">
-                <button type="submit" class="btn-icon del">Delete</button>
-              </form>
-            </div>
-
-          </div>
-          {% endfor %}
-        {% else %}
-          <div class="empty">
-            <b>No Staff Added Yet</b>
-            <span>Use the form to add first staff.</span>
-          </div>
-        {% endif %}
+      <!-- Search -->
+      <div style="margin-bottom:12px;">
+        <input
+          type="text"
+          id="searchInput"
+          placeholder="Search by name or phone..."
+          style="width:100%; padding:9px 12px; border:1px solid var(--rule); background:transparent; color:var(--ink); font-family:'DM Mono'; font-size:12px;"
+        />
       </div>
+
+      <div class="item-list" id="tableBody"></div>
+      <div id="pagination" style="display:flex; gap:6px; margin-top:14px; flex-wrap:wrap;"></div>
     </div>
 
     <!-- RIGHT: ADD STAFF FORM -->
-       {{ render_toast() }}  
     <div class="form-panel">
       <div class="form-divider"></div>
 
       <h2>Add Staff</h2>
       <p>Fill in the details below to add a new staff member.</p>
 
-
       <form method="POST" action="/admin/add_new_staff" autocomplete="off">
 
-        <!-- Username -->
         <div class="field">
           <label for="username">Username</label>
-          <input 
+          <input
             type="text"
             id="username"
             name="username"
@@ -143,10 +73,9 @@
           />
         </div>
 
-        <!-- Phone -->
         <div class="field">
           <label for="phone">Phone Number</label>
-          <input 
+          <input
             type="tel"
             id="phone"
             name="phone"
@@ -156,10 +85,9 @@
           />
         </div>
 
-        <!-- Password -->
         <div class="field">
           <label for="password">Password</label>
-          <input 
+          <input
             type="password"
             id="password"
             name="password"
@@ -170,10 +98,9 @@
           <p class="hint">Minimum 8 characters, including a number and symbol.</p>
         </div>
 
-        <!-- Confirm Password -->
         <div class="field">
           <label for="confirm">Confirm Password</label>
-          <input 
+          <input
             type="password"
             id="confirm"
             name="confirm_password"
@@ -186,12 +113,15 @@
         <button type="submit" class="btn-submit">+ Add Staff</button>
 
       </form>
-    </aside>
+    </div>
+
   </div>
 </main>
 
-<!-- Edit Modal -->
+<!-- Edit Modal Overlay -->
 <div id="modalOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.4); z-index:998;" onclick="closeModal()"></div>
+
+<!-- Edit Modal -->
 <div id="editModal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); width:min(400px,92vw); background:var(--paper); border:1px solid var(--rule); padding:25px; z-index:999; box-shadow:0 12px 30px rgba(0,0,0,0.15); max-height:90vh; overflow-y:auto;">
   <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:1px solid var(--rule); padding-bottom:10px;">
     <h2 style="font-family:'Bebas Neue'; font-size:26px; letter-spacing:1px; margin:0; color:var(--ink);">Edit Staff Member</h2>
@@ -237,8 +167,11 @@ function renderTable() {
   tableBody.innerHTML = "";
   if (filteredStaffList.length === 0) {
     tableBody.innerHTML = `<div class="item-row" style="justify-content:center; padding:40px 0;">
-      <div style="text-align:center;"><b style="font-family:'Bebas Neue'; font-size:20px; color:var(--mist);">No Active Staff Found</b>
-      <p style="margin:5px 0 0 0; font-size:11px; color:var(--mist); font-family:'DM Mono';">No staff match your search parameters.</p></div></div>`;
+      <div style="text-align:center;">
+        <b style="font-family:'Bebas Neue'; font-size:20px; color:var(--mist);">No Active Staff Found</b>
+        <p style="margin:5px 0 0 0; font-size:11px; color:var(--mist); font-family:'DM Mono';">No staff match your search parameters.</p>
+      </div>
+    </div>`;
     return;
   }
   const startIndex = (currentPage - 1) * rowsPerPage;
@@ -270,17 +203,25 @@ function renderPaginationControls() {
     paginationContainer.innerHTML += `
       <button onclick="goToPage(${i})"
         style="padding:6px 10px; border:1px solid var(--rule); cursor:pointer; transition:all .2s;
-        background:${isCurrent?'#c8933a':'transparent'}; color:${isCurrent?'#000':'inherit'};
-        font-family:'DM Mono'; font-weight:${isCurrent?'bold':'normal'};">${i}</button>`;
+        background:${isCurrent ? '#c8933a' : 'transparent'}; color:${isCurrent ? '#000' : 'inherit'};
+        font-family:'DM Mono'; font-weight:${isCurrent ? 'bold' : 'normal'};">${i}</button>`;
   }
 }
 
-function goToPage(page) { currentPage = page; renderTable(); renderPaginationControls(); }
+function goToPage(page) {
+  currentPage = page;
+  renderTable();
+  renderPaginationControls();
+}
 
 document.getElementById("searchInput").addEventListener("input", function(e) {
   const query = e.target.value.toLowerCase();
-  filteredStaffList = fullStaffList.filter(s => s.username.toLowerCase().includes(query) || s.phone.includes(query));
-  currentPage = 1; renderTable(); renderPaginationControls();
+  filteredStaffList = fullStaffList.filter(s =>
+    s.username.toLowerCase().includes(query) || s.phone.includes(query)
+  );
+  currentPage = 1;
+  renderTable();
+  renderPaginationControls();
 });
 
 function openEditModal(id, username, phone) {
@@ -290,6 +231,7 @@ function openEditModal(id, username, phone) {
   document.getElementById('modalOverlay').style.display = 'block';
   document.getElementById('editModal').style.display = 'block';
 }
+
 function closeModal() {
   document.getElementById('modalOverlay').style.display = 'none';
   document.getElementById('editModal').style.display = 'none';
@@ -316,7 +258,6 @@ renderPaginationControls();
     link.addEventListener('click', function() { if (window.innerWidth < 1024) closeSidebar(); });
   });
 })();
-
 </script>
 
 </body>
