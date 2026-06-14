@@ -248,10 +248,26 @@
 
         const data = await res.json();
 
+<<<<<<< Updated upstream
         if (data.success) {
           // Update total
           const totalEl = document.getElementById('order-total');
           if (totalEl) totalEl.textContent = `$${data.new_total.toFixed(2)}`;
+=======
+          <form method="POST" action="/Customer/PlaceOrder">
+            <div class="flex flex-col gap-1.5 mb-5">
+              <label class="flex items-center gap-4 p-4 border border-white/10 bg-white/[0.03] text-[#b0b0b0] hover:border-white/30 hover:text-white transition-all cursor-pointer group">
+                <input class="hidden peer" type="radio" name="payment_method" id="pay-cash" value="cash" checked>
+                <div class="w-4 h-4 rounded-full border-2 border-[#b0b0b0] flex items-center justify-center p-0.5 peer-checked:border-[#c8933a]">
+                  <div class="w-full h-full bg-[#c8933a] rounded-full scale-0 peer-checked:scale-100 transition-transform"></div>
+                </div>
+                <span class="text-xl">💵</span>
+                <div>
+                  <span class="block text-sm font-medium text-white group-peer-checked:text-[#c8933a]">Cash</span>
+                  <span class="block font-mono-custom text-[10px] tracking-wider text-[#7a7a7a] mt-0.5">Pay at the counter</span>
+                </div>
+              </label>
+>>>>>>> Stashed changes
 
           // Update discount label in loyalty panel
           const discountLabel = document.getElementById('loyalty-discount-label');

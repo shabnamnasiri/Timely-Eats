@@ -3,7 +3,7 @@ import pymysql
 
 pymysql.install_as_MySQLdb()
 
-from flask import Flask, session
+from flask import Flask, send_from_directory, session
 from flask_socketio import join_room
 
 from app.extensions import socketio, mysql
@@ -72,10 +72,17 @@ from app.customer.place_order import register_customer_place_order_routes
 from app.admin.add_menu import register_admin_add_menu_routes
 from app.admin.add_staff import register_admin_add_staff_routes
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 from app.admin.orders import register_admin_order_routes
 from app.admin.reports import register_admin_report_routes
 =======
 from app.admin.analytics import register_admin_analytics_routes
+>>>>>>> Stashed changes
+=======
+from app.admin.categories import register_admin_category_routes
+from app.admin.list_customer import register_admin_list_customer_routes
+from app.admin.orders import register_admin_order_routes
+from app.admin.reports import register_admin_report_routes
 >>>>>>> Stashed changes
 from app.staff.api.staff_api import register_staff_api
 from app.staff.session_routes import register_session_routes
@@ -100,6 +107,11 @@ register_customer_cart_routes(app, mysql)
 register_admin_add_menu_routes(app, mysql)
 register_customer_place_order_routes(app, mysql)
 register_admin_add_staff_routes(app, mysql)
+<<<<<<< Updated upstream
+=======
+register_admin_category_routes(app, mysql)
+register_admin_list_customer_routes(app, mysql)
+>>>>>>> Stashed changes
 register_admin_order_routes(app, mysql)
 register_admin_report_routes(app, mysql)
 register_staff_api(app, mysql)
@@ -107,7 +119,24 @@ register_session_routes(app, mysql)
 register_staff_order_routes(app, mysql)
 register_forgotpassword_routes(app, mysql)
 register_notification_routes(app, mysql)
+<<<<<<< Updated upstream
 
+=======
+register_customer_profile_routes(app, mysql)
+register_customer_order_history_routes(app, mysql)
+
+
+# =========================
+# STATIC COMPATIBILITY
+# =========================
+
+@app.route("/static/css/Add_Menu.css")
+def legacy_add_menu_css():
+    return send_from_directory(
+        os.path.join(app.static_folder, "css"),
+        "Add_menu.css",
+    )
+>>>>>>> Stashed changes
 # =========================
 # SOCKET CONNECTIONS
 # =========================
@@ -189,4 +218,8 @@ register_session_room_events(socketio)
 # =========================
 
 if __name__ == "__main__":
+<<<<<<< Updated upstream
     socketio.run(app, debug=True)
+=======
+    socketio.run(app, host="0.0.0.0", port=5000, debug=True)
+>>>>>>> Stashed changes

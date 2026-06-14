@@ -1,9 +1,14 @@
 import os
 from flask import request, jsonify, render_template, Response, redirect, url_for, session, flash
 from werkzeug.utils import secure_filename
+<<<<<<< Updated upstream
 
 from app.admin.helpers import admin_required, get_admin_user
 
+=======
+from app.admin.helpers import get_admin_user
+# For handling file uploads and validating file types
+>>>>>>> Stashed changes
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'webp'}
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS

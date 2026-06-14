@@ -7,31 +7,31 @@
 
   <div class="sidebar-section">Menu</div>
   <ul class="sidebar-nav">
-    <li><a href="/admin/add_menu"{% if active_page == 'menu' %} class="active"{% endif %}><i class="ico">▤</i> Menu Items</a></li>
+    <li><a href="/admin/add_menu"{% if active_page == 'menu' %} class="active"{% endif %}><i class="ico">&#9724;</i> Menu Items</a></li>
   </ul>
 
   <div class="sidebar-section">Live Feed</div>
   <ul class="sidebar-nav">
-    <li><a href="/admin/orders"{% if active_page == 'orders' %} class="active"{% endif %}><i class="ico">⊙</i> Orders</a></li>
-    <li><a href="/admin/tables"{% if active_page == 'tables' %} class="active"{% endif %}><i class="ico">◫</i> Tables</a></li>
+    <li><a href="/admin/orders"{% if active_page == 'orders' %} class="active"{% endif %}><i class="ico">&#8857;</i> Orders</a></li>
+    <li><a href="/admin/tables"{% if active_page == 'tables' %} class="active"{% endif %}><i class="ico">&#9702;</i> Tables</a></li>
   </ul>
 
   <div class="sidebar-section">Users</div>
   <ul class="sidebar-nav">
-    <li><a href="/admin/add_staff"{% if active_page == 'staff' %} class="active"{% endif %}><i class="ico">⊙</i> Staff</a></li>
-    <li><a href="/admin/customer_report"{% if active_page == 'customer_report' %} class="active"{% endif %}><i class="ico">◫</i> Customers</a></li>
+    <li><a href="/admin/add_staff"{% if active_page == 'staff' %} class="active"{% endif %}><i class="ico">&#8857;</i> Staff</a></li>
+    <li><a href="/admin/list_customer"{% if active_page == 'customers' %} class="active"{% endif %}><i class="ico">&#9702;</i> Customers</a></li>
   </ul>
 
   <div class="sidebar-section">Analytics</div>
   <ul class="sidebar-nav">
-    <li><a href="/admin/revenue"{% if active_page == 'revenue' %} class="active"{% endif %}><i class="ico">▦</i> Revenue</a></li>
-    <li><a href="/admin/order_report"{% if active_page == 'order_report' %} class="active"{% endif %}><i class="ico">▦</i> Order Report</a></li>
-    <li><a href="/admin/customer_report"{% if active_page == 'customer_report' %} class="active"{% endif %}><i class="ico">▦</i> Customer Report</a></li>
-    <li><a href="/admin/table_report"{% if active_page == 'table_report' %} class="active"{% endif %}><i class="ico">▦</i> Table Report</a></li>
+    <li><a href="/admin/revenue"{% if active_page == 'revenue' %} class="active"{% endif %}><i class="ico">&#9830;</i> Revenue</a></li>
+    <li><a href="/admin/order_report"{% if active_page == 'order_report' %} class="active"{% endif %}><i class="ico">&#9830;</i> Order Report</a></li>
+    <li><a href="/admin/customer_report"{% if active_page == 'customer_report' %} class="active"{% endif %}><i class="ico">&#9830;</i> Customer Report</a></li>
+    <li><a href="/admin/table_report"{% if active_page == 'table_report' %} class="active"{% endif %}><i class="ico">&#9830;</i> Table Report</a></li>
   </ul>
 
   <ul class="sidebar-nav" style="margin-top: auto;">
-    <li><a href="/logout"><i class="ico">↩</i> Logout</a></li>
+    <li><a href="/logout"><i class="ico">&#8617;</i> Logout</a></li>
   </ul>
 
   {% if user %}

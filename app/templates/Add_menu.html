@@ -13,7 +13,53 @@
 </head>
 <body>
 
+<<<<<<< Updated upstream
 {{ render_admin_sidebar('menu', user) }}
+=======
+<body class="overflow-x-hidden">
+
+<!-- Backdrop OUTSIDE sidebar, BEFORE it -->
+<div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+<aside id="sidebar" class="sidebar">
+  <div class="sidebar-logo">
+    <b>Timely<span style="color: #f0b347;">Eats</span></b>
+    <small>Admin Panel</small>
+  </div>
+
+  <div class="sidebar-section">Menu</div>
+  <ul class="sidebar-nav flex-1">
+    <li><a href="/admin/add_menu" class="active"><i class="ico">▤</i> Menu Items</a></li>
+    
+  </ul>
+
+  <div class="sidebar-section">Live Feed</div>
+  <ul class="sidebar-nav">
+    <li><a href="/admin/orders"><i class="ico">⊙</i> Orders</a></li>
+    <li><a href="/admin/tables"><i class="ico">◫</i> Tables</a></li>
+  </ul>
+
+  <div class="sidebar-section">Users</div>
+  <ul class="sidebar-nav">
+    <li><a href="/admin/add_staff"><i class="ico">⊙</i> Staff</a></li>
+    <li><a href="/admin/customers"><i class="ico">◫</i> Customers</a></li>
+  </ul>
+
+  <div class="sidebar-section">Analytics</div>
+  <ul class="sidebar-nav">
+    <li><a href="/admin/revenue"><i class="ico">▦</i> Revenue</a></li>
+    <li><a href="/admin/order_report"><i class="ico">▦</i> Order Report</a></li>
+    <li><a href="/admin/customer_report"><i class="ico">▦</i> Customer Report</a></li>
+    <li><a href="/admin/table_report"><i class="ico">▦</i> Table Report</a></li>
+  </ul>
+
+  <div class="sidebar-user">
+    <small>Signed in as</small>
+    <span>Admin · {{ user[0] }}</span>
+    <a href="/logout" class="sidebar-logout">⏻ Logout</a>
+  </div>
+</aside>
+>>>>>>> Stashed changes
 
 <div class="main">
   <div class="topbar">
@@ -81,6 +127,18 @@
             <b>No Items Yet</b>
             <span>Use the form to add your first menu item.</span>
           </div>
+<<<<<<< Updated upstream
+=======
+
+        </div>
+      {% endfor %}
+
+        {% if not items %}
+        <div class="empty text-center p-5 col-span-full">
+          <b>No Items Yet</b>
+          <div class="text-muted">Add your first menu item.</div>
+        </div>
+>>>>>>> Stashed changes
         {% endif %}
       </div>
     </div>
