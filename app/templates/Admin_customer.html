@@ -14,7 +14,7 @@
 <!-- ================= SIDEBAR ================= -->
 <aside class="sidebar">
   <div class="sidebar-logo">
-      <b>Timely<span style = "color: #c8933a;">Eats</span></b>
+    <b>Timely<span style="color: #c8933a;">Eats</span></b>
     <small>Admin Panel</small>
   </div>
   <div class="sidebar-section">Menu</div>
@@ -25,22 +25,21 @@
   <div class="sidebar-section">Live_feed</div>
   <ul class="sidebar-nav">
     <li><a href="/admin/orders"><i class="ico">⊙</i> Orders</a></li>
-    <li><a href="/admin//admin/tables"><i class="ico">◫</i> Tables</a></li>
-  </ul> 
-   <div class="sidebar-section">Users</div>
-    <ul class="sidebar-nav">
-    <li><a href="/admin/add_staff"><i class="ico">⊙</i>Staff</a></li>
-    <li><a href="/admin/orders" class = "active"><i class="ico">◫</i> Customers</a></li>
+    <li><a href="/admin/tables"><i class="ico">◫</i> Tables</a></li>
+  </ul>
+  <div class="sidebar-section">Users</div>
+  <ul class="sidebar-nav">
+    <li><a href="/admin/add_staff"><i class="ico">⊙</i> Staff</a></li>
+    <li><a href="/admin/customers" class="active"><i class="ico">◫</i> Customers</a></li>
   </ul>
   <div class="sidebar-section">analytics</div>
   <ul class="sidebar-nav">
     <li><a href="/admin/revenue"><i class="ico">▦</i> Revenue</a></li>
     <li><a href="/admin/order_report"><i class="ico">▦</i> Order_Report</a></li>
-        <li><a href="/admin/customer_report"><i class="ico">▦</i>Customer_Report</a></li>
-            <li><a href="/admin/table_report"><i class="ico">▦</i>Table_Report</a></li>
-
+    <li><a href="/admin/customer_report"><i class="ico">▦</i> Customer_Report</a></li>
+    <li><a href="/admin/table_report"><i class="ico">▦</i> Table_Report</a></li>
   </ul>
-<div class="sidebar-user">
+  <div class="sidebar-user">
     <small>Signed in as</small>
     <span>Admin · {{ user[0] }}</span>
     <a href="/logout" class="sidebar-logout">⏻ Logout</a>
@@ -52,48 +51,98 @@
 
 <header class="topbar">
   <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
-                          <button class="sidebar-toggle" id="sidebarToggle" aria-label="Open menu">&#9776;</button>
-
+  <button class="sidebar-toggle" id="sidebarToggle" aria-label="Open menu">&#9776;</button>
   <h1>Customer Directory</h1>
 </header>
+
+<!-- Flash messages -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div style="padding: 0 20px;">
+      {% for category, message in messages %}
+        <div style="
+          padding: 10px 15px;
+          margin-bottom: 8px;
+          border-left: 3px solid {{ '#c8933a' if category == 'success' else '#e74c3c' if category == 'danger' else '#f0ad4e' }};
+          background: rgba(255,255,255,0.04);
+          font-family: 'DM Mono';
+          font-size: 13px;
+        ">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
 
 <div class="content">
 
 <!-- ================= TABLE PANEL ================= -->
 <section style="flex:2;">
-
 <div class="panel">
 
   <span class="label">Database</span>
-  <h2 class="panel-title">Customers (Paginated View)</h2>
+  <h2 class="panel-title">Customers ({{ customers|length }} total)</h2>
 
-  <!-- SEARCH (inside panel as requested) -->
+  <!-- CLIENT-SIDE SEARCH -->
   <input id="searchInput" type="text" placeholder="Search customers..."
-    style="width:100%; margin-bottom:15px; padding:10px; border:1px solid var(--rule); background:transparent; font-family:'DM Mono';">
+    style="width:100%; margin-bottom:15px; padding:10px; border:1px solid var(--rule);
+           background:transparent; font-family:'DM Mono'; box-sizing:border-box;">
 
   <!-- TABLE HEADER -->
   <div class="item-row" style="opacity:0.7; font-weight:600;">
     <div class="item-info">
       <strong>Customer</strong>
-      <span>Email / Stats</span>
+      <span>Email · Phone · Loyalty pts</span>
     </div>
     <div style="display:flex; gap:10px;">
-      <span>Status</span>
       <span>Actions</span>
     </div>
   </div>
 
-  <!-- TABLE BODY -->
-  <div id="tableBody"></div>
+  <!-- TABLE BODY (server-rendered, JS handles pagination + search) -->
+  <div id="tableBody">
+    {% for c in customers %}
+    <div class="item-row customer-row"
+         data-name="{{ c[1]|lower }}"
+         data-email="{{ (c[2] or '')|lower }}">
+      <div class="item-info">
+        <strong>{{ c[1] }}</strong>
+        <span>
+          {{ c[2] or '—' }}
+          {% if c[3] %} · {{ c[3] }}{% endif %}
+          · {{ c[4] or 0 }} pts
+        </span>
+      </div>
+
+      <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+
+        <!-- Edit trigger -->
+        <button class="date-select-btn"
+          onclick="openEdit({{ c[0] }}, '{{ c[1]|e }}', '{{ (c[2] or '')|e }}', '{{ (c[3] or '')|e }}')">
+          Edit
+        </button>
+
+        <!-- Delete form -->
+        <form method="POST" action="/admin/delete_customer/{{ c[0] }}"
+              onsubmit="return confirm('Delete {{ c[1]|e }}?');" style="margin:0;">
+          <button type="submit" class="date-select-btn" style="background:#e74c3c;">
+            Delete
+          </button>
+        </form>
+
+      </div>
+    </div>
+    {% else %}
+    <p style="font-family:'DM Mono'; opacity:0.5; padding:15px 0;">No customers found.</p>
+    {% endfor %}
+  </div>
 
   <!-- PAGINATION -->
   <div id="pagination" style="display:flex; gap:8px; margin-top:15px; justify-content:center;"></div>
 
 </div>
-
 </section>
 
-<!-- ================= ADD USER ================= -->
+<!-- ================= ADD CUSTOMER ================= -->
 <aside class="side-panel">
 
   <span class="label">Admin Tools</span>
@@ -104,160 +153,189 @@
     <strong>Passwords are stored securely (hashed in backend)</strong>
   </div>
 
-  <form style="display:flex; flex-direction:column; gap:10px; margin-top:15px;">
+  <form method="POST" action="/admin/add_customer"
+        style="display:flex; flex-direction:column; gap:10px; margin-top:15px;">
 
-    <input type="text" placeholder="First Name"
-      style="padding:10px; border:1px solid var(--rule); background:transparent; font-family:'DM Mono'; font-size:12px;">
-  <input type="text" placeholder="Last Name"
-      style="padding:10px; border:1px solid var(--rule); background:transparent; font-family:'DM Mono'; font-size:12px;">
-    <input type="email" placeholder="Email"
-      style="padding:10px; border:1px solid var(--rule); background:transparent; font-family:'DM Mono'; font-size:12px;">
+    <input type="text" name="first_name" placeholder="First Name" required
+      style="padding:10px; border:1px solid var(--rule); background:transparent;
+             font-family:'DM Mono'; font-size:12px;">
 
-    <input type="text" placeholder="Phone"
-      style="padding:10px; border:1px solid var(--rule); background:transparent; font-family:'DM Mono'; font-size:12px;">
+    <input type="text" name="last_name" placeholder="Last Name"
+      style="padding:10px; border:1px solid var(--rule); background:transparent;
+             font-family:'DM Mono'; font-size:12px;">
 
-    <!-- PASSWORD FIELD -->
-    <input type="password" placeholder="Password"
-      style="padding:10px; border:1px solid var(--rule); background:transparent; font-family:'DM Mono'; font-size:12px;">
+    <input type="email" name="email" placeholder="Email" required
+      style="padding:10px; border:1px solid var(--rule); background:transparent;
+             font-family:'DM Mono'; font-size:12px;">
 
-    <!-- STATUS / SEGMENT -->
-    <select style="padding:10px; border:1px solid var(--rule); background:transparent; font-family:'DM Mono'; font-size:12px;">
-      <option>New</option>
-      <option>VIP</option>
+    <input type="text" name="phone" placeholder="Phone"
+      style="padding:10px; border:1px solid var(--rule); background:transparent;
+             font-family:'DM Mono'; font-size:12px;">
+
+    <input type="password" name="password" placeholder="Password" required
+      style="padding:10px; border:1px solid var(--rule); background:transparent;
+             font-family:'DM Mono'; font-size:12px;">
+
+    <select name="status"
+      style="padding:10px; border:1px solid var(--rule); background:transparent;
+             font-family:'DM Mono'; font-size:12px;">
+      <option value="New">New</option>
+      <option value="VIP">VIP</option>
     </select>
 
-    <button class="date-select-btn" style="margin-top:10px; justify-content:center;">
+    <button type="submit" class="date-select-btn" style="margin-top:10px; justify-content:center;">
       + Create Customer
     </button>
 
   </form>
 
 </aside>
-
 </div>
+
+<!-- ================= EDIT MODAL ================= -->
+<div id="editModal" style="
+  display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6);
+  z-index:1000; align-items:center; justify-content:center;">
+
+  <div style="
+    background:var(--paper); border:1px solid var(--rule);
+    padding:30px; width:380px; max-width:90vw; font-family:'DM Mono';">
+
+    <h3 style="margin:0 0 20px; font-family:'DM Sans';">Edit Customer</h3>
+
+    <form id="editForm" method="POST"
+          style="display:flex; flex-direction:column; gap:10px;">
+
+      <input type="text" name="username" id="editName" placeholder="Full Name" required
+        style="padding:10px; border:1px solid var(--rule); background:transparent;
+               font-family:'DM Mono'; font-size:12px;">
+
+      <input type="email" name="email" id="editEmail" placeholder="Email" required
+        style="padding:10px; border:1px solid var(--rule); background:transparent;
+               font-family:'DM Mono'; font-size:12px;">
+
+      <input type="text" name="phone" id="editPhone" placeholder="Phone"
+        style="padding:10px; border:1px solid var(--rule); background:transparent;
+               font-family:'DM Mono'; font-size:12px;">
+
+      <input type="password" name="password" placeholder="New password (leave blank to keep)"
+        style="padding:10px; border:1px solid var(--rule); background:transparent;
+               font-family:'DM Mono'; font-size:12px;">
+
+      <input type="password" name="confirm_password" placeholder="Confirm new password"
+        style="padding:10px; border:1px solid var(--rule); background:transparent;
+               font-family:'DM Mono'; font-size:12px;">
+
+      <div style="display:flex; gap:10px; margin-top:10px;">
+        <button type="submit" class="date-select-btn" style="flex:1; justify-content:center;">
+          Save
+        </button>
+        <button type="button" onclick="closeEdit()"
+          class="date-select-btn" style="flex:1; justify-content:center; background:#555;">
+          Cancel
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>
+
 </main>
 
-<!-- ================= JS LOGIC ================= -->
+<!-- ================= JS ================= -->
 <script>
-const users = Array.from({length: 42}, (_, i) => ({
-  name: `User ${i + 1}`,
-  email: `user${i+1}@mail.com`,
-  orders: Math.floor(Math.random() * 20),
-  spent: Math.floor(Math.random() * 300),
-  status: ["VIP", "New", "Regular"][i % 3]
-}));
+// ── Edit modal ───────────────────────────────────
+function openEdit(id, name, email, phone) {
+  document.getElementById('editName').value  = name;
+  document.getElementById('editEmail').value = email;
+  document.getElementById('editPhone').value = phone;
+  document.getElementById('editForm').action = '/admin/edit_customer/' + id;
+  document.getElementById('editModal').style.display = 'flex';
+}
+function closeEdit() {
+  document.getElementById('editModal').style.display = 'none';
+}
+document.getElementById('editModal').addEventListener('click', function(e) {
+  if (e.target === this) closeEdit();
+});
 
+// ── Client-side search + pagination ──────────────
 const rowsPerPage = 10;
-let currentPage = 1;
+let currentPage   = 1;
+let visibleRows   = [];
 
-const tableBody = document.getElementById("tableBody");
-const pagination = document.getElementById("pagination");
-const searchInput = document.getElementById("searchInput");
+const tableBody   = document.getElementById('tableBody');
+const pagination  = document.getElementById('pagination');
+const searchInput = document.getElementById('searchInput');
 
-// FILTERED DATA
-let filteredUsers = [...users];
-
-function renderTable() {
-  tableBody.innerHTML = "";
-
-  const start = (currentPage - 1) * rowsPerPage;
-  const end = start + rowsPerPage;
-
-  const pageData = filteredUsers.slice(start, end);
-
-  pageData.forEach(u => {
-    tableBody.innerHTML += `
-      <div class="item-row">
-        <div class="item-info">
-          <strong>${u.name}</strong>
-          <span>${u.email} • ${u.orders} orders • $${u.spent}</span>
-        </div>
-
-        <div style="display:flex; gap:10px; align-items:center;">
-          <span class="analytics-date">${u.status}</span>
-          <button class="date-select-btn">Edit</button>
-          <button class="date-select-btn" style="background:#e74c3c;">Delete</button>
-        </div>
-      </div>
-    `;
-  });
+function getRows() {
+  return Array.from(document.querySelectorAll('.customer-row'));
 }
 
-function renderPagination() {
-  pagination.innerHTML = "";
+function applyFilter(query) {
+  const q = query.toLowerCase();
+  getRows().forEach(row => {
+    const match = row.dataset.name.includes(q) || row.dataset.email.includes(q);
+    row.style.display = match ? '' : 'none';
+  });
+  visibleRows = getRows().filter(r => r.style.display !== 'none');
+  currentPage = 1;
+  paginate();
+}
 
-  const pages = Math.ceil(filteredUsers.length / rowsPerPage);
+function paginate() {
+  const total = visibleRows.length;
+  const pages = Math.ceil(total / rowsPerPage) || 1;
+  const start = (currentPage - 1) * rowsPerPage;
+  const end   = start + rowsPerPage;
 
+  visibleRows.forEach((row, i) => {
+    row.style.display = (i >= start && i < end) ? '' : 'none';
+  });
+
+  // Re-hide filtered rows that pagination would accidentally re-show
+  getRows().filter(r => !visibleRows.includes(r)).forEach(r => r.style.display = 'none');
+
+  pagination.innerHTML = '';
   for (let i = 1; i <= pages; i++) {
     pagination.innerHTML += `
-      <button onclick="goToPage(${i})"
-        style="
-          padding:6px 10px;
-          border:1px solid var(--rule);
-          background:${i === currentPage ? '#c8933a' : 'transparent'};
-          color:${i === currentPage ? '#000' : 'inherit'};
-          cursor:pointer;
-          font-family:'DM Mono';
-        ">
-        ${i}
-      </button>
-    `;
+      <button onclick="goToPage(${i})" style="
+        padding:6px 10px;
+        border:1px solid var(--rule);
+        background:${i === currentPage ? '#c8933a' : 'transparent'};
+        color:${i === currentPage ? '#000' : 'inherit'};
+        cursor:pointer;
+        font-family:'DM Mono';
+      ">${i}</button>`;
   }
 }
 
 function goToPage(page) {
   currentPage = page;
-  renderTable();
-  renderPagination();
+  paginate();
 }
 
-// SEARCH
-searchInput.addEventListener("input", (e) => {
-  const value = e.target.value.toLowerCase();
+searchInput.addEventListener('input', e => applyFilter(e.target.value));
 
-  filteredUsers = users.filter(u =>
-    u.name.toLowerCase().includes(value) ||
-    u.email.toLowerCase().includes(value)
-  );
+// Init
+visibleRows = getRows();
+paginate();
 
-  currentPage = 1;
-  renderTable();
-  renderPagination();
-});
-
-// INIT
-renderTable();
-renderPagination();
+// ── Sidebar toggle ────────────────────────────────
 (function () {
   const sidebar  = document.querySelector('.sidebar');
   const backdrop = document.querySelector('.sidebar-backdrop');
   const toggle   = document.querySelector('.sidebar-toggle');
-
   if (!sidebar || !backdrop || !toggle) return;
 
-  function openSidebar() {
-    sidebar.classList.add('open');
-    backdrop.classList.add('open');
-    document.body.style.overflow = 'hidden';
-  }
-
-  function closeSidebar() {
-    sidebar.classList.remove('open');
-    backdrop.classList.remove('open');
-    document.body.style.overflow = '';
-  }
+  function openSidebar()  { sidebar.classList.add('open');    backdrop.classList.add('open');    document.body.style.overflow = 'hidden'; }
+  function closeSidebar() { sidebar.classList.remove('open'); backdrop.classList.remove('open'); document.body.style.overflow = ''; }
 
   toggle.addEventListener('click', openSidebar);
   backdrop.addEventListener('click', closeSidebar);
-
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape') closeSidebar();
-  });
-
-  sidebar.querySelectorAll('a').forEach(function (link) {
-    link.addEventListener('click', function () {
-      if (window.innerWidth < 1024) closeSidebar();
-    });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSidebar(); });
+  sidebar.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => { if (window.innerWidth < 1024) closeSidebar(); });
   });
 })();
 </script>

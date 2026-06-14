@@ -24,7 +24,7 @@ from app.staff.orders import register_staff_order_routes
 from app.staff.order_hist import register_staff_order_history_routes
 from app.admin.orders import register_admin_order_routes
 from app.admin.reports import register_admin_report_routes
-
+from app.admin.customer import register_admin_customer_routes
 template_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "app", "templates")
 static_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "app", "static")
 app = Flask(__name__, template_folder=template_path, static_folder=static_path)
@@ -56,7 +56,7 @@ register_loyalty_routes(app, mysql)
 register_staff_order_history_routes(app, mysql)
 register_admin_order_routes(app, mysql)
 register_admin_report_routes(app, mysql)
-
+register_admin_customer_routes(app, mysql)
 @app.route("/")
 def home():
     if "user_id" in session:
