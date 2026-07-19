@@ -47,7 +47,7 @@ def get_orders(mysql):
     if overdue_ids:
         fmt = ",".join(["%s"] * len(overdue_ids))
         cursor.execute(f"""
-            UPDATE orders SET status = 'ready', preparation_time = 0
+            UPDATE orders SET status = 'ready', preparation_time = 0, ready_notified = 0
             WHERE order_id IN ({fmt})
         """, tuple(overdue_ids))
         mysql.connection.commit()
@@ -215,14 +215,13 @@ def register_staff_order_routes(app, mysql):
         original_prep = order["preparation_time"] or 10
 
         if new_status == "ready":
-            cursor.execute("UPDATE orders SET status = 'ready', preparation_time = 0 WHERE order_id = %s", (order_id,))
+            cursor.execute("UPDATE orders SET status = 'ready', preparation_time = 0, ready_notified = 0 WHERE order_id = %s", (order_id,))
         elif new_status == "pending":
             cursor.execute("UPDATE orders SET status = 'pending', preparation_time = %s WHERE order_id = %s", (original_prep, order_id))
-        elif new_status == "closed":
-            cursor.execute("UPDATE orders SET status = 'closed' WHERE order_id = %s", (order_id,))
+        elif new_status == "preparing":
+            cursor.execute("UPDATE orders SET status = %s, notified = 0 WHERE order_id = %s", (new_status, order_id))
         else:
             cursor.execute("UPDATE orders SET status = %s WHERE order_id = %s", (new_status, order_id))
-
         mysql.connection.commit()
 
         # ── Auto-close session if all orders are ready ────────────────────────
