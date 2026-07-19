@@ -10,7 +10,6 @@
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/toast.css') }}"/>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
-  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>  <!-- ADD THIS -->
 
   <style>
     body { font-family: 'DM Sans', sans-serif; }
@@ -128,8 +127,6 @@
   <div class="text-[11px] font-mono-custom uppercase tracking-wider text-[#b0b0b0] text-center w-full mt-12">
     © 2026 Timely Eats
   </div>
-<!-- Load socket.io FIRST before anything else -->
-  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
 
   {{ render_toast_script() }}
 
@@ -139,6 +136,8 @@
     function filterOrders(status) {
       currentFilter = status;
       const cards = document.querySelectorAll('.order-card');
+
+      // Update toggle button UI appearance
       ['all', 'completed', 'cancelled'].forEach(type => {
         const btn = document.getElementById(`btn-${type}`);
         if(type === status) {
@@ -149,6 +148,7 @@
           btn.classList.add('bg-white', 'text-[#3d3d3d]');
         }
       });
+
       cards.forEach(card => {
         if (status === 'all' || card.getAttribute('data-status') === status) {
           card.style.display = 'block';
@@ -156,26 +156,30 @@
           card.style.display = 'none';
         }
       });
-      sortOrders();
+      sortOrders(); // Retain sorting alignment during active filter transformations
     }
 
     function sortOrders() {
       const grid = document.getElementById('past-orders-grid');
       if (!grid) return;
+
       const cards = Array.from(grid.querySelectorAll('.order-card'));
       const sortValue = document.getElementById('sortOrder').value;
+
       cards.sort((a, b) => {
         const priceA = parseFloat(a.getAttribute('data-price'));
         const priceB = parseFloat(b.getAttribute('data-price'));
         const indexA = parseInt(a.getAttribute('data-index'));
         const indexB = parseInt(b.getAttribute('data-index'));
+
         if (sortValue === 'low-high') return priceA - priceB;
         if (sortValue === 'high-low') return priceB - priceA;
-        return indexA - indexB;
+        return indexA - indexB; // Resets view configuration cleanly to descending date structure
       });
+
+      // Clear existing context grid layout and cleanly append ordered collection stack
       cards.forEach(card => grid.appendChild(card));
     }
   </script>
-
 </body>
 </html>

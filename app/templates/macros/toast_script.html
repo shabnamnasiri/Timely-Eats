@@ -1,6 +1,6 @@
 {% macro render_toast_script() %}
 <script>
-  // ── Flash toasts ───────────────────────────────────────────────────────────
+  // ── Flash-тосты ───────────────────────────────────────────────────────────
   window.addEventListener("load", function () {
     const toasts = document.querySelectorAll(".popup-toast");
     toasts.forEach((toast) => {
@@ -13,7 +13,7 @@
     });
   });
 
-  // ── Sound ──────────────────────────────────────────────────────────────────
+  // ── Звук ──────────────────────────────────────────────────────────────────
   let audioCtx = null;
   document.addEventListener("click", function () {
     if (!audioCtx) {
@@ -36,7 +36,7 @@
     } catch(e) {}
   }
 
-  // ── Order toast ────────────────────────────────────────────────────────────
+  // ── Уведомления о заказе ─────────────────────────────────────────────────
   window.showOrderToast = function(message, category, items) {
     const icons  = { success: "✅", warning: "⏳", info: "👨‍🍳", error: "❌" };
     const titles = { success: "Order Ready", warning: "Order Received", info: "Being Prepared", error: "Error" };
@@ -68,46 +68,31 @@
     }, timeout);
   };
 
-// ── Socket: real-time order status notifications ───────────────────────────
-  if (typeof io !== "undefined" && !window._orderSocketInit) {
-    window._orderSocketInit = true;
+  let lastStatus = {};
 
-    const _socket = io();
-
-    _socket.on("connect", () => {
-      console.log("[SOCKET] connected:", _socket.id);
-    });
-
-    _socket.on("order_update", (data) => {
-      console.log("[SOCKET] order_update:", data);
-
-      const status = data.status;
-
-      const messages = {
-        pending:   "Your order has been received! ⏳",
-        preparing: "Your order is being prepared! 👨‍🍳",
-        ready:     "Your order is ready! Enjoy your meal 🍽️",
-        closed:    "Your order is ready! Enjoy your meal 🍽️",
-      };
-
-      const categories = {
-        pending:   "warning",
-        preparing: "info",
-        ready:     "success",
-        closed:    "success",
-      };
-
-      window.showOrderToast(
-        messages[status] || "Order status updated.",
-        categories[status] || "info",
-        null
-      );
-
-      if (status === "ready" || status === "closed") playSound();
-
-      // Reload on any status change so page reflects new state
-      setTimeout(() => location.reload(), 2000);
-    });
+  function checkOrders() {
+    fetch("/notifications/order-status-json")
+      .then(res => res.json())
+      .then(orders => {
+        orders.forEach(order => {
+          if (lastStatus[order.order_id] !== order.status) {
+            lastStatus[order.order_id] = order.status;
+            const categories = { pending: "warning", preparing: "info", ready: "success" };
+            window.showOrderToast(order.message, categories[order.status] || "info", order.items);
+            if (order.status === "ready") playSound();
+          }
+        });
+      })
+      .catch(() => {});
   }
-  </script>
+
+  const allowedPaths = ["/menu", "/Customer/Cart", "/Customer/place-order"];
+  const currentPath = window.location.pathname;
+  const shouldPoll = allowedPaths.some(p => currentPath.startsWith(p));
+
+  if (shouldPoll) {
+    setInterval(checkOrders, 5000);
+    checkOrders();
+  }
+</script>
 {% endmacro %}

@@ -1,4 +1,5 @@
 from flask import jsonify, session
+from app.extensions import socketio
 
 
 def register_notification_routes(app, mysql):
@@ -11,6 +12,7 @@ def register_notification_routes(app, mysql):
 
         cursor = mysql.connection.cursor()
 
+        # Only fetch orders the user hasn't been notified about yet
         cursor.execute("""
             SELECT o.order_id, o.status,
                 GROUP_CONCAT(i.name ORDER BY i.name SEPARATOR ', ') AS items
@@ -18,11 +20,8 @@ def register_notification_routes(app, mysql):
             JOIN order_details od ON od.order_id = o.order_id
             JOIN item i ON i.item_id = od.item_id
             WHERE o.user_id = %s
-            AND (
-                (o.status IN ('pending', 'preparing') AND o.notified = 0)
-                OR
-                (o.status IN ('ready', 'closed') AND o.ready_notified = 0)
-            )
+            AND o.status IN ('pending', 'preparing', 'ready', 'closed')
+            AND o.notified = 0
             GROUP BY o.order_id, o.status
             ORDER BY o.timestamp DESC
             LIMIT 5
@@ -30,22 +29,13 @@ def register_notification_routes(app, mysql):
         orders = cursor.fetchall()
 
         if orders:
-            non_ready = [o[0] for o in orders if o[1] not in ('ready', 'closed')]
-            if non_ready:
-                ph = ", ".join(["%s"] * len(non_ready))
-                cursor.execute(
-                    f"UPDATE orders SET notified = 1 WHERE order_id IN ({ph})",
-                    non_ready
-                )
-
-            ready = [o[0] for o in orders if o[1] in ('ready', 'closed')]
-            if ready:
-                ph = ", ".join(["%s"] * len(ready))
-                cursor.execute(
-                    f"UPDATE orders SET ready_notified = 1 WHERE order_id IN ({ph})",
-                    ready
-                )
-
+            # Mark all fetched orders as notified so they don't show again
+            order_ids = [o[0] for o in orders]
+            placeholders = ", ".join(["%s"] * len(order_ids))
+            cursor.execute(
+                f"UPDATE orders SET notified = 1 WHERE order_id IN ({placeholders})",
+                order_ids
+            )
             mysql.connection.commit()
 
         cursor.close()
@@ -62,6 +52,5 @@ def register_notification_routes(app, mysql):
         return {
             "pending":   "Your order has been received!",
             "preparing": "Your order is being prepared!",
-            "ready":     "Your order is ready! Enjoy your meal 🍽️",
-            "closed":    "Your order is ready! Enjoy your meal 🍽️",
+            "ready":     "Your order is ready! Enjoy your meal.",
         }.get(status, "Order status updated.")
