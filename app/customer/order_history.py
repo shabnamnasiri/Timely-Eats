@@ -11,6 +11,7 @@ def register_customer_order_history_routes(app, mysql):
             return redirect('/signin')
 
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        #takes all information about all orders from DB for customer
         cursor.execute("""
             SELECT
                 o.order_id,
@@ -34,7 +35,7 @@ def register_customer_order_history_routes(app, mysql):
         active_orders = []
         past_orders   = []
         total_spent   = 0.0
-
+        #shows the orders that are pending/preparing/completed
         for row in rows:
             status = row['status']
 
@@ -45,7 +46,7 @@ def register_customer_order_history_routes(app, mysql):
                 'id':      row['order_id'],
                 'status':  display_status,
                 'summary': row['summary'] or '',
-                'date':    row['timestamp'].strftime('%b %d, %Y  %H:%M') if row['timestamp'] else '—',
+                'date':    row['timestamp'].strftime('%b %d, %Y  %H:%M') if row['timestamp'] else '-',
                 'total':   float(row['total_amount'] or 0),
             }
 

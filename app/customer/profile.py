@@ -5,7 +5,7 @@ import MySQLdb.cursors
 
 def register_customer_profile_routes(app, mysql):
 
-    # ---------------- PROFILE PAGE ----------------
+    # Profile for customer with his information
     @app.route('/customer/profile')
     def customer_profile():
         user_id = session.get('user_id')
@@ -22,8 +22,7 @@ def register_customer_profile_routes(app, mysql):
 
         return render_template('profile.html', user=user_data)
 
-
-    # ---------------- UPDATE INFO ----------------
+    # Editing of profile information by customer
     @app.route('/customer/profile/update-info', methods=['POST'])
     def customer_profile_update_info():
         user_id = session.get('user_id')
@@ -59,7 +58,7 @@ def register_customer_profile_routes(app, mysql):
         return redirect('/customer/profile')
 
 
-    # ---------------- UPDATE PASSWORD ----------------
+    # Update the password by customer
     @app.route('/customer/profile/update-password', methods=['POST'])
     def customer_profile_update_password():
         user_id = session.get('user_id')

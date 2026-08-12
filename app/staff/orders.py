@@ -24,17 +24,17 @@ def get_orders(mysql):
             p.payment_status, p.payment_method,
             i.name AS item_name, od.quantity, od.customization_note
         FROM orders o
-        LEFT JOIN User u ON u.user_id = o.user_id
-        LEFT JOIN Table_Session ts ON ts.session_id = o.session_id
+        LEFT JOIN user u ON u.user_id = o.user_id
+        LEFT JOIN table_session ts ON ts.session_id = o.session_id
         LEFT JOIN payment p ON p.order_id = o.order_id
         LEFT JOIN order_details od ON od.order_id = o.order_id
         LEFT JOIN item i ON i.item_id = od.item_id
-        WHERE LOWER(COALESCE(o.status, '')) IN ('pending', 'preparing', 'ready')
+        WHERE LOWER(COALESCE(o.status, '')) IN ('pending', 'preparing', 'ready', 'closed')
         ORDER BY o.timestamp DESC
     """)
     rows = cursor.fetchall()
 
-    # ── Auto-ready: mark overdue orders as ready in DB ────────────────────────
+    # ── Auto-ready: mark overdue orders as ready in DB If an order's preparation time has passed, mark it "ready" automatically even if staff never updated it.
     now = datetime.now()
     overdue_ids = set()
     for row in rows:
@@ -52,7 +52,7 @@ def get_orders(mysql):
         """, tuple(overdue_ids))
         mysql.connection.commit()
 
-        # ── Check if any affected session should now be closed ────────────────
+        # ── Check if any affected session should now be closed If every order in a table session is now "ready", close that session.
         cursor.execute(f"""
             SELECT DISTINCT session_id FROM orders WHERE order_id IN ({fmt})
         """, tuple(overdue_ids))
@@ -75,9 +75,8 @@ def get_orders(mysql):
                     WHERE session_id = %s AND status IN ('active', 'ordered')
                 """, (now, sid))
         mysql.connection.commit()
-        # ─────────────────────────────────────────────────────────────────────
 
-        # Re-fetch rows so the rest of the function sees updated statuses
+        # Re-fetch rows so the rest of the function sees the updated statuses from the auto-ready update above.
         cursor.execute("""
            SELECT
                 o.order_id, o.user_id, o.timestamp, o.status,
@@ -91,14 +90,14 @@ def get_orders(mysql):
             LEFT JOIN payment p ON p.order_id = o.order_id
             LEFT JOIN order_details od ON od.order_id = o.order_id
             LEFT JOIN item i ON i.item_id = od.item_id
-            WHERE LOWER(COALESCE(o.status, '')) IN ('pending', 'preparing', 'ready')
+            WHERE LOWER(COALESCE(o.status, '')) IN ('pending', 'preparing', 'ready', 'closed')
             ORDER BY o.timestamp DESC
         """)
         rows = cursor.fetchall()
-    # ──────────────────────────────────────────────────────────────────────────
 
     cursor.close()
 
+    # Group the flat rows (one row per item) into one entry per order, with a list of item lines underneath.
     orders = {}
     for row in rows:
         oid = row["order_id"]
@@ -129,6 +128,7 @@ def get_orders(mysql):
                 "note": (row["customization_note"] or "").strip()
             })
 
+    # Build a one-line summary string for each order (e.g. "2x Pizza, 1x Coke").
     orders = list(orders.values())
     for o in orders:
         o["summary"] = ", ".join(l["item"] for l in o["lines"]) if o["lines"] else "No items"
@@ -140,7 +140,7 @@ def get_sessions(mysql):
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     cursor.execute("""
         SELECT ts.session_id, ts.table_number, ts.status, COUNT(o.order_id) AS order_count
-        FROM Table_Session ts
+        FROM table_session ts
         LEFT JOIN orders o ON o.session_id = ts.session_id
         GROUP BY ts.session_id, ts.table_number, ts.status
         ORDER BY ts.table_number ASC
@@ -148,6 +148,7 @@ def get_sessions(mysql):
     rows = cursor.fetchall()
     cursor.close()
 
+    # Split sessions into "still happening" vs "done" for the template.
     active_sessions = [r for r in rows if (r["status"] or "").strip().lower() in ("active", "ordered")]
     closed_sessions = [r for r in rows if (r["status"] or "").strip().lower() == "closed"]
     return active_sessions, closed_sessions
@@ -163,6 +164,7 @@ def register_staff_order_routes(app, mysql):
         orders = get_orders(mysql)
         sessions, closed_sessions = get_sessions(mysql)
 
+        # Quick counts shown on the staff dashboard.
         stats = {
             "active_orders":    len(orders),
             "pending_orders":   sum(1 for o in orders if o["status"] == "pending"),
@@ -185,6 +187,7 @@ def register_staff_order_routes(app, mysql):
         if (block := require_staff()):
             return block
 
+        # Read and validate the form input.
         try:
             order_id = int(request.form.get("order_id", "").strip())
         except ValueError:
@@ -206,6 +209,7 @@ def register_staff_order_routes(app, mysql):
             flash("Order not found.", "warning")
             return redirect("/staff/orders")
 
+        # Once an order is "ready", staff can only close it, not move it backwards.
         current_status = (order["status"] or "").strip().lower()
         if current_status == "ready" and new_status not in ("ready", "closed"):
             cursor.close()
@@ -214,6 +218,7 @@ def register_staff_order_routes(app, mysql):
 
         original_prep = order["preparation_time"] or 10
 
+        # Apply the status change. Each branch resets fields that make sense for that status (e.g. "ready" clears the prep timer).
         if new_status == "ready":
             cursor.execute("UPDATE orders SET status = 'ready', preparation_time = 0, ready_notified = 0 WHERE order_id = %s", (order_id,))
         elif new_status == "pending":
@@ -224,11 +229,11 @@ def register_staff_order_routes(app, mysql):
             cursor.execute("UPDATE orders SET status = %s WHERE order_id = %s", (new_status, order_id))
         mysql.connection.commit()
 
-        # ── Auto-close session if all orders are ready ────────────────────────
+        #Auto-close session if all orders are ready Check the table session this order belongs to. If every order in that session is now "ready", mark the whole session as closed.
         cursor.execute("""
             SELECT o.session_id, ts.status AS session_status
             FROM orders o
-            JOIN Table_Session ts ON ts.session_id = o.session_id
+            JOIN table_session ts ON ts.session_id = o.session_id
             WHERE o.order_id = %s
         """, (order_id,))
         session_row = cursor.fetchone()
@@ -249,9 +254,8 @@ def register_staff_order_routes(app, mysql):
                     WHERE session_id = %s
                 """, (sid,))
                 mysql.connection.commit()
-        # ─────────────────────────────────────────────────────────────────────
 
-        # Notify the customer
+        # Notify the customer in real time that their order status changed.
         cursor.execute("SELECT user_id FROM orders WHERE order_id = %s", (order_id,))
         order_user = cursor.fetchone()
         cursor.close()
@@ -264,6 +268,7 @@ def register_staff_order_routes(app, mysql):
                 "message":  f"Your order #{order_id} is now {new_status}"
             }, to=f"user_{user_id}")
 
+        # Also notify all connected staff so their dashboards update live.
         socketio.emit("staff_update", {
             "order_id": order_id,
             "status":   new_status,

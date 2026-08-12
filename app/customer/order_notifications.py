@@ -10,7 +10,7 @@ def register_notification_routes(app, mysql):
             return jsonify([])
 
         cursor = mysql.connection.cursor()
-
+        #takes infromation from DB about order status for customer
         cursor.execute("""
             SELECT o.order_id, o.status,
                 GROUP_CONCAT(i.name ORDER BY i.name SEPARATOR ', ') AS items
@@ -28,7 +28,7 @@ def register_notification_routes(app, mysql):
             LIMIT 5
         """, (user_id,))
         orders = cursor.fetchall()
-
+        #checking order status for sending notification to customer
         if orders:
             non_ready = [o[0] for o in orders if o[1] not in ('ready', 'closed')]
             if non_ready:
@@ -57,7 +57,7 @@ def register_notification_routes(app, mysql):
             "message":  _status_message(o[1])
         } for o in orders])
 
-
+        #text of notifications for different statuses
     def _status_message(status):
         return {
             "pending":   "Your order has been received!",

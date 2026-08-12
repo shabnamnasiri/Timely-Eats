@@ -5,7 +5,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Timely Eats — Profile</title>
+  <title>Timely Eats - Profile</title>
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 <link rel="stylesheet" href="{{ url_for('static', filename='css/toast.css') }}"/>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;700&display=swap" rel="stylesheet"/>
@@ -69,7 +69,7 @@
         <div class="space-y-2">
           <div class="flex justify-between items-center text-xs">
             <span class="font-mono-custom text-[#7a7a7a] uppercase tracking-wider text-[10px]">Phone Number:</span>
-            <span class="font-mono-custom text-[#0e0e0e]">{{ user.phone_number or '—' }}</span>
+            <span class="font-mono-custom text-[#0e0e0e]">{{ user.phone_number or '-' }}</span>
           </div>
         </div>
       </div>

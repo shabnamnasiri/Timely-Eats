@@ -162,7 +162,7 @@ def register_customer_place_order_routes(app, mysql):
         cursor.execute("SELECT loyalty_point FROM user WHERE user_id = %s", (user_id,))
         user_row = cursor.fetchone()
         loyalty_points = user_row['loyalty_point'] if user_row else 0
-
+        # Application of loyalty points for order for discount 
         cursor.execute("""
             SELECT ci.quantity, i.price
             FROM cart_item ci

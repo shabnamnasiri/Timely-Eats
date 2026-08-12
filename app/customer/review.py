@@ -4,7 +4,7 @@ def register_review_routes(app, mysql):
 
     @app.route('/item/<int:item_id>/review-page', methods=["GET"])
     def review_page(item_id):
-        
+        #opens review form page
         user_id = session.get("user_id")
         cursor = mysql.connection.cursor()
         cursor.execute("SELECT username FROM User WHERE user_id = %s", (user_id,))
@@ -28,7 +28,7 @@ def register_review_routes(app, mysql):
         if not user_id:
             flash("You must be logged in to submit a review", "error")
             return redirect(url_for('review_page', item_id=item_id))
-
+        #get form info
         rating = request.form.get("rating")
         comment = request.form.get("comment", "").strip()
         tags = request.form.getlist("tag")
@@ -38,7 +38,7 @@ def register_review_routes(app, mysql):
 
         try:
             cursor = mysql.connection.cursor()
-
+            #submit review to db
             cursor.execute("""
                 INSERT INTO Review (user_id, item_id, tag, rating, comment)
                 VALUES (%s, %s, %s, %s, %s)
@@ -58,7 +58,7 @@ def register_review_routes(app, mysql):
     def reviews_page(item_id):
 
         cursor = mysql.connection.cursor()
-
+        #display reviews 
         cursor.execute("""
             SELECT r.rating, r.comment, r.tag, u.username
             FROM Review r

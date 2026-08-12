@@ -82,6 +82,7 @@
         .status-badge.status-pending   { background: rgba(250,204,21,.15); color: #ca8a04; }
         .status-badge.status-preparing { background: rgba(59,130,246,.15);  color: #2563eb; }
         .status-badge.status-ready     { background: rgba(34,197,94,.15);   color: #16a34a; }
+        .status-badge.status-closed     { background: rgba(255,0,0,.15);   color: #000000; }
 
         /* ── Last-updated ticker ── */
         #last-updated {
@@ -92,11 +93,11 @@
     </style>
 </head>
 <body>
-
+<div class="sidebar-backdrop" id="sidebarBackdrop"></div>
     <aside class="sidebar">
         <div class="sidebar-logo">
             <b>ORDER<span>FLOW</span></b>
-            <small>Internal Terminal v2.0</small>
+            <small>Staff Portal</small>
         </div>
 
         <div class="sidebar-section">Management</div>
@@ -116,15 +117,14 @@
         {{ render_toast() }}
 
         <header class="topbar">
+            <button class="sidebar-toggle" id="sidebarToggle" aria-label="Open menu">☰</button>
             <h1>Current Expeditions</h1>
             <div class="topbar-right">
                 <span class="badge badge-items" id="network-badge">
                     <span class="rt-dot" id="rt-dot"></span>
                     <span id="network-label">Connecting…</span>
                 </span>
-                <span class="badge badge-items" style="color: var(--success)">
-                    <span id="stat-active-topbar">{{ stats.active_orders }}</span> Active Orders
-                </span>
+
                 <span id="last-updated"></span>
             </div>
         </header>
@@ -146,6 +146,7 @@
                         <button type="button" class="filter-tab" data-filter="pending">Pending</button>
                         <button type="button" class="filter-tab" data-filter="preparing">Preparing</button>
                         <button type="button" class="filter-tab" data-filter="ready">Ready</button>
+                        <button type="button" class="filter-tab" data-filter="closed">Closed</button>
                     </div>
                 </div>
 
@@ -175,7 +176,7 @@
                                 </span>
                                 <div class="item-lines">
                                     {% for line in order.lines %}
-                                    <span>{{ line.item }}{% if line.note %} — <em>{{ line.note }}</em>{% endif %}</span>
+                                    <span>{{ line.item }}{% if line.note %} - <em>{{ line.note }}</em>{% endif %}</span>
                                     {% endfor %}
                                 </div>
                             </div>
@@ -272,7 +273,7 @@
     </main>
 
 <!-- ─────────────────────────────────────────────────────────────────
-     Socket.IO — loaded from CDN, same version as flask-socketio 5.x
+     Socket.IO - loaded from CDN, same version as flask-socketio 5.x
 ──────────────────────────────────────────────────────────────────── -->
 <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
 <script>
@@ -335,7 +336,7 @@ function buildOrderRow(order, index) {
 
     // item lines HTML
     const linesHtml = (order.lines || []).map(l =>
-        `<span>${l.item}${l.note ? ` — <em>${l.note}</em>` : ""}</span>`
+        `<span>${l.item}${l.note ? ` - <em>${l.note}</em>` : ""}</span>`
     ).join("");
 
     let readyText = "Ready!";
@@ -424,6 +425,17 @@ socket.on("staff_update", function(data) {
     stampUpdated();
 });
 
+  const _toggle   = document.getElementById("sidebarToggle");
+  const _sidebar  = document.querySelector(".sidebar");
+  const _backdrop = document.getElementById("sidebarBackdrop");
+
+  function openSidebar()  { _sidebar.classList.add("open");  _backdrop.classList.add("open"); }
+  function closeSidebar() { _sidebar.classList.remove("open"); _backdrop.classList.remove("open"); }
+
+  _toggle.addEventListener("click", openSidebar);
+  _backdrop.addEventListener("click", closeSidebar);
+  _sidebar.querySelectorAll("a").forEach(a => a.addEventListener("click", closeSidebar));
+
 // ── dashboard_refresh: full data push every 10 s ──────────────────
 
 socket.on("dashboard_refresh", function(data) {
@@ -480,7 +492,7 @@ socket.on("dashboard_refresh", function(data) {
                 applyFilterToRow(existing);
             }
         } else {
-            // Brand-new order — build row, add NEW badge, prepend to list
+            // Brand-new order - build row, add NEW badge, prepend to list
             const row = buildOrderRow(order, idx + 1);
             const strong = row.querySelector("strong");
             if (strong) {

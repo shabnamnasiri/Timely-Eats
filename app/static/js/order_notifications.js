@@ -85,7 +85,7 @@
     toast.querySelector(".toast-close").addEventListener("click", () => removeToast(toast));
     container.appendChild(toast);
 
-    // Автоудаление: ready — 10 сек, остальные — 6 сек
+    // Автоудаление: ready - 10 сек, остальные - 6 сек
     const timeout = status === "ready" ? 10000 : 6000;
     setTimeout(() => removeToast(toast), timeout);
   }
@@ -104,7 +104,7 @@
         const data = JSON.parse(event.data);
         showToast(data.order_id, data.status, data.message);
 
-        // Если заказ готов — воспроизводим звук (если браузер разрешает)
+        // Если заказ готов - воспроизводим звук (если браузер разрешает)
         if (data.status === "ready") playSound();
       } catch (e) {
         console.warn("Notification parse error:", e);

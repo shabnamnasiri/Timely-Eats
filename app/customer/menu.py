@@ -5,14 +5,14 @@ def register_menu_routes(app, mysql):
     @app.route("/menu", methods=["GET", "POST"])
     def menu():
 
-        # ✅ read from Flask session instead of URL parameter
+        # read from Flask session instead of URL parameter
         session_id = session.get('table_session_id')
 
         if not session_id:
             return redirect('/Customer/scan-required')  # ✅ not a 400 error
 
         cursor = mysql.connection.cursor()
-
+        #check if session is active
         cursor.execute("""
         SELECT table_number FROM Table_Session 
         WHERE session_id=%s AND status IN ('active', 'ordered')
@@ -21,12 +21,12 @@ def register_menu_routes(app, mysql):
         cursor.close()
 
         if not result:
-            return redirect('/Customer/scan-required')  # ✅ not a 400 error
+            return redirect('/Customer/scan-required')  # error message
 
         table_number = result[0]
 
         cursor = mysql.connection.cursor()
-
+        #takes all information from db for menu items
         cursor.execute("""
             SELECT 
                 i.item_id,
@@ -46,7 +46,7 @@ def register_menu_routes(app, mysql):
 
         items = cursor.fetchall()
         cursor.close()
-
+        #show the menu items
         return render_template("Menu.html", 
                                session_id=session_id, 
                                table_number=table_number, 

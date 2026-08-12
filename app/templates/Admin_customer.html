@@ -1,227 +1,163 @@
+{% from 'macros/toast.html' import render_toast %}
+{% from 'macros/toast_script.html' import render_toast_script %}
+{% from 'macros/admin_sidebar.html' import render_admin_sidebar %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Customer Directory | Admin</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../static/css/Revenue.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customer Directory | Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/Revenue.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/toast.css') }}">
 </head>
-
 <body>
 
-<!-- ================= SIDEBAR ================= -->
-<aside class="sidebar">
-  <div class="sidebar-logo">
-      <b>Timely<span style = "color: #c8933a;">Eats</span></b>
-    <small>Admin Panel</small>
-  </div>
-  <div class="sidebar-section">Menu</div>
-  <ul class="sidebar-nav">
-    <li><a href="Add_menu.html"><i class="ico">▤</i> Menu Items</a></li>
-    <li><a href="Admin_staff.html"><i class="ico">⊞</i> Categories</a></li>
-  </ul>
-  <div class="sidebar-section">Live_feed</div>
-  <ul class="sidebar-nav">
-    <li><a href="Admin_order.html"><i class="ico">⊙</i> Orders</a></li>
-    <li><a href="Admin_table.html"><i class="ico">◫</i> Tables</a></li>
-  </ul> 
-   <div class="sidebar-section">Users</div>
-    <ul class="sidebar-nav">
-    <li><a href="Admin_staff.html"><i class="ico">⊙</i>Staff</a></li>
-    <li><a href="Admin_customer.html" class = "active"><i class="ico">◫</i> Customers</a></li>
-  </ul>
-  <div class="sidebar-section">Analaytics</div>
-  <ul class="sidebar-nav">
-    <li><a href="Revenue.html"><i class="ico">▦</i> Revenue</a></li>
-    <li><a href="Order_Report.html"><i class="ico">▦</i> Order_Report</a></li>
-        <li><a href="Customer_report"><i class="ico">▦</i>Customer_Report</a></li>
-            <li><a href="Table_report.html"><i class="ico">▦</i>Table_Report</a></li>
+<div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
-  </ul>
+{{ render_admin_sidebar('customers', user) }}
 
-</aside>
-
-<!-- ================= MAIN ================= -->
 <main class="main">
 
-<header class="topbar">
-  <h1>Customer Directory</h1>
-</header>
-
-<div class="content">
-
-<!-- ================= TABLE PANEL ================= -->
-<section style="flex:2;">
-
-<div class="panel">
-
-  <span class="label">Database</span>
-  <h2 class="panel-title">Customers (Paginated View)</h2>
-
-  <!-- SEARCH (inside panel as requested) -->
-  <input id="searchInput" type="text" placeholder="Search customers..."
-    style="width:100%; margin-bottom:15px; padding:10px; border:1px solid var(--rule); background:transparent; font-family:'DM Mono';">
-
-  <!-- TABLE HEADER -->
-  <div class="item-row" style="opacity:0.7; font-weight:600;">
-    <div class="item-info">
-      <strong>Customer</strong>
-      <span>Email / Stats</span>
+  <header class="topbar">
+    <div style="display:flex; align-items:center; gap:12px;">
+      <button class="sidebar-toggle" id="sidebarToggle" aria-label="Open menu">&#9776;</button>
+      <h1>Customer Directory</h1>
     </div>
-    <div style="display:flex; gap:10px;">
-      <span>Status</span>
-      <span>Actions</span>
+  </header>
+
+  {{ render_toast() }}
+
+  <div class="content">
+    <div class="list-panel">
+
+      <span class="label">Customers ({{ customers|length }} total)</span>
+
+      <input id="searchInput" type="text" placeholder="Search by name or email..."
+        style="width:100%; margin-bottom:15px; padding:10px; border:1px solid var(--rule);
+               background:transparent; font-family:'DM Mono'; font-size:12px; box-sizing:border-box;">
+
+      <!-- Header row -->
+      <div class="item-row" style="opacity:0.5; font-size:11px; font-family:'DM Mono'; text-transform:uppercase; letter-spacing:.08em;">
+        <div class="item-info">
+          <strong>Name</strong>
+          <span>Email · Phone · Loyalty pts</span>
+        </div>
+
+      </div>
+
+      <!-- Data rows -->
+      <div id="tableBody">
+        {% for c in customers %}
+        <div class="item-row customer-row"
+             data-name="{{ c[1]|lower }}"
+             data-email="{{ (c[2] or '')|lower }}">
+
+          <div class="item-info">
+            <strong>{{ c[1] }}</strong>
+            <span>
+              {{ c[2] or '-' }}
+              {% if c[3] %} · {{ c[3] }}{% endif %}
+              · {{ c[4] or 0 }} pts
+            </span>
+          </div>
+
+
+
+        </div>
+        {% else %}
+        <div class="empty">
+          <b>No Customers Yet</b>
+          <span>Customers will appear here once they sign up.</span>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Pagination -->
+      <div id="pagination" style="display:flex; gap:8px; margin-top:15px; flex-wrap:wrap;"></div>
+
     </div>
   </div>
 
-  <!-- TABLE BODY -->
-  <div id="tableBody"></div>
-
-  <!-- PAGINATION -->
-  <div id="pagination" style="display:flex; gap:8px; margin-top:15px; justify-content:center;"></div>
-
-</div>
-
-</section>
-
-<!-- ================= ADD USER ================= -->
-<aside class="side-panel">
-
-  <span class="label">Admin Tools</span>
-  <h2 class="panel-title">Add Customer</h2>
-
-  <div class="insight">
-    <small>Security Note</small>
-    <strong>Passwords are stored securely (hashed in backend)</strong>
-  </div>
-
-  <form style="display:flex; flex-direction:column; gap:10px; margin-top:15px;">
-
-    <input type="text" placeholder="First Name"
-      style="padding:10px; border:1px solid var(--rule); background:transparent; font-family:'DM Mono'; font-size:12px;">
-  <input type="text" placeholder="Last Name"
-      style="padding:10px; border:1px solid var(--rule); background:transparent; font-family:'DM Mono'; font-size:12px;">
-    <input type="email" placeholder="Email"
-      style="padding:10px; border:1px solid var(--rule); background:transparent; font-family:'DM Mono'; font-size:12px;">
-
-    <input type="text" placeholder="Phone"
-      style="padding:10px; border:1px solid var(--rule); background:transparent; font-family:'DM Mono'; font-size:12px;">
-
-    <!-- PASSWORD FIELD -->
-    <input type="password" placeholder="Password"
-      style="padding:10px; border:1px solid var(--rule); background:transparent; font-family:'DM Mono'; font-size:12px;">
-
-    <!-- STATUS / SEGMENT -->
-    <select style="padding:10px; border:1px solid var(--rule); background:transparent; font-family:'DM Mono'; font-size:12px;">
-      <option>New</option>
-      <option>VIP</option>
-    </select>
-
-    <button class="date-select-btn" style="margin-top:10px; justify-content:center;">
-      + Create Customer
-    </button>
-
-  </form>
-
-</aside>
-
-</div>
 </main>
 
-<!-- ================= JS LOGIC ================= -->
+
+
 <script>
-const users = Array.from({length: 42}, (_, i) => ({
-  name: `User ${i + 1}`,
-  email: `user${i+1}@mail.com`,
-  orders: Math.floor(Math.random() * 20),
-  spent: Math.floor(Math.random() * 300),
-  status: ["VIP", "New", "Regular"][i % 3]
-}));
 
 const rowsPerPage = 10;
 let currentPage = 1;
+let visibleRows = [];
 
-const tableBody = document.getElementById("tableBody");
-const pagination = document.getElementById("pagination");
-const searchInput = document.getElementById("searchInput");
+const pagination  = document.getElementById('pagination');
+const searchInput = document.getElementById('searchInput');
 
-// FILTERED DATA
-let filteredUsers = [...users];
-
-function renderTable() {
-  tableBody.innerHTML = "";
-
-  const start = (currentPage - 1) * rowsPerPage;
-  const end = start + rowsPerPage;
-
-  const pageData = filteredUsers.slice(start, end);
-
-  pageData.forEach(u => {
-    tableBody.innerHTML += `
-      <div class="item-row">
-        <div class="item-info">
-          <strong>${u.name}</strong>
-          <span>${u.email} • ${u.orders} orders • $${u.spent}</span>
-        </div>
-
-        <div style="display:flex; gap:10px; align-items:center;">
-          <span class="analytics-date">${u.status}</span>
-          <button class="date-select-btn">Edit</button>
-          <button class="date-select-btn" style="background:#e74c3c;">Delete</button>
-        </div>
-      </div>
-    `;
-  });
+function getRows() {
+  return Array.from(document.querySelectorAll('.customer-row'));
 }
 
-function renderPagination() {
-  pagination.innerHTML = "";
+function applyFilter(query) {
+  const q = query.toLowerCase();
+  getRows().forEach(row => {
+    const match = row.dataset.name.includes(q) || row.dataset.email.includes(q);
+    row.style.display = match ? '' : 'none';
+  });
+  visibleRows = getRows().filter(r => r.style.display !== 'none');
+  currentPage = 1;
+  paginate();
+}
 
-  const pages = Math.ceil(filteredUsers.length / rowsPerPage);
+function paginate() {
+  const total = visibleRows.length;
+  const pages = Math.ceil(total / rowsPerPage) || 1;
+  const start = (currentPage - 1) * rowsPerPage;
+  const end   = start + rowsPerPage;
 
+  visibleRows.forEach((row, i) => {
+    row.style.display = (i >= start && i < end) ? '' : 'none';
+  });
+
+  getRows().filter(r => !visibleRows.includes(r)).forEach(r => r.style.display = 'none');
+
+  pagination.innerHTML = '';
   for (let i = 1; i <= pages; i++) {
     pagination.innerHTML += `
-      <button onclick="goToPage(${i})"
-        style="
-          padding:6px 10px;
-          border:1px solid var(--rule);
-          background:${i === currentPage ? '#c8933a' : 'transparent'};
-          color:${i === currentPage ? '#000' : 'inherit'};
-          cursor:pointer;
-          font-family:'DM Mono';
-        ">
-        ${i}
-      </button>
-    `;
+      <button onclick="goToPage(${i})" style="
+        padding:6px 10px; border:1px solid var(--rule); cursor:pointer;
+        background:${i === currentPage ? '#c8933a' : 'transparent'};
+        color:${i === currentPage ? '#000' : 'inherit'};
+        font-family:'DM Mono';">${i}</button>`;
   }
 }
 
 function goToPage(page) {
   currentPage = page;
-  renderTable();
-  renderPagination();
+  paginate();
 }
 
-// SEARCH
-searchInput.addEventListener("input", (e) => {
-  const value = e.target.value.toLowerCase();
+searchInput.addEventListener('input', e => applyFilter(e.target.value));
+visibleRows = getRows();
+paginate();
 
-  filteredUsers = users.filter(u =>
-    u.name.toLowerCase().includes(value) ||
-    u.email.toLowerCase().includes(value)
-  );
-
-  currentPage = 1;
-  renderTable();
-  renderPagination();
-});
-
-// INIT
-renderTable();
-renderPagination();
+// Sidebar
+(function () {
+  const sidebar  = document.getElementById('sidebar');
+  const backdrop = document.getElementById('sidebarBackdrop');
+  const toggle   = document.getElementById('sidebarToggle');
+  if (!sidebar || !backdrop || !toggle) return;
+  function openSidebar()  { sidebar.classList.add('open');    backdrop.classList.add('open');    document.body.style.overflow = 'hidden'; }
+  function closeSidebar() { sidebar.classList.remove('open'); backdrop.classList.remove('open'); document.body.style.overflow = ''; }
+  toggle.addEventListener('click', openSidebar);
+  backdrop.addEventListener('click', closeSidebar);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSidebar(); });
+  sidebar.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => { if (window.innerWidth < 1024) closeSidebar(); });
+  });
+})();
 </script>
+
+{{ render_toast_script() }}
 
 </body>
 </html>

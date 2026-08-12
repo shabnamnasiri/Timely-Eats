@@ -3,18 +3,12 @@ from werkzeug.security import generate_password_hash
 from MySQLdb import IntegrityError
 import phonenumbers, re
 
+from app.admin.helpers import admin_required, get_admin_user
+
 def register_admin_add_staff_routes(app, mysql):
 
-    def admin_required():
-        if "user_id" not in session:
-            flash("Please sign in to access this page.", "warning")
-            return redirect("/signin")
-        if session.get("role_id") != 3:
-            flash("Access denied. Admins only.", "danger")
-            return redirect("/signin")
-        return None
-
     def get_all_staff(cursor):
+        # role_id = 2 -> staff accounts
         cursor.execute("""
             SELECT user_id, username, phone_number, role_id
             FROM user
@@ -28,11 +22,9 @@ def register_admin_add_staff_routes(app, mysql):
         if guard:
             return guard
 
-        user_id = session.get('user_id')
         cursor = mysql.connection.cursor()
         staffs = get_all_staff(cursor)
-        cursor.execute("SELECT username FROM user WHERE user_id = %s", (user_id,))
-        user = cursor.fetchone()
+        user = get_admin_user(mysql)
         cursor.close()
 
         return render_template("add_staff.html", staffs=staffs, form_data={}, user=user)
@@ -47,38 +39,40 @@ def register_admin_add_staff_routes(app, mysql):
         phone            = request.form.get("phone")
         password         = request.form.get("password")
         confirm_password = request.form.get("confirm_password")
+        # form_data is sent back to the template so the form can be
+        # re-filled with what the user typed if validation fails.
         form_data        = {"username": username, "phone": phone}
 
-        user_id = session.get('user_id')
         cursor = mysql.connection.cursor()
         staffs = get_all_staff(cursor)
-        # ✅ fetch user here so it's always available
-        cursor.execute("SELECT username FROM user WHERE user_id = %s", (user_id,))
-        user = cursor.fetchone()
+        user = get_admin_user(mysql)
         cursor.close()
 
-        # ── Validation ──────────────────────────────
+        # Validation
+        # Password must be 8+ chars, with at least one digit and one symbol.
         pattern = r'^(?=.*[0-9])(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$'
         if not re.match(pattern, password):
             flash("Password must be at least 8 characters, include a number and a symbol.", "danger")
-            return render_template("add_staff.html", form_data=form_data, staffs=staffs, user=user)  # ✅
+            return render_template("add_staff.html", form_data=form_data, staffs=staffs, user=user)  
 
         if password != confirm_password:
             flash("Passwords do not match.", "danger")
-            return render_template("add_staff.html", form_data=form_data, staffs=staffs, user=user)  # ✅
+            return render_template("add_staff.html", form_data=form_data, staffs=staffs, user=user)  
 
+        # Validate the phone number format/region using the phonenumbers library.
         try:
             parsed_number = phonenumbers.parse(phone, None)
             if not phonenumbers.is_valid_number(parsed_number):
                 flash("Invalid phone number.", "danger")
-                return render_template("add_staff.html", form_data=form_data, staffs=staffs, user=user)  # ✅
+                return render_template("add_staff.html", form_data=form_data, staffs=staffs, user=user)  
         except phonenumbers.NumberParseException:
             flash("Phone must start with + and country code.", "danger")
-            return render_template("add_staff.html", form_data=form_data, staffs=staffs, user=user)  # ✅
+            return render_template("add_staff.html", form_data=form_data, staffs=staffs, user=user)  
 
-        # ── DB Insert ────────────────────────────────
+        # DB Insert
         cursor = mysql.connection.cursor()
         try:
+            # Make sure no existing user already has this username or phone.
             cursor.execute("""
                 SELECT user_id FROM user
                 WHERE username=%s OR phone_number=%s
@@ -87,8 +81,10 @@ def register_admin_add_staff_routes(app, mysql):
             if cursor.fetchone():
                 flash("Username or phone number already exists.", "warning")
                 staffs = get_all_staff(cursor)
-                return render_template("add_staff.html", form_data=form_data, staffs=staffs, user=user)  # ✅
+                return render_template("add_staff.html", form_data=form_data, staffs=staffs, user=user)  
 
+            # Hash the password before storing it, and create the staff
+            # account with role_id = 2.
             hashed_password = generate_password_hash(password)
             cursor.execute("""
                 INSERT INTO user (username, password, phone_number, role_id)
@@ -99,7 +95,7 @@ def register_admin_add_staff_routes(app, mysql):
         except IntegrityError:
             staffs = get_all_staff(cursor)
             flash("Database error. Please try again.", "danger")
-            return render_template("add_staff.html", form_data=form_data, staffs=staffs, user=user)  # ✅
+            return render_template("add_staff.html", form_data=form_data, staffs=staffs, user=user)  
 
         finally:
             cursor.close()
@@ -107,38 +103,7 @@ def register_admin_add_staff_routes(app, mysql):
         flash(f"Staff member '{username}' added successfully!", "success")
         return redirect(url_for('admin_staff'))
 
-        # ── DB Insert ────────────────────────────────
-        cursor = mysql.connection.cursor()
-        try:
-            cursor.execute("""
-                SELECT user_id FROM user
-                WHERE username=%s OR phone_number=%s
-            """, (username, phone))
-
-            if cursor.fetchone():
-                flash("Username or phone number already exists.", "warning")
-                staffs = get_all_staff(cursor)
-                return render_template("add_staff.html", form_data=form_data, staffs=staffs)
-
-            hashed_password = generate_password_hash(password)
-            cursor.execute("""
-                INSERT INTO user (username, password, phone_number, role_id)
-                VALUES (%s, %s, %s, 2)
-            """, (username, hashed_password, phone))
-            mysql.connection.commit()
-
-        except IntegrityError:
-            staffs = get_all_staff(cursor)
-            flash("Database error. Please try again.", "danger")
-            return render_template("add_staff.html", form_data=form_data, staffs=staffs)
-
-        finally:
-            cursor.close()
-
-        flash(f"Staff member '{username}' added successfully!", "success")
-        return redirect(url_for('admin_staff'))
-
-    # ── EDIT STAFF ───────────────────────────────────
+    # EDIT STAFF ──
     @app.route("/admin/edit_staff/<int:user_id>", methods=["POST"])
     def edit_staff(user_id):
         guard = admin_required()
@@ -152,6 +117,8 @@ def register_admin_add_staff_routes(app, mysql):
 
         cursor = mysql.connection.cursor()
         try:
+            # Check that the new username/phone isn't already used by
+            # someone else (excluding this staff member themselves).
             cursor.execute("""
                 SELECT user_id FROM user
                 WHERE (username=%s OR phone_number=%s) AND user_id != %s
@@ -161,6 +128,7 @@ def register_admin_add_staff_routes(app, mysql):
                 flash("Username or phone number already exists.", "warning")
                 return redirect(url_for('admin_staff'))
 
+            # Only validate/update the password if one was actually entered.
             if password:
                 pattern = r'^(?=.*[0-9])(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$'
                 if not re.match(pattern, password):
@@ -177,6 +145,7 @@ def register_admin_add_staff_routes(app, mysql):
                     WHERE user_id=%s AND role_id=2
                 """, (username, phone, hashed_password, user_id))
             else:
+                # No new password given: leave the existing password as-is.
                 cursor.execute("""
                     UPDATE user SET username=%s, phone_number=%s
                     WHERE user_id=%s AND role_id=2
@@ -192,7 +161,7 @@ def register_admin_add_staff_routes(app, mysql):
 
         return redirect(url_for('admin_staff'))
 
-    # ── DELETE STAFF ─────────────────────────────────
+    # DELETE STAFF 
     @app.route("/delete_staff/<int:user_id>", methods=["POST"])
     def delete_staff(user_id):
         guard = admin_required()

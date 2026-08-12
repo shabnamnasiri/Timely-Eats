@@ -1,34 +1,25 @@
 from flask import request, jsonify, render_template, Response, redirect, url_for, session, flash
 from werkzeug.utils import secure_filename
-# For handling file uploads and validating file types
+from app.admin.helpers import admin_required, get_admin_user
+
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'webp'}
 def allowed_file(filename):
+    # Check the file has an extension and that extension is on the allow-list.
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def register_admin_add_menu_routes(app, mysql):
-
-    def admin_required():
-        # Access control: Only allow admins to access these routes
-        if "user_id" not in session:
-            flash("Please sign in to access this page.", "warning")
-            return redirect("/signin")
-        if session.get("role_id") != 3:
-            flash("Access denied. Admins only.", "danger")
-            return redirect("/signin")
-        return None
 
     @app.route("/admin/add_menu", methods=["GET", "POST"])
     def admin_menu():
         guard = admin_required()
         if guard:
             return guard
-        # Fetch all menu items to display in the admin dashboard
-        user_id = session.get('user_id')
+
+        # Load all menu items so the admin page can list/edit them.
         cursor = mysql.connection.cursor()
         cursor.execute("SELECT item_id, name, description, preparation_time, price, category FROM item")
         items = cursor.fetchall()
-        cursor.execute("SELECT username FROM user WHERE user_id = %s", (user_id,))
-        user = cursor.fetchone()
+        user = get_admin_user(mysql)
         cursor.close()
 
         return render_template("Add_menu.html", items=items, user=user)
@@ -55,6 +46,8 @@ def register_admin_add_menu_routes(app, mysql):
             file = request.files['photo']
             if file and file.filename:
                 if allowed_file(file.filename):
+                    # Store the image bytes and mimetype directly in the DB
+                    # so it can be served back later via /item_photo/<id>.
                     photo_data     = file.read()
                     photo_mimetype = file.mimetype
                 else:
@@ -76,7 +69,7 @@ def register_admin_add_menu_routes(app, mysql):
         # Redirect back to the admin menu page after processing
         return redirect(url_for('admin_menu'))
 
-    #serve photo by item_id
+    # Serve an item's photo by item_id (used as the src for <img> tags).
     @app.route("/item_photo/<int:item_id>")
     def item_photo(item_id):
         try:
@@ -85,14 +78,16 @@ def register_admin_add_menu_routes(app, mysql):
             row = cursor.fetchone()
             cursor.close()
             if row and row[0]:
+                # Return the stored image bytes with their original mimetype.
                 return Response(row[0], mimetype=row[1])
+            # No photo saved: return a tiny transparent 1x1 PNG as a placeholder.
             import base64
             blank = base64.b64decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=")
             return Response(blank, mimetype='image/png')
         except Exception as e:
             return jsonify({'error': str(e)}), 500
 
-    #update item 
+    # Update an existing menu item.
     @app.route("/update_item/<int:item_id>", methods=["POST"])
     def update_item(item_id):
         guard = admin_required()
@@ -114,7 +109,8 @@ def register_admin_add_menu_routes(app, mysql):
                     if not allowed_file(file.filename):
                         flash("Invalid file type. Allowed: png, jpg, jpeg, webp.", "danger")
                         return redirect(url_for('admin_menu'))
-                    # If a new photo is uploaded, we read it and update the photo data and mimetype in the database. If no new photo is uploaded, we leave the existing photo unchanged.
+                    # A new photo was uploaded: update the photo data/mimetype
+                    # along with the other fields.
                     photo_data     = file.read()
                     photo_mimetype = file.mimetype
                     cursor.execute("""
@@ -123,12 +119,14 @@ def register_admin_add_menu_routes(app, mysql):
                         WHERE item_id=%s
                     """, (name, description, price, prep_time, category, photo_data, photo_mimetype, item_id))
                 else:
+                    # No new photo: leave the existing photo as-is.
                     cursor.execute("""
                         UPDATE item SET name=%s, description=%s, price=%s,
                         preparation_time=%s, category=%s
                         WHERE item_id=%s
                     """, (name, description, price, prep_time, category, item_id))
             else:
+                # No file field in the request at all: leave the photo as-is.
                 cursor.execute("""
                     UPDATE item SET name=%s, description=%s, price=%s,
                     preparation_time=%s, category=%s
@@ -144,7 +142,7 @@ def register_admin_add_menu_routes(app, mysql):
 
         return redirect(url_for('admin_menu'))
 
-    # delete item
+    # Delete a menu item and all related rows that reference it.
     @app.route("/delete_item/<int:item_id>", methods=["POST"])
     def delete_item(item_id):
         guard = admin_required()
@@ -161,6 +159,7 @@ def register_admin_add_menu_routes(app, mysql):
                 flash("Item not found.", "warning")
                 return redirect(url_for('admin_menu'))
 
+            # Remove dependent rows first so the foreign keys don't block deletion.
             cursor.execute("DELETE FROM review WHERE item_id=%s", (item_id,))
             cursor.execute("DELETE FROM cart_item WHERE item_id=%s", (item_id,))
             cursor.execute("DELETE FROM order_details WHERE item_id=%s", (item_id,))

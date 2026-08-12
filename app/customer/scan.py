@@ -5,20 +5,20 @@ def register_scan_routes(app, mysql):
 
     @app.route('/session/<int:session_id>')
     def scan_qr(session_id):
-
+        #validates qr code 
         cursor = mysql.connection.cursor()
         cursor.execute("""
             SELECT session_id, table_number, status FROM Table_Session
             WHERE session_id = %s AND status IN ('active', 'ordered')
         """, (session_id,))
         result = cursor.fetchone()
-
+        #if none existent display error
         if not result:
             cursor.close()
             session.clear()
             flash("This QR code is no longer valid. Please ask staff for assistance.", "danger")
             return redirect('/signin')
-
+        #get status and check if the user is the same user using it
         ts_id     = result[0]
         table_num = result[1]
         ts_status = result[2]
@@ -47,7 +47,7 @@ def register_scan_routes(app, mysql):
                     session['expected_user_id'] = owner_id
                     flash(f"Welcome back to Table {table_num}! Please sign in to continue.", "success")
                     return redirect('/signin')
-            # No orders found — fall through to active flow
+            # No orders found - fall through to active flow
 
         else:
             cursor.close()
@@ -84,4 +84,5 @@ def register_scan_routes(app, mysql):
 
     @app.route('/Customer/scan-required')
     def scan_required():
+        #redirect to scan required page
         return render_template('ScanRequired.html')

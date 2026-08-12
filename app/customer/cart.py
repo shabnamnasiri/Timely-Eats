@@ -4,7 +4,7 @@ import MySQLdb.cursors
 
 def register_customer_cart_routes(app, mysql):
 
-    # ---------------- CART PAGE ----------------
+
     @app.route('/Customer/Cart')
     def customer_cart():
         user_id = session.get('user_id')
@@ -12,13 +12,13 @@ def register_customer_cart_routes(app, mysql):
             return redirect('/signin')
 
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-
+        #get loyalty point from db
         cursor.execute("""
             SELECT loyalty_point FROM user WHERE user_id = %s
         """, (user_id,))
         user_data = cursor.fetchone()
         loyalty_points = user_data['loyalty_point'] if user_data else 0
-
+        #get user active cart
         cursor.execute("""
             SELECT * FROM cart
             WHERE user_id = %s AND status='open'
@@ -34,11 +34,11 @@ def register_customer_cart_routes(app, mysql):
 
         # Whether the user has already toggled redeem this session
         redeem_active = bool(session.get('redeem_points'))
-
+        #display cart without items to template
         empty_ctx = dict(
             cart_items=[],
             cart_total=0,
-            table_number=session.get('table_number', '—'),
+            table_number=session.get('table_number', '-'),
             table_session_id=session.get('table_session_id'),
             loyalty_points=loyalty_points,
             loyalty_progress=loyalty_progress,
@@ -86,11 +86,11 @@ def register_customer_cart_routes(app, mysql):
 
         # Award 1 pt per $1 spent (consistent with place_order)
         points_earned = int(displayed_total)
-
+        #display cart with items to template
         return render_template("Cart.html",
                                cart_items=cart_items,
                                cart_total=displayed_total,
-                               table_number=session.get('table_number', '—'),
+                               table_number=session.get('table_number', '-'),
                                table_session_id=session.get('table_session_id'),
                                loyalty_points=loyalty_points,
                                loyalty_progress=loyalty_progress,
@@ -100,10 +100,11 @@ def register_customer_cart_routes(app, mysql):
                                redeem_active=redeem_active,
                                points_earned=points_earned)
 
-    # ---------------- INCREASE ----------------
+    
     @app.route("/cart/increase/<int:item_id>", methods=["POST"])
     def increase_item(item_id):
         cursor = mysql.connection.cursor()
+        #increase cart item qnt
         cursor.execute("""
             UPDATE cart_item SET quantity = quantity + 1
             WHERE cart_item_id = %s
@@ -112,10 +113,10 @@ def register_customer_cart_routes(app, mysql):
         cursor.close()
         return redirect('/Customer/Cart')
 
-    # ---------------- DECREASE ----------------
     @app.route("/cart/decrease/<int:item_id>", methods=["POST"])
     def decrease_item(item_id):
         cursor = mysql.connection.cursor()
+        #decrease cart item qnt
         cursor.execute("""
             UPDATE cart_item SET quantity = quantity - 1
             WHERE cart_item_id = %s
@@ -127,10 +128,10 @@ def register_customer_cart_routes(app, mysql):
         cursor.close()
         return redirect('/Customer/Cart')
 
-    # ---------------- REMOVE ----------------
     @app.route("/cart/remove/<int:item_id>", methods=["POST"])
     def remove_item(item_id):
         cursor = mysql.connection.cursor()
+        #remove cart item
         cursor.execute("""
             DELETE FROM cart_item WHERE cart_item_id = %s
         """, (item_id,))
@@ -138,10 +139,10 @@ def register_customer_cart_routes(app, mysql):
         cursor.close()
         return redirect('/Customer/Cart')
 
-    # ---------------- SAVE NOTES ----------------
     @app.route('/cart/save_notes', methods=['POST'])
     def save_notes():
         cursor = mysql.connection.cursor()
+        #save notes for customization
         for key, value in request.form.items():
             if key.startswith('note_'):
                 cart_item_id = key.split('_', 1)[1]

@@ -13,9 +13,11 @@ def register_session_expiry_task(app, mysql, socketio):
     """
 
     def check_expired_sessions():
+        # Loop forever, checking every 60 seconds.
         while True:
             socketio.sleep(60)
             try:
+                # Needed so we can use the database outside a normal request.
                 with app.app_context():
                     conn = mysql.connection
                     cursor = conn.cursor()
@@ -23,7 +25,7 @@ def register_session_expiry_task(app, mysql, socketio):
                     now = datetime.now()
                     cutoff = now - timedelta(minutes=20)
 
-                    # Find expired sessions
+                    # Find sessions that haven't been touched in 20+ minutes.
                     cursor.execute("""
                         SELECT session_id
                         FROM table_session
@@ -36,13 +38,14 @@ def register_session_expiry_task(app, mysql, socketio):
                         for row in expired:
                             sid = row[0]
 
+                            # Close the session in the database.
                             cursor.execute("""
                                 UPDATE table_session
                                 SET status = 'closed', closed_at = %s
                                 WHERE session_id = %s
                             """, (now, sid))
 
-                            # Notify any customer still connected to this session room
+                            # Tell the customer's browser the session expired.
                             socketio.emit(
                                 'session_closed',
                                 {'message': 'Your table session has expired.'},
@@ -55,8 +58,10 @@ def register_session_expiry_task(app, mysql, socketio):
                     cursor.close()
 
             except Exception as e:
+                # Don't crash the loop, just log and try again next time.
                 print(f"[SESSION EXPIRY ERROR] {e}")
 
+    # Start the loop above as a background task.
     socketio.start_background_task(check_expired_sessions)
 
 
@@ -68,6 +73,8 @@ def register_session_room_events(socketio):
 
     @socketio.on('join_session_room')
     def join_session_room(data):
+        # The customer's browser sends this when it connects, so it can
+        # later receive the 'session_closed' message above.
         session_id = data.get('session_id')
         if session_id:
             join_room(f'table_session_{session_id}')

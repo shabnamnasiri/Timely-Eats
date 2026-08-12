@@ -253,7 +253,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--paper); color: var(
 .pay-name { display: block; font-size: 13px; font-weight: 500; color: inherit; }
 .pay-desc { display: block; font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: .14em; color: var(--mist); margin-top: 2px; }
 
-/* card fields — shown only when card radio is checked */
+/* card fields - shown only when card radio is checked */
 .card-fields { display: none; flex-direction: column; gap: 8px; margin-bottom: 16px; }
 #pay-card:checked ~ .card-fields { display: flex; }
 .card-input {

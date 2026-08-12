@@ -6,7 +6,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Timely Eats — Menu · Table {{ table_number or '?' }}</title>
+  <title>Timely Eats - Menu · Table {{ table_number or '?' }}</title>
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/toast.css') }}"/>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant:ital,wght@0,400;0,600;1,300;1,400&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;700&display=swap" rel="stylesheet"/>
@@ -26,27 +26,42 @@
 
   <style>
 
-    /* rating */
-
-    .rating-box {
-      margin-top: 14px;
-
-      font-family: 'DM Sans', sans-serif;
-      font-size: 14px;
-
-      color: #d4a017;
-      letter-spacing: .04em;
-    }
-
-    /* layout */
-
     .card-actions {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 18px;
+}
 
-      margin-top: 18px;
-    }
+.review-btn,
+.reviews-btn {
+  display: block;
+  width: 100%;
+  text-align: center;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  border: 1px solid #c8933a;
+  padding: 8px 16px;
+  background: transparent;
+  color: #0e0e0e;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.review-btn:hover,
+.reviews-btn:hover {
+  background: #c8933a;
+  color: #f9f7f4;
+}
+
+.review-btn:active,
+.reviews-btn:active {
+  transform: translateY(1px);
+}
 
 
   </style>
@@ -97,7 +112,6 @@
             <div class="py-1">
               <a href="/customer/profile" class="block px-4 py-2.5 text-xs text-[#b0b0b0] hover:bg-[#c8933a] hover:text-[#0e0e0e] font-mono-custom uppercase tracking-wider transition-colors">Profile Details</a>
               <a href="/customer/order_history" class="block px-4 py-2.5 text-xs text-[#b0b0b0] hover:bg-[#c8933a] hover:text-[#0e0e0e] font-mono-custom uppercase tracking-wider transition-colors">Order History</a>
-              <a href="/customer/loyalty" class="block px-4 py-2.5 text-xs text-[#b0b0b0] hover:bg-[#c8933a] hover:text-[#0e0e0e] font-mono-custom uppercase tracking-wider transition-colors">Loyalty Points</a>
             </div>
             <div class="py-1">
               <a href="/logout" class="block px-4 py-2.5 text-xs text-red-400 hover:bg-red-500 hover:text-white font-mono-custom uppercase tracking-wider transition-colors">Logout</a>
@@ -163,7 +177,7 @@
           <div class="space-y-3 mt-auto">
             <div class="flex gap-2">
               <span class="font-mono-custom text-[9px] tracking-wider uppercase px-2 py-0.5 bg-[#e8e4dc] text-[#3d3d3d] rounded-xs">
-                ⏱ {{ item[3] or '—' }} min
+                ⏱ {{ item[3] or '-' }} min
               </span>
             </div>
             <form action="{{ url_for('add_to_cart') }}" method="post" class="w-full">
@@ -175,13 +189,11 @@
                 Add to Cart
               </button>
             </form>
-             <a href="/item/{{ item[0] }}/review-page"
-             class="w-full mt-2 mr-2 text-center font-mono-custom text-xs tracking-widest uppercase border border-[#c8933a] py-2 px-4 bg-transparent text-[#0e0e0e] hover:bg-[#c8933a] hover:text-[#f9f7f4] active:translate-y-px transition-all rounded-xs cursor-pointer">
+             <a href="/item/{{ item[0] }}/review-page" class="review-btn">
             Write Review
           </a>
 
-          <a href="/item/{{ item[0] }}/reviews-display"
-             class="w-full mt-2 mr-2 text-center font-mono-custom text-xs tracking-widest uppercase border border-[#c8933a] py-2 px-4 bg-transparent text-[#0e0e0e] hover:bg-[#c8933a] hover:text-[#f9f7f4] active:translate-y-px transition-all rounded-xs cursor-pointer">
+          <a href="/item/{{ item[0] }}/reviews-display" class="reviews-btn">
             View Reviews
           </a>
           </div>
@@ -218,7 +230,7 @@
           <div class="space-y-3 mt-auto">
             <div class="flex gap-2">
               <span class="font-mono-custom text-[9px] tracking-wider uppercase px-2 py-0.5 bg-[#e8e4dc] text-[#3d3d3d] rounded-xs">
-                ⏱ {{ item[3] or '—' }} min
+                ⏱ {{ item[3] or '-' }} min
               </span>
             </div>
             <form action="{{ url_for('add_to_cart') }}" method="post" class="w-full">

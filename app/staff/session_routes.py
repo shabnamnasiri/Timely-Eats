@@ -5,7 +5,7 @@ from app.extensions import socketio
 
 def register_session_routes(app, mysql):
 
-    # 🔹 PRINT QR PAGE
+    # PRINT QR PAGE
     @app.route('/staff/print/<int:session_id>')
     def print_qr(session_id):
         cursor = mysql.connection.cursor()
@@ -30,9 +30,7 @@ def register_session_routes(app, mysql):
             qr_code=f"qrcodes/session_{session_id}.png"
         )
 
-    # =========================
     # GET ALL SESSIONS
-    # =========================
     @app.route('/staff/sessions')
     def get_sessions():
         cursor = mysql.connection.cursor()
@@ -62,9 +60,7 @@ def register_session_routes(app, mysql):
         return jsonify(data)
 
 
-    # =========================
     # QR PAGE
-    # =========================
     @app.route('/staff/qr')
     def staff_qr_page():
         user_id = session.get('user_id')
@@ -76,14 +72,12 @@ def register_session_routes(app, mysql):
         return render_template("EmpQR.html", staff_name=user)
 
 
-    # =========================
     # START SESSION (UPDATED)
-    # =========================
     @app.route('/staff/start-session/<int:table_number>', methods=['POST'])
     def start_session(table_number):
         cursor = mysql.connection.cursor()
 
-        # 🔴 NEW PART: CHECK IF ACTIVE SESSION EXISTS
+        # NEW PART: CHECK IF ACTIVE SESSION EXISTS
         cursor.execute("""
             SELECT * FROM Table_Session
             WHERE table_number=%s AND status='active'
@@ -96,7 +90,7 @@ def register_session_routes(app, mysql):
                 "message": "Table already has an active session"
             }), 400
 
-        # 🟢 CREATE NEW SESSION
+        # CREATE NEW SESSION
         cursor.execute("""
             INSERT INTO Table_Session (table_number, status)
             VALUES (%s, 'active')
@@ -139,9 +133,7 @@ def register_session_routes(app, mysql):
         })
     
 
-    # =========================
     # CLOSE SESSION
-    # =========================
     @app.route('/staff/close-session/<int:session_id>', methods=['POST'])
     def close_session(session_id):
 
